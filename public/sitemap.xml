@@ -7,71 +7,71 @@
     <!-- 메인 페이지 (최우선) -->
     <url>
         <loc>https://albi.kr/</loc>
-        <lastmod>2026-03-09</lastmod>
+        <lastmod>2026-03-19</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
     </url>
     
     <!-- AI 면접 연습 (핵심 기능) -->
     <url>
-        <loc>https://albi.kr/chat</loc>
-        <lastmod>2026-03-09</lastmod>
+        <loc>https://albi.kr/chat.html</loc>
+        <lastmod>2026-03-19</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     
     <!-- AI 멘토 (핵심 기능) -->
     <url>
-        <loc>https://albi.kr/mentor-chat</loc>
-        <lastmod>2026-03-09</lastmod>
+        <loc>https://albi.kr/mentor-chat.html</loc>
+        <lastmod>2026-03-19</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     
     <!-- 요금제 페이지 (전환 핵심) -->
     <url>
-        <loc>https://albi.kr/payment</loc>
-        <lastmod>2026-03-09</lastmod>
+        <loc>https://albi.kr/payment.html</loc>
+        <lastmod>2026-03-19</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <!-- About 페이지 -->
     <url>
-        <loc>https://albi.kr/about</loc>
-        <lastmod>2026-03-09</lastmod>
+        <loc>https://albi.kr/about.html</loc>
+        <lastmod>2026-03-19</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     
     <!-- Contact 페이지 -->
     <url>
-        <loc>https://albi.kr/contact</loc>
-        <lastmod>2026-03-09</lastmod>
+        <loc>https://albi.kr/contact.html</loc>
+        <lastmod>2026-03-19</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     
     <!-- 마이페이지 -->
     <url>
-        <loc>https://albi.kr/mypage</loc>
-        <lastmod>2026-03-09</lastmod>
+        <loc>https://albi.kr/mypage.html</loc>
+        <lastmod>2026-03-19</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.7</priority>
     </url>
     
     <!-- 구독 관리 -->
     <url>
-        <loc>https://albi.kr/subscription-manage</loc>
-        <lastmod>2026-03-09</lastmod>
+        <loc>https://albi.kr/subscription-manage.html</loc>
+        <lastmod>2026-03-19</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.7</priority>
     </url>
     
     <!-- 알바 공고 -->
     <url>
-        <loc>https://albi.kr/jobs</loc>
-        <lastmod>2026-03-09</lastmod>
+        <loc>https://albi.kr/jobs.html</loc>
+        <lastmod>2026-03-19</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.8</priority>
     </url>
