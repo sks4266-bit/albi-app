@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Albi 면접 세션 모니터링</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Auth Check -->
+    <script>
+        // 관리자 인증 체크
+        (function() {
+            // 이 페이지는 직접 접근 전용입니다
+            // 관리자 대시보드를 원하시면 /admin-dashboard.html로 이동하세요
+            const fromDashboard = document.referrer.includes('admin-dashboard');
+            
+            const token = localStorage.getItem('admin_token');
+            if (!token) {
+                window.location.href = '/admin-login.html?redirect=' + encodeURIComponent(window.location.pathname);
+                return;
+            }
+            
+            // 토큰 유효성 검증
+            fetch('/api/admin-auth', {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (!result.success) {
+                    localStorage.removeItem('admin_token');
+                    window.location.href = '/admin-login.html?redirect=' + encodeURIComponent(window.location.pathname);
+                }
+            })
+            .catch(() => {
+                localStorage.removeItem('admin_token');
+                window.location.href = '/admin-login.html?redirect=' + encodeURIComponent(window.location.pathname);
+            });
+        })();
+    </script>
+    
+    <div class="container mx-auto px-4 py-8">
+        <!-- 안내 메시지 -->
+        <div class="mb-4 bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+            <div class="flex items-center">
+                <i class="fas fa-info-circle text-blue-500 mr-3"></i>
+                <div>
+                    <p class="text-blue-800 font-medium">독립 모니터링 페이지입니다</p>
+                    <p class="text-blue-700 text-sm">전체 관리 기능을 원하시면 
+                        <a href="/admin-dashboard.html" class="underline font-semibold hover:text-blue-900">관리자 대시보드</a>로 이동하세요.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h1 class="text-4xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-chart-line text-blue-600"></i>
+                        면접 세션 모니터링
+                    </h1>
+                    <p class="text-gray-600">실시간 D1 세션 통계 및 분석</p>
+                    <div class="mt-2 text-sm text-gray-500">
+                        마지막 업데이트: <span id="lastUpdate">-</span>
+                        <button onclick="loadStats()" class="ml-4 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+                            <i class="fas fa-sync-alt"></i> 새로고침
+                        </button>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <a href="/admin-dashboard.html" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        <i class="fas fa-tachometer-alt mr-2"></i>대시보드
+                    </a>
+                    <button onclick="logout()" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                        <i class="fas fa-sign-out-alt mr-2"></i>로그아웃
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 주요 지표 카드 -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">활성 세션</p>
+                        <p class="text-3xl font-bold text-blue-600" id="activeSessions">-</p>
+                    </div>
+                    <i class="fas fa-users text-4xl text-blue-200"></i>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">최근 1시간</p>
+                        <p class="text-3xl font-bold text-green-600" id="recent1h">-</p>
+                    </div>
+                    <i class="fas fa-clock text-4xl text-green-200"></i>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">완료 (24h)</p>
+                        <p class="text-3xl font-bold text-purple-600" id="completed24h">-</p>
+                    </div>
+                    <i class="fas fa-check-circle text-4xl text-purple-200"></i>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">평균 시간</p>
+                        <p class="text-3xl font-bold text-orange-600" id="avgDuration">-</p>
+                    </div>
+                    <i class="fas fa-stopwatch text-4xl text-orange-200"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- 차트 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <!-- 직무별 분포 -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-briefcase text-blue-600"></i>
+                    직무별 세션 분포
+                </h2>
+                <canvas id="jobTypeChart" height="200"></canvas>
+            </div>
+            
+            <!-- 등급별 분포 -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-medal text-yellow-600"></i>
+                    등급 분포 (24h)
+                </h2>
+                <canvas id="gradeChart" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- 진행 단계별 분포 -->
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-tasks text-green-600"></i>
+                진행 단계별 분포
+            </h2>
+            <canvas id="progressChart" height="100"></canvas>
+        </div>
+
+        <!-- 최근 활성 세션 -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-history text-purple-600"></i>
+                최근 활성 세션 (Top 10)
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">세션 ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">직무</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">진행</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">생성 시각</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">마지막 활동</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">만료</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">작업</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sessionTable" class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td colspan="7" class="px-6 py-4 text-center text-gray-500">데이터 로딩 중...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let jobTypeChart, gradeChart, progressChart;
+        
+        const jobTypeNames = {
+            cafe: '☕ 카페',
+            cvs: '🏪 편의점',
+            restaurant: '🍜 음식점',
+            retail: '🛒 매장',
+            fastfood: '🍔 패스트푸드'
+        };
+        
+        function formatDateTime(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleString('ko-KR', { 
+                month: 'short', 
+                day: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+        }
+        
+        function formatDuration(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${minutes}분 ${secs}초`;
+        }
+        
+        function getTimeRemaining(expiresAt) {
+            const now = new Date();
+            const expires = new Date(expiresAt);
+            const diff = expires - now;
+            const minutes = Math.floor(diff / 60000);
+            return minutes > 0 ? `${minutes}분 남음` : '만료됨';
+        }
+        
+        async function loadStats() {
+            try {
+                console.log('📊 Loading stats...');
+                const response = await fetch('/api/session-stats');
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.error || 'Failed to load stats');
+                }
+                
+                const stats = result.data;
+                console.log('✅ Stats loaded:', stats);
+                
+                // 주요 지표 업데이트
+                document.getElementById('activeSessions').textContent = stats.active_sessions.total;
+                document.getElementById('recent1h').textContent = stats.active_sessions.recent_1h;
+                document.getElementById('completed24h').textContent = stats.completed_interviews_24h;
+                document.getElementById('avgDuration').textContent = formatDuration(stats.avg_interview_duration_seconds);
+                document.getElementById('lastUpdate').textContent = formatDateTime(stats.timestamp);
+                
+                // 직무별 분포 차트
+                const jobTypes = stats.job_type_distribution.map(d => jobTypeNames[d.job_type] || d.job_type);
+                const jobCounts = stats.job_type_distribution.map(d => d.count);
+                
+                if (jobTypeChart) jobTypeChart.destroy();
+                const ctx1 = document.getElementById('jobTypeChart').getContext('2d');
+                jobTypeChart = new Chart(ctx1, {
+                    type: 'doughnut',
+                    data: {
+                        labels: jobTypes,
+                        datasets: [{
+                            data: jobCounts,
+                            backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+                
+                // 등급 분포 차트
+                const grades = stats.grade_distribution_24h.map(d => d.final_grade);
+                const gradeCounts = stats.grade_distribution_24h.map(d => d.count);
+                
+                if (gradeChart) gradeChart.destroy();
+                const ctx2 = document.getElementById('gradeChart').getContext('2d');
+                gradeChart = new Chart(ctx2, {
+                    type: 'bar',
+                    data: {
+                        labels: grades,
+                        datasets: [{
+                            label: '면접 결과',
+                            data: gradeCounts,
+                            backgroundColor: ['#F59E0B', '#10B981', '#3B82F6', '#6B7280', '#EF4444']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                        }
+                    }
+                });
+                
+                // 진행 단계 분포 차트
+                const steps = stats.progress_distribution.map(d => `${d.question_count}/15`);
+                const stepCounts = stats.progress_distribution.map(d => d.count);
+                
+                if (progressChart) progressChart.destroy();
+                const ctx3 = document.getElementById('progressChart').getContext('2d');
+                progressChart = new Chart(ctx3, {
+                    type: 'bar',
+                    data: {
+                        labels: steps,
+                        datasets: [{
+                            label: '세션 수',
+                            data: stepCounts,
+                            backgroundColor: '#8B5CF6'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                        }
+                    }
+                });
+                
+                // 최근 세션 테이블
+                const tableBody = document.getElementById('sessionTable');
+                if (stats.recent_active_sessions.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">활성 세션이 없습니다</td></tr>';
+                } else {
+                    tableBody.innerHTML = stats.recent_active_sessions.map(session => `
+                        <tr>
+                            <td class="px-6 py-4 text-sm text-gray-900 font-mono">${session.session_id.substring(0, 20)}...</td>
+                            <td class="px-6 py-4 text-sm text-gray-900">${jobTypeNames[session.job_type] || session.job_type}</td>
+                            <td class="px-6 py-4 text-sm">
+                                <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded">${session.question_count}/15</span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-500">${formatDateTime(session.created_at)}</td>
+                            <td class="px-6 py-4 text-sm text-gray-500">${formatDateTime(session.last_activity)}</td>
+                            <td class="px-6 py-4 text-sm">
+                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded">${getTimeRemaining(session.expires_at)}</span>
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                <a href="/session-detail.html?session_id=${encodeURIComponent(session.session_id)}" 
+                                   class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs">
+                                    <i class="fas fa-search mr-1"></i>상세
+                                </a>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+                
+            } catch (error) {
+                console.error('❌ Failed to load stats:', error);
+                alert('통계 로드 실패: ' + error.message);
+            }
+        }
+        
+        // 페이지 로드 시 통계 로드
+        loadStats();
+        
+        // 30초마다 자동 새로고침
+        setInterval(loadStats, 30000);
+        
+        // 로그아웃 함수
+        function logout() {
+            if (confirm('로그아웃 하시겠습니까?')) {
+                localStorage.removeItem('admin_token');
+                window.location.href = '/admin-login.html';
+            }
+        }
+    </script>
+</body>
+</html>

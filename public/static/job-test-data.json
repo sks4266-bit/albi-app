@@ -1,0 +1,679 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "dimension": "Behavior",
+      "dimensionName": "Part 1: 업무 행동 패턴",
+      "question": "새로운 프로젝트를 시작할 때 나는?",
+      "icon": "🚀",
+      "options": [
+        {
+          "value": "A",
+          "text": "전체 계획을 먼저 세우고 단계별로 실행한다",
+          "type": "strategic"
+        },
+        {
+          "value": "B",
+          "text": "관련 자료를 충분히 조사하고 분석한다",
+          "type": "analytical"
+        },
+        {
+          "value": "C",
+          "text": "팀원들과 먼저 의견을 나누고 합의점을 찾는다",
+          "type": "communicative"
+        },
+        {
+          "value": "D",
+          "text": "일단 시작하면서 필요한 것들을 해결한다",
+          "type": "executive"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "dimension": "Behavior",
+      "dimensionName": "Part 1: 업무 행동 패턴",
+      "question": "업무 중 예상치 못한 문제가 발생했을 때?",
+      "icon": "⚡",
+      "options": [
+        {
+          "value": "A",
+          "text": "문제의 원인을 파악하고 전략적 해결책을 찾는다",
+          "type": "strategic"
+        },
+        {
+          "value": "B",
+          "text": "유사한 사례를 찾아보고 데이터로 검증한다",
+          "type": "analytical"
+        },
+        {
+          "value": "C",
+          "text": "관련 팀원들과 즉시 논의하고 협력한다",
+          "type": "communicative"
+        },
+        {
+          "value": "D",
+          "text": "빠르게 임시 해결책을 실행하고 개선한다",
+          "type": "executive"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "dimension": "Behavior",
+      "dimensionName": "Part 1: 업무 행동 패턴",
+      "question": "마감 기한이 촉박한 업무를 맡았을 때?",
+      "icon": "⏰",
+      "options": [
+        {
+          "value": "A",
+          "text": "우선순위를 정하고 효율적인 실행 계획을 짠다",
+          "type": "strategic"
+        },
+        {
+          "value": "B",
+          "text": "필수 요소만 분석하고 핵심에 집중한다",
+          "type": "analytical"
+        },
+        {
+          "value": "C",
+          "text": "팀원들과 역할을 나누고 협업한다",
+          "type": "communicative"
+        },
+        {
+          "value": "D",
+          "text": "즉시 실행하면서 동시에 문제를 해결한다",
+          "type": "executive"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "dimension": "Behavior",
+      "dimensionName": "Part 1: 업무 행동 패턴",
+      "question": "팀 프로젝트에서 나의 역할은?",
+      "icon": "👥",
+      "options": [
+        {
+          "value": "A",
+          "text": "전체 방향을 제시하고 계획을 조율한다",
+          "type": "strategic"
+        },
+        {
+          "value": "B",
+          "text": "자료를 조사하고 근거를 제시한다",
+          "type": "analytical"
+        },
+        {
+          "value": "C",
+          "text": "팀원들의 의견을 듣고 중재한다",
+          "type": "communicative"
+        },
+        {
+          "value": "D",
+          "text": "결정된 일을 빠르게 실행한다",
+          "type": "executive"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "dimension": "Thinking",
+      "dimensionName": "Part 2: 사고 및 문제해결",
+      "question": "복잡한 문제를 해결할 때 나는?",
+      "icon": "🧩",
+      "options": [
+        {
+          "value": "A",
+          "text": "큰 그림을 보고 장기적 해결책을 찾는다",
+          "type": "strategic"
+        },
+        {
+          "value": "B",
+          "text": "문제를 세분화하고 논리적으로 접근한다",
+          "type": "analytical"
+        },
+        {
+          "value": "C",
+          "text": "다른 사람의 의견을 듣고 종합한다",
+          "type": "communicative"
+        },
+        {
+          "value": "D",
+          "text": "직관과 경험으로 빠르게 판단한다",
+          "type": "executive"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "dimension": "Thinking",
+      "dimensionName": "Part 2: 사고 및 문제해결",
+      "question": "의사결정을 할 때 가장 중요하게 생각하는 것은?",
+      "icon": "🎯",
+      "options": [
+        {
+          "value": "A",
+          "text": "장기적 목표와 전략적 가치",
+          "type": "strategic"
+        },
+        {
+          "value": "B",
+          "text": "객관적 데이터와 분석 결과",
+          "type": "analytical"
+        },
+        {
+          "value": "C",
+          "text": "팀원들의 의견과 합의",
+          "type": "communicative"
+        },
+        {
+          "value": "D",
+          "text": "실행 가능성과 즉각적 효과",
+          "type": "executive"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "dimension": "Thinking",
+      "dimensionName": "Part 2: 사고 및 문제해결",
+      "question": "새로운 아이디어가 떠올랐을 때?",
+      "icon": "💡",
+      "options": [
+        {
+          "value": "A",
+          "text": "전략적으로 실현 가능한지 먼저 검토한다",
+          "type": "strategic"
+        },
+        {
+          "value": "B",
+          "text": "관련 데이터와 사례를 찾아본다",
+          "type": "analytical"
+        },
+        {
+          "value": "C",
+          "text": "주변 사람들에게 피드백을 구한다",
+          "type": "communicative"
+        },
+        {
+          "value": "D",
+          "text": "작은 규모로 빠르게 시도해본다",
+          "type": "executive"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "dimension": "Thinking",
+      "dimensionName": "Part 2: 사고 및 문제해결",
+      "question": "업무 우선순위를 정할 때 기준은?",
+      "icon": "📊",
+      "options": [
+        {
+          "value": "A",
+          "text": "전체 목표 달성에 미치는 영향도",
+          "type": "strategic"
+        },
+        {
+          "value": "B",
+          "text": "각 업무의 중요도와 긴급도 분석",
+          "type": "analytical"
+        },
+        {
+          "value": "C",
+          "text": "팀원들과 논의 후 합의된 순서",
+          "type": "communicative"
+        },
+        {
+          "value": "D",
+          "text": "빠르게 처리 가능한 것부터",
+          "type": "executive"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "dimension": "Values",
+      "dimensionName": "Part 3: 가치관 및 동기",
+      "question": "일을 할 때 가장 보람을 느끼는 순간은?",
+      "icon": "⭐",
+      "options": [
+        {
+          "value": "A",
+          "text": "세운 전략이 성공적으로 실현될 때",
+          "type": "strategic"
+        },
+        {
+          "value": "B",
+          "text": "복잡한 문제를 논리적으로 해결했을 때",
+          "type": "analytical"
+        },
+        {
+          "value": "C",
+          "text": "팀원들과 협력해서 좋은 결과를 냈을 때",
+          "type": "communicative"
+        },
+        {
+          "value": "D",
+          "text": "계획한 일을 완수하고 성과를 냈을 때",
+          "type": "executive"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "dimension": "Values",
+      "dimensionName": "Part 3: 가치관 및 동기",
+      "question": "직장에서 가장 중요한 가치는?",
+      "icon": "💎",
+      "options": [
+        {
+          "value": "A",
+          "text": "비전과 성장 가능성",
+          "type": "strategic"
+        },
+        {
+          "value": "B",
+          "text": "전문성과 논리적 사고",
+          "type": "analytical"
+        },
+        {
+          "value": "C",
+          "text": "팀워크와 소통",
+          "type": "communicative"
+        },
+        {
+          "value": "D",
+          "text": "실행력과 성과",
+          "type": "executive"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "dimension": "Values",
+      "dimensionName": "Part 3: 가치관 및 동기",
+      "question": "커리어를 선택할 때 가장 중요한 기준은?",
+      "icon": "🎓",
+      "options": [
+        {
+          "value": "A",
+          "text": "장기적 성장 가능성과 영향력",
+          "type": "strategic"
+        },
+        {
+          "value": "B",
+          "text": "전문성을 깊이 있게 발전시킬 수 있는지",
+          "type": "analytical"
+        },
+        {
+          "value": "C",
+          "text": "좋은 사람들과 함께 일할 수 있는지",
+          "type": "communicative"
+        },
+        {
+          "value": "D",
+          "text": "빠르게 실력을 발휘하고 성과를 낼 수 있는지",
+          "type": "executive"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "dimension": "Values",
+      "dimensionName": "Part 3: 가치관 및 동기",
+      "question": "성공의 기준은 무엇인가요?",
+      "icon": "🏆",
+      "options": [
+        {
+          "value": "A",
+          "text": "세운 비전을 달성하는 것",
+          "type": "strategic"
+        },
+        {
+          "value": "B",
+          "text": "전문가로 인정받는 것",
+          "type": "analytical"
+        },
+        {
+          "value": "C",
+          "text": "주변 사람들과 좋은 관계를 유지하는 것",
+          "type": "communicative"
+        },
+        {
+          "value": "D",
+          "text": "눈에 보이는 성과를 내는 것",
+          "type": "executive"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "dimension": "Environment",
+      "dimensionName": "Part 4: 환경 적응성",
+      "question": "선호하는 업무 환경은?",
+      "icon": "🏢",
+      "options": [
+        {
+          "value": "A",
+          "text": "장기적 계획을 세우고 실행하는 환경",
+          "type": "strategic"
+        },
+        {
+          "value": "B",
+          "text": "분석과 연구가 중요한 환경",
+          "type": "analytical"
+        },
+        {
+          "value": "C",
+          "text": "협업과 소통이 활발한 환경",
+          "type": "communicative"
+        },
+        {
+          "value": "D",
+          "text": "빠른 실행과 결과가 중요한 환경",
+          "type": "executive"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "dimension": "Environment",
+      "dimensionName": "Part 4: 환경 적응성",
+      "question": "이상적인 팀 구조는?",
+      "icon": "🤝",
+      "options": [
+        {
+          "value": "A",
+          "text": "명확한 비전과 전략이 있는 팀",
+          "type": "strategic"
+        },
+        {
+          "value": "B",
+          "text": "전문성과 논리를 중시하는 팀",
+          "type": "analytical"
+        },
+        {
+          "value": "C",
+          "text": "수평적이고 의견 교류가 자유로운 팀",
+          "type": "communicative"
+        },
+        {
+          "value": "D",
+          "text": "빠른 실행력과 유연성이 있는 팀",
+          "type": "executive"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "dimension": "Environment",
+      "dimensionName": "Part 4: 환경 적응성",
+      "question": "업무 방식의 변화가 필요할 때?",
+      "icon": "🔄",
+      "options": [
+        {
+          "value": "A",
+          "text": "새로운 전략을 수립하고 방향을 제시한다",
+          "type": "strategic"
+        },
+        {
+          "value": "B",
+          "text": "변화의 필요성을 데이터로 검증한다",
+          "type": "analytical"
+        },
+        {
+          "value": "C",
+          "text": "팀원들과 충분히 소통하며 적응한다",
+          "type": "communicative"
+        },
+        {
+          "value": "D",
+          "text": "빠르게 적응하고 실행한다",
+          "type": "executive"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "dimension": "Environment",
+      "dimensionName": "Part 4: 환경 적응성",
+      "question": "스트레스를 받는 상황은? (역문항)",
+      "icon": "😓",
+      "reverse": true,
+      "options": [
+        {
+          "value": "A",
+          "text": "장기 계획 없이 즉흥적으로 일할 때",
+          "type": "strategic",
+          "reverseType": "executive"
+        },
+        {
+          "value": "B",
+          "text": "근거 없이 감으로만 판단해야 할 때",
+          "type": "analytical",
+          "reverseType": "executive"
+        },
+        {
+          "value": "C",
+          "text": "혼자서만 일하고 소통이 없을 때",
+          "type": "communicative",
+          "reverseType": "executive"
+        },
+        {
+          "value": "D",
+          "text": "오래 계획만 세우고 실행이 느릴 때",
+          "type": "executive",
+          "reverseType": "strategic"
+        }
+      ]
+    }
+  ],
+  "types": {
+    "strategic": {
+      "name": "전략형 (Strategic Thinker)",
+      "shortName": "전략형",
+      "emoji": "🎯",
+      "description": "큰 그림을 보고 장기적 계획을 수립하는 전략가",
+      "strengths": [
+        "장기적 비전 수립",
+        "전략적 사고",
+        "우선순위 설정",
+        "리더십"
+      ],
+      "growthPoints": [
+        "디테일한 실행 계획",
+        "즉각적인 대응력",
+        "유연성 향상"
+      ],
+      "idealEnvironment": [
+        "장기 프로젝트",
+        "전략 기획",
+        "조직 리더",
+        "사업 개발"
+      ],
+      "famousPeople": [
+        {
+          "name": "일론 머스크",
+          "title": "Tesla & SpaceX CEO",
+          "description": "전기차, 우주 탐사 등 여러 산업에서 장기 비전을 제시하고 실현하는 전략가",
+          "image": "/static/images/famous-people/elon-musk.png"
+        },
+        {
+          "name": "손정의",
+          "title": "소프트뱅크 회장",
+          "description": "30년 앞을 내다보는 장기 비전으로 IT 제국을 건설한 전략적 투자자",
+          "image": "/static/images/famous-people/son-masayoshi.png"
+        },
+        {
+          "name": "리드 헤이스팅스",
+          "title": "넷플릭스 공동 창업자",
+          "description": "DVD 대여에서 스트리밍으로의 전환을 예측하고 실행한 비전가",
+          "image": "/static/images/famous-people/reed-hastings.png"
+        }
+      ]
+    },
+    "analytical": {
+      "name": "분석형 (Analytical Mind)",
+      "shortName": "분석형",
+      "emoji": "📊",
+      "description": "데이터와 논리로 최적의 해답을 찾는 분석가",
+      "strengths": [
+        "논리적 사고",
+        "데이터 분석",
+        "문제 해결",
+        "전문성"
+      ],
+      "growthPoints": [
+        "빠른 의사결정",
+        "대인관계 스킬",
+        "실행력 강화"
+      ],
+      "idealEnvironment": [
+        "데이터 분석",
+        "연구 개발",
+        "품질 관리",
+        "컨설팅"
+      ],
+      "famousPeople": [
+        {
+          "name": "래리 페이지",
+          "title": "Google 공동 창업자",
+          "description": "알고리즘과 데이터 분석으로 검색 엔진을 혁신한 분석적 천재",
+          "image": "/static/images/famous-people/larry-page.png"
+        },
+        {
+          "name": "마크 저커버그",
+          "title": "Meta CEO",
+          "description": "사용자 데이터 분석을 통해 소셜 네트워크를 최적화한 데이터 기반 리더",
+          "image": "/static/images/famous-people/mark-zuckerberg.png"
+        },
+        {
+          "name": "제프 베조스",
+          "title": "Amazon 창업자",
+          "description": "데이터 기반 의사결정으로 전자상거래를 지배한 분석적 경영자",
+          "image": "/static/images/famous-people/jeff-bezos.png"
+        }
+      ]
+    },
+    "communicative": {
+      "name": "소통형 (Communicator)",
+      "shortName": "소통형",
+      "emoji": "💬",
+      "description": "사람들과의 협력으로 시너지를 만드는 소통가",
+      "strengths": [
+        "팀워크",
+        "커뮤니케이션",
+        "공감 능력",
+        "갈등 조정"
+      ],
+      "growthPoints": [
+        "독립적 의사결정",
+        "분석적 사고",
+        "효율성 향상"
+      ],
+      "idealEnvironment": [
+        "팀 협업",
+        "대외 업무",
+        "고객 관리",
+        "교육/코칭"
+      ],
+      "famousPeople": [
+        {
+          "name": "오프라 윈프리",
+          "title": "미디어 임원 & 토크쇼 진행자",
+          "description": "탁월한 소통 능력으로 사람들의 마음을 움직이는 미디어계의 여왕",
+          "image": "/static/images/famous-people/oprah-winfrey.png"
+        },
+        {
+          "name": "사티아 나델라",
+          "title": "Microsoft CEO",
+          "description": "공감과 소통으로 마이크로소프트 문화를 혁신한 리더",
+          "image": "/static/images/famous-people/satya-nadella.png"
+        },
+        {
+          "name": "유재석",
+          "title": "MC & 방송인",
+          "description": "뛰어난 공감 능력과 소통으로 국민 MC의 자리를 지킨 엔터테이너",
+          "image": "/static/images/famous-people/yoo-jaesuk.png"
+        }
+      ]
+    },
+    "executive": {
+      "name": "실행형 (Executor)",
+      "shortName": "실행형",
+      "emoji": "⚡",
+      "description": "빠른 실행력으로 성과를 만드는 실행가",
+      "strengths": [
+        "실행력",
+        "속도",
+        "적응력",
+        "문제 해결"
+      ],
+      "growthPoints": [
+        "장기 계획 수립",
+        "전략적 사고",
+        "분석력 향상"
+      ],
+      "idealEnvironment": [
+        "스타트업",
+        "영업/마케팅",
+        "프로젝트 관리",
+        "운영 관리"
+      ],
+      "famousPeople": [
+        {
+          "name": "잭 마",
+          "title": "알리바바 창업자",
+          "description": "빠른 실행력으로 중국 최대 전자상거래 기업을 만든 실행가",
+          "image": "/static/images/famous-people/jack-ma.png"
+        },
+        {
+          "name": "트래비스 칼라닉",
+          "title": "Uber 창업자",
+          "description": "공격적인 실행력으로 차량 공유 시장을 개척한 혁신가",
+          "image": "/static/images/famous-people/travis-kalanick.png"
+        },
+        {
+          "name": "백종원",
+          "title": "더본코리아 대표",
+          "description": "현장 실행력과 빠른 의사결정으로 외식 산업을 장악한 실행형 CEO",
+          "image": "/static/images/famous-people/paik-jongwon.png"
+        }
+      ]
+    }
+  },
+  "hybridTypes": {
+    "strategic-analytical": {
+      "name": "전략-분석형",
+      "description": "데이터 기반 전략가",
+      "detail": "논리적 분석을 바탕으로 장기 전략을 수립하는 유형"
+    },
+    "strategic-communicative": {
+      "name": "전략-소통형",
+      "description": "비전 공유형 리더",
+      "detail": "팀을 이끌며 전략적 방향을 제시하는 유형"
+    },
+    "strategic-executive": {
+      "name": "전략-실행형",
+      "description": "실행력 있는 전략가",
+      "detail": "전략을 빠르게 실행으로 옮기는 유형"
+    },
+    "analytical-communicative": {
+      "name": "분석-소통형",
+      "description": "데이터 커뮤니케이터",
+      "detail": "분석 결과를 효과적으로 전달하는 유형"
+    },
+    "analytical-executive": {
+      "name": "분석-실행형",
+      "description": "실용적 문제 해결사",
+      "detail": "분석을 바탕으로 빠르게 실행하는 유형"
+    },
+    "communicative-executive": {
+      "name": "소통-실행형",
+      "description": "팀 플레이어",
+      "detail": "협업을 통해 빠르게 성과를 내는 유형"
+    }
+  }
+}

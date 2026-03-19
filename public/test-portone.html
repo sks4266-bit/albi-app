@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PortOne SDK Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-2xl font-bold mb-4">PortOne V2 SDK 테스트</h1>
+        
+        <div id="status" class="mb-4 p-4 rounded-lg bg-gray-50">
+            <p>로딩 중...</p>
+        </div>
+        
+        <button onclick="testPayment()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
+            테스트 결제 실행
+        </button>
+        
+        <div id="debug" class="mt-4 p-4 bg-gray-800 text-green-400 text-xs font-mono rounded-lg overflow-auto max-h-96">
+            <p>디버그 로그:</p>
+        </div>
+    </div>
+
+    <!-- PortOne V2 SDK -->
+    <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
+    
+    <script>
+        const statusEl = document.getElementById('status');
+        const debugEl = document.getElementById('debug');
+        
+        function log(msg) {
+            console.log(msg);
+            debugEl.innerHTML += `<br>${msg}`;
+        }
+        
+        // 페이지 로드 직후 체크
+        log('🔍 Script execution started');
+        log(`🔍 typeof window.PortOne: ${typeof window.PortOne}`);
+        log(`🔍 window.PortOne: ${window.PortOne}`);
+        
+        // 100ms 후 체크
+        setTimeout(() => {
+            log(`⏰ After 100ms - typeof window.PortOne: ${typeof window.PortOne}`);
+        }, 100);
+        
+        // 500ms 후 체크
+        setTimeout(() => {
+            log(`⏰ After 500ms - typeof window.PortOne: ${typeof window.PortOne}`);
+        }, 500);
+        
+        // 1000ms 후 체크
+        setTimeout(() => {
+            log(`⏰ After 1000ms - typeof window.PortOne: ${typeof window.PortOne}`);
+            
+            if (typeof window.PortOne !== 'undefined') {
+                statusEl.innerHTML = '<p class="text-green-600 font-bold">✅ PortOne SDK 로드 성공!</p>';
+                log('✅ PortOne methods: ' + Object.keys(window.PortOne).join(', '));
+            } else {
+                statusEl.innerHTML = '<p class="text-red-600 font-bold">❌ PortOne SDK 로드 실패</p>';
+                log('❌ window keys with "port": ' + Object.keys(window).filter(k => k.toLowerCase().includes('port')).join(', '));
+            }
+        }, 1000);
+        
+        // DOM 로드 시 체크
+        document.addEventListener('DOMContentLoaded', () => {
+            log('📄 DOMContentLoaded - typeof window.PortOne: ' + typeof window.PortOne);
+        });
+        
+        // window.onload 체크
+        window.addEventListener('load', () => {
+            log('🌐 window.load - typeof window.PortOne: ' + typeof window.PortOne);
+        });
+        
+        async function testPayment() {
+            log('🚀 Test payment clicked');
+            
+            if (typeof window.PortOne === 'undefined') {
+                alert('PortOne SDK가 로드되지 않았습니다!');
+                log('❌ PortOne not available');
+                return;
+            }
+            
+            try {
+                log('📞 Calling PortOne.requestPayment...');
+                const response = await window.PortOne.requestPayment({
+                    storeId: 'store-1db2baf1-49d6-4b31-afcb-4662f37d7b05',
+                    paymentId: 'test_' + Date.now(),
+                    orderName: '테스트 결제',
+                    totalAmount: 1000,
+                    currency: 'KRW',
+                    channelKey: 'channel-key-f8f466e2-764d-40d4-b003-f85733fdc50a',
+                    payMethod: 'CARD'
+                });
+                
+                log('✅ Payment response: ' + JSON.stringify(response));
+                alert('결제 응답: ' + JSON.stringify(response));
+            } catch (error) {
+                log('❌ Payment error: ' + error.message);
+                alert('결제 오류: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

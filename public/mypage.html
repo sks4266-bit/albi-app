@@ -1,0 +1,4877 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>마이페이지 - 알비</title>
+  <link href="/styles.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+      background: #f8f9fa;
+      color: #222;
+      line-height: 1.5;
+    }
+    
+    /* 헤더 */
+    .header {
+      background: white;
+      border-bottom: 1px solid #e5e5e5;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+    
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .header-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #222;
+    }
+    
+    .user-type-badge {
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    .user-type-badge.jobseeker {
+      background: #E3F2FD;
+      color: #1976D2;
+    }
+    
+    .user-type-badge.employer {
+      background: #FFF3E0;
+      color: #F57C00;
+    }
+    
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .btn {
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .btn-primary {
+      background: #FF6B35;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #E55A2B;
+    }
+    
+    .btn-secondary {
+      background: #f8f9fa;
+      color: #666;
+      border: 1px solid #e5e5e5;
+    }
+    
+    .btn-secondary:hover {
+      background: #e9ecef;
+    }
+    
+    /* 컨테이너 */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    /* 레이아웃 */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+    
+    /* 사이드바 */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #222;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    /* 프로필 정보 */
+    .profile-info {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .profile-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .profile-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    
+    .profile-label {
+      font-size: 14px;
+      color: #666;
+      font-weight: 500;
+    }
+    
+    .profile-value {
+      font-size: 14px;
+      color: #222;
+      font-weight: 600;
+    }
+    
+    /* 네비게이션 메뉴 */
+    .nav-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .nav-item {
+      padding: 12px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 15px;
+      color: #666;
+    }
+    
+    .nav-item:hover {
+      background: #f8f9fa;
+      color: #FF6B35;
+    }
+    
+    .nav-item.active {
+      background: #FFF5F0;
+      color: #FF6B35;
+      font-weight: 600;
+    }
+    
+    .nav-item i {
+      width: 20px;
+      text-align: center;
+    }
+    
+    /* 메인 콘텐츠 */
+    .main-content {
+      min-height: 400px;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    /* 폼 스타일 */
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: all 0.2s;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: #FF6B35;
+      box-shadow: 0 0 0 3px rgba(255,107,53,0.1);
+    }
+    
+    .form-input:disabled {
+      background: #f5f5f5;
+      cursor: not-allowed;
+    }
+    
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+    
+    .empty-state i {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+    
+    /* 포인트 내역 스타일 */
+    .point-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .point-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+    
+    .point-item:hover {
+      background: #e9ecef;
+    }
+    
+    .point-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .point-info i {
+      font-size: 24px;
+    }
+    
+    .point-description {
+      font-size: 15px;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .point-date {
+      font-size: 13px;
+      color: #666;
+      margin-top: 4px;
+    }
+    
+    .point-amount {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    
+    .point-amount.positive {
+      color: #4CAF50;
+    }
+    
+    .point-amount.negative {
+      color: #FF6B35;
+    }
+    
+    /* 면접 결과 스타일 */
+    .interview-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .interview-card {
+      padding: 20px;
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .interview-card:hover {
+      border-color: #FF6B35;
+      box-shadow: 0 4px 12px rgba(255,107,53,0.1);
+      transform: translateY(-2px);
+    }
+    
+    .interview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    
+    .interview-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .interview-title i {
+      color: #FF6B35;
+      font-size: 18px;
+    }
+    
+    .interview-score {
+      font-size: 24px;
+      font-weight: 700;
+    }
+    
+    .interview-meta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+    
+    .interview-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .interview-meta i {
+      color: #999;
+    }
+    
+    .interview-summary {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    /* 반응형 */
+    @media (max-width: 768px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .header-actions {
+        flex-direction: column;
+      }
+    }
+    
+    /* 필터 버튼 스타일 */
+    .filter-btn {
+      padding: 8px 16px;
+      border: 2px solid #e5e7eb;
+      background: white;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    
+    .filter-btn:hover {
+      border-color: #FF6B35;
+      color: #FF6B35;
+    }
+    
+    .filter-btn.active {
+      background: #FF6B35;
+      color: white;
+      border-color: #FF6B35;
+    }
+    
+    /* 지원자 카드 스타일 */
+    .applicant-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      transition: all 0.3s;
+    }
+    
+    .applicant-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .applicant-status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .applicant-status.hired {
+      background: #10b981;
+      color: white;
+    }
+    
+    .applicant-status.working {
+      background: #3b82f6;
+      color: white;
+    }
+    
+    .applicant-status.completed {
+      background: #6b7280;
+      color: white;
+    }
+    
+    /* 노쇼 신고 모달 */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+    }
+    
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+  <link href="/footer.css" rel="stylesheet">
+</head>
+<body>
+  <!-- 헤더 -->
+  <div class="header">
+    <div class="header-container">
+      <div class="header-left">
+        <h1 class="header-title">마이페이지</h1>
+        <span id="userTypeBadge" class="user-type-badge jobseeker">구직자</span>
+      </div>
+      <div class="header-actions">
+        <a href="/chat.html" class="btn btn-secondary">
+          <i class="fas fa-comments"></i>
+          면접하기
+        </a>
+        <a href="/" class="btn btn-secondary">
+          <i class="fas fa-home"></i>
+          홈으로
+        </a>
+      </div>
+    </div>
+  </div>
+  
+  <div class="container">
+    <div class="content-grid">
+      <!-- 사이드바 -->
+      <div class="sidebar">
+        <!-- 프로필 카드 -->
+        <div class="card">
+          <div class="card-title">
+            <i class="fas fa-user-circle"></i>
+            내 정보
+          </div>
+          <div class="profile-info">
+            <div class="profile-item">
+              <span class="profile-label">이름</span>
+              <span class="profile-value" id="userName">로딩 중...</span>
+            </div>
+            <div class="profile-item">
+              <span class="profile-label">휴대폰</span>
+              <span class="profile-value" id="userPhone">-</span>
+            </div>
+            <div class="profile-item">
+              <span class="profile-label">이메일</span>
+              <span class="profile-value" id="userEmail">-</span>
+            </div>
+            <div class="profile-item">
+              <span class="profile-label">로그인 방식</span>
+              <span class="profile-value" id="loginMethod">-</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 포인트 카드 -->
+        <div class="card">
+          <div class="card-title">
+            <i class="fas fa-coins"></i>
+            알비 포인트
+          </div>
+          <div style="text-align: center; padding: 20px 0;">
+            <div style="font-size: 32px; font-weight: 700; color: #FF6B35;" id="userPoints">0</div>
+            <div style="font-size: 14px; color: #666; margin-top: 4px;">보유 포인트</div>
+          </div>
+        </div>
+        
+        <!-- 네비게이션 메뉴 -->
+        <div class="card">
+          <div class="nav-menu">
+            <div class="nav-item active" data-tab="results">
+              <i class="fas fa-clipboard-list"></i>
+              <span>면접 결과</span>
+            </div>
+            <div class="nav-item" data-tab="testResults">
+              <i class="fas fa-brain"></i>
+              <span>적성 테스트</span>
+            </div>
+            <div class="nav-item" data-tab="bookmarks">
+              <i class="fas fa-bookmark"></i>
+              <span>관심 공고</span>
+            </div>
+            <div class="nav-item" data-tab="applications">
+              <i class="fas fa-file-alt"></i>
+              <span>지원 목록</span>
+            </div>
+            <div class="nav-item" data-tab="hires">
+              <i class="fas fa-check-circle"></i>
+              <span>나의 채용</span>
+            </div>
+            <div class="nav-item" data-tab="chats">
+              <i class="fas fa-comments"></i>
+              <span>채팅 목록</span>
+            </div>
+            <div class="nav-item employer-only" data-tab="myJobs" style="display:none;">
+              <i class="fas fa-briefcase"></i>
+              <span>채용 공고 관리</span>
+            </div>
+            <div class="nav-item employer-only" data-tab="applicants" style="display:none;">
+              <i class="fas fa-users"></i>
+              <span>지원자 관리</span>
+            </div>
+            <div class="nav-item employer-only" data-tab="noshowReports" style="display:none;">
+              <i class="fas fa-exclamation-triangle"></i>
+              <span>노쇼 신고 관리</span>
+            </div>
+            <div class="nav-item" data-tab="referral">
+              <i class="fas fa-user-friends"></i>
+              <span>친구 초대</span>
+            </div>
+            <div class="nav-item jobseeker-only" data-tab="proposals" style="display:none;">
+              <i class="fas fa-handshake"></i>
+              <span>체험 제안</span>
+            </div>
+            <div class="nav-item" data-tab="points">
+              <i class="fas fa-history"></i>
+              <span>포인트 내역</span>
+            </div>
+            <div class="nav-item" data-tab="payments">
+              <i class="fas fa-credit-card"></i>
+              <span>결제내역</span>
+            </div>
+            <div class="nav-item" data-tab="dashboard">
+              <i class="fas fa-chart-bar"></i>
+              <span>대시보드</span>
+            </div>
+            <div class="nav-item" data-tab="subscription">
+              <i class="fas fa-crown"></i>
+              <span>구독관리</span>
+            </div>
+            <div class="nav-item" data-tab="profile">
+              <i class="fas fa-user-edit"></i>
+              <span>프로필 수정</span>
+            </div>
+            <div class="nav-item" data-tab="contracts">
+              <i class="fas fa-file-contract"></i>
+              <span>전자계약서</span>
+            </div>
+            <div class="nav-item" data-tab="employer">
+              <i class="fas fa-building"></i>
+              <span>구인자 인증</span>
+            </div>
+            <div class="nav-item" data-tab="password">
+              <i class="fas fa-key"></i>
+              <span>비밀번호 변경</span>
+            </div>
+            <div class="nav-item" data-tab="deleteAccount">
+              <i class="fas fa-user-times"></i>
+              <span>회원 탈퇴</span>
+            </div>
+            <div class="nav-item" onclick="logout()">
+              <i class="fas fa-sign-out-alt"></i>
+              <span>로그아웃</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 메인 콘텐츠 -->
+      <div class="main-content">
+        <!-- 면접 결과 탭 -->
+        <div id="tabResults" class="tab-content" style="display: block;">
+          <div class="card">
+            <div class="card-title">
+              <i class="fas fa-chart-line"></i>
+              최근 면접 결과
+            </div>
+            <div id="interviewResults">
+              <div class="empty-state">
+                <i class="fas fa-clipboard"></i>
+                <div style="font-size: 16px; margin-top: 8px;">아직 면접 결과가 없습니다</div>
+                <div style="font-size: 14px; margin-top: 8px;">AI 면접을 시작해보세요!</div>
+                <a href="/chat.html" class="btn btn-primary" style="margin-top: 20px;">
+                  <i class="fas fa-comments"></i>
+                  면접 시작하기
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 적성 테스트 결과 탭 -->
+        <div id="tabTestResults" class="tab-content">
+          <div class="card">
+            <div class="card-title">
+              <i class="fas fa-brain"></i>
+              직무적성 테스트 결과
+            </div>
+            <div id="testResultsList">
+              <div class="empty-state">
+                <i class="fas fa-brain"></i>
+                <div style="font-size: 16px; margin-top: 8px;">아직 테스트 결과가 없습니다</div>
+                <div style="font-size: 14px; margin-top: 8px;">나의 업무 DNA를 찾아보세요!</div>
+                <a href="/job-test.html" class="btn btn-primary" style="margin-top: 20px;">
+                  <i class="fas fa-play"></i>
+                  테스트 시작하기
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 친구 초대 탭 -->
+        <div id="tabReferral" class="tab-content">
+          <!-- 추천인 코드 섹션 -->
+          <div class="card">
+            <div class="card-title">
+              <i class="fas fa-gift"></i>
+              내 추천 코드
+            </div>
+            <div style="background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%); padding: 30px; border-radius: 12px; text-align: center; color: white;">
+              <div style="font-size: 14px; opacity: 0.9; margin-bottom: 12px;">친구가 이 코드로 가입하면</div>
+              <div style="font-size: 20px; font-weight: 700; margin-bottom: 8px;">친구 20P + 나 30P 지급!</div>
+              <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <div style="font-size: 32px; font-weight: 700; color: #FF6B35; letter-spacing: 4px;" id="myReferralCode">-</div>
+              </div>
+              <div style="display: flex; gap: 8px; justify-content: center;">
+                <button class="btn btn-secondary" onclick="copyReferralCode()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
+                  <i class="fas fa-copy"></i>
+                  코드 복사
+                </button>
+                <button class="btn btn-secondary" onclick="shareReferralLink()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
+                  <i class="fas fa-share-alt"></i>
+                  링크 공유
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 초대코드 입력 섹션 -->
+          <div class="card" id="referralInputSection">
+            <div class="card-title">
+              <i class="fas fa-user-plus"></i>
+              나를 초대한 친구
+            </div>
+            <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; border: 2px dashed #007bff;">
+              <div id="referrerDisplay" style="display: none;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                  <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: 700;">
+                    <i class="fas fa-user"></i>
+                  </div>
+                  <div style="flex: 1;">
+                    <div style="font-size: 12px; color: #666; margin-bottom: 4px;">추천인</div>
+                    <div style="font-size: 18px; font-weight: 700; color: #007bff;" id="referrerName">-</div>
+                  </div>
+                  <div style="background: #28a745; color: white; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600;">
+                    <i class="fas fa-check-circle"></i> 등록 완료
+                  </div>
+                </div>
+                <div style="font-size: 14px; color: #666; text-align: center; padding: 12px; background: white; border-radius: 6px;">
+                  <i class="fas fa-gift"></i> <span id="referrerName2">-</span>님이 나를 초대했습니다
+                </div>
+              </div>
+              
+              <div id="referralInputForm">
+                <div style="text-align: center; margin-bottom: 16px;">
+                  <div style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 8px;">친구 초대코드 입력</div>
+                  <div style="font-size: 14px; color: #666;">친구의 초대코드를 입력하면 20P를 받을 수 있어요!</div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <input 
+                    type="text" 
+                    id="referralCodeInput" 
+                    placeholder="친구의 6자리 초대코드 입력" 
+                    maxlength="6"
+                    style="flex: 1; padding: 12px 16px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; letter-spacing: 2px; text-transform: uppercase; text-align: center; font-weight: 600;"
+                  />
+                  <button onclick="submitReferralCode()" class="btn btn-primary" style="padding: 12px 24px; white-space: nowrap;">
+                    <i class="fas fa-check"></i>
+                    등록하기
+                  </button>
+                </div>
+                <div style="font-size: 13px; color: #999; margin-top: 12px; text-align: center;">
+                  <i class="fas fa-info-circle"></i> 초대코드는 한 번만 입력할 수 있습니다
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 추천 통계 -->
+          <div class="card">
+            <div class="card-title">
+              <i class="fas fa-chart-bar"></i>
+              추천 통계
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-top: 20px;">
+              <div style="text-align: center; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                <div style="font-size: 28px; font-weight: 700; color: #FF6B35;" id="totalReferrals">0</div>
+                <div style="font-size: 14px; color: #666; margin-top: 4px;">총 초대 인원</div>
+              </div>
+              <div style="text-align: center; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                <div style="font-size: 28px; font-weight: 700; color: #28a745;" id="hiredReferrals">0</div>
+                <div style="font-size: 14px; color: #666; margin-top: 4px;">고용 성공</div>
+              </div>
+              <div style="text-align: center; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                <div style="font-size: 28px; font-weight: 700; color: #007bff;" id="referralPoints">0P</div>
+                <div style="font-size: 14px; color: #666; margin-top: 4px;">획득 포인트</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 초대한 친구 목록 -->
+          <div class="card">
+            <div class="card-title">
+              <i class="fas fa-users"></i>
+              초대한 친구 목록
+            </div>
+            <div id="referralList">
+              <div class="empty-state">
+                <i class="fas fa-user-plus"></i>
+                <div style="font-size: 16px; margin-top: 8px;">아직 초대한 친구가 없습니다</div>
+                <div style="font-size: 14px; margin-top: 8px; color: #999;">위의 추천 코드를 친구에게 공유해보세요!</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 포인트 내역 탭 -->
+        <div id="tabPoints" class="tab-content">
+          <!-- 추천인 코드 카드 -->
+          <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-bottom: 24px;">
+            <div class="card-title" style="color: white; border-bottom-color: rgba(255,255,255,0.2);">
+              <i class="fas fa-gift"></i>
+              친구 초대하고 포인트 받기
+            </div>
+            <div style="padding: 24px;">
+              <!-- 추천인 코드 -->
+              <div style="background: rgba(255,255,255,0.15); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">내 추천인 코드</div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div id="referralCode" style="font-size: 32px; font-weight: 700; letter-spacing: 2px; flex: 1;">------</div>
+                  <button onclick="copyReferralCode()" class="btn" style="background: white; color: #764ba2; font-weight: 600;">
+                    <i class="fas fa-copy"></i>
+                    복사
+                  </button>
+                </div>
+              </div>
+
+              <!-- 추천 링크 -->
+              <div style="background: rgba(255,255,255,0.15); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">초대 링크</div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <input type="text" id="referralLink" readonly 
+                    style="flex: 1; background: rgba(255,255,255,0.25); border: none; border-radius: 8px; padding: 12px; color: white; font-size: 14px;"
+                    value="https://albi.kr/signup.html?ref=------">
+                  <button onclick="copyReferralLink()" class="btn" style="background: white; color: #764ba2; font-weight: 600;">
+                    <i class="fas fa-link"></i>
+                    복사
+                  </button>
+                  <button onclick="shareReferralLink()" class="btn" style="background: rgba(255,255,255,0.25); color: white; font-weight: 600; border: 1px solid rgba(255,255,255,0.3);">
+                    <i class="fas fa-share-alt"></i>
+                    공유
+                  </button>
+                </div>
+              </div>
+
+              <!-- 추천 통계 -->
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                <div style="background: rgba(255,255,255,0.15); border-radius: 8px; padding: 16px; text-align: center;">
+                  <div style="font-size: 24px; font-weight: 700; margin-bottom: 4px;" id="referralCount">0</div>
+                  <div style="font-size: 13px; opacity: 0.9;">초대한 친구</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.15); border-radius: 8px; padding: 16px; text-align: center;">
+                  <div style="font-size: 24px; font-weight: 700; margin-bottom: 4px;" id="hiredCount">0</div>
+                  <div style="font-size: 13px; opacity: 0.9;">고용 성공</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.15); border-radius: 8px; padding: 16px; text-align: center;">
+                  <div style="font-size: 24px; font-weight: 700; margin-bottom: 4px;" id="earnedPoints">0P</div>
+                  <div style="font-size: 13px; opacity: 0.9;">획득 포인트</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 포인트 수입/지출 내역 -->
+          <div class="card">
+            <div class="card-title">
+              <i class="fas fa-receipt"></i>
+              포인트 수입/지출 내역
+            </div>
+            <div id="pointTransactions">
+              <div style="text-align: center; padding: 40px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 32px; color: #FF6B35;"></i>
+                <div style="margin-top: 12px; color: #666;">내역을 불러오는 중...</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 체험 제안 탭 -->
+        <div id="tabProposals" class="tab-content jobseeker-only" style="display:none;">
+          <div class="card">
+            <div class="card-title">
+              <i class="fas fa-handshake"></i>
+              받은 1시간 체험 제안
+            </div>
+            <div id="proposalsList">
+              <div class="empty-state">
+                <i class="fas fa-spinner fa-spin" style="font-size: 32px;"></i>
+                <div style="font-size: 16px; margin-top: 8px;">제안 목록을 불러오는 중...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 관심 공고 탭 -->
+        <div id="tabBookmarks" class="tab-content">
+          <div class="card">
+            <div class="card-title">
+              <i class="fas fa-bookmark"></i>
+              관심 공고
+            </div>
+            <div id="bookmarkList">
+              <div class="empty-state">
+                <i class="fas fa-bookmark"></i>
+                <div style="font-size: 16px; margin-top: 8px;">저장한 공고가 없습니다</div>
+                <div style="font-size: 14px; margin-top: 8px;">관심있는 공고를 저장해보세요!</div>
+                <a href="/jobs.html" class="btn btn-primary" style="margin-top: 20px;">
+                  <i class="fas fa-search"></i>
+                  공고 찾기
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 지원 목록 탭 -->
+        <div id="tabApplications" class="tab-content">
+          <div class="card">
+            <div class="card-title">
+              <i class="fas fa-file-alt"></i>
+              지원 목록
+            </div>
+            <div id="applicationList">
+              <div class="empty-state">
+                <i class="fas fa-file-alt"></i>
+                <div style="font-size: 16px; margin-top: 8px;">지원한 공고가 없습니다</div>
+                <div style="font-size: 14px; margin-top: 8px;">마음에 드는 공고에 지원해보세요!</div>
+                <a href="/jobs.html" class="btn btn-primary" style="margin-top: 20px;">
+                  <i class="fas fa-search"></i>
+                  공고 찾기
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 나의 채용 탭 -->
+        <div id="tabHires" class="tab-content">
+          <div class="card">
+            <div class="card-title">
+              <i class="fas fa-check-circle"></i>
+              나의 채용
+            </div>
+            
+            <!-- 통계 카드 -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+              <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px;">
+                <div style="font-size: 14px; opacity: 0.9;">총 채용 확정</div>
+                <div style="font-size: 28px; font-weight: 700; margin-top: 8px;" id="totalHires">0건</div>
+              </div>
+              <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 20px; border-radius: 12px;">
+                <div style="font-size: 14px; opacity: 0.9;">활성 근무</div>
+                <div style="font-size: 28px; font-weight: 700; margin-top: 8px;" id="activeWorks">0건</div>
+              </div>
+              <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 20px; border-radius: 12px;">
+                <div style="font-size: 14px; opacity: 0.9;">총 수입</div>
+                <div style="font-size: 28px; font-weight: 700; margin-top: 8px;" id="totalEarnings">0원</div>
+              </div>
+            </div>
+            
+            <div id="hiresList">
+              <div class="empty-state">
+                <i class="fas fa-check-circle" style="font-size: 48px; color: #10b981;"></i>
+                <div style="font-size: 18px; margin-top: 16px; font-weight: 600;">채용 확정 내역이 없습니다</div>
+                <div style="font-size: 14px; margin-top: 8px; color: #666;">
+                  채용이 확정되면 여기에 표시됩니다
+                </div>
+                <a href="/jobs.html" class="btn btn-primary" style="margin-top: 20px;">
+                  <i class="fas fa-search"></i>
+                  공고 찾기
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 채팅 목록 탭 -->
+        <div id="tabChats" class="tab-content">
+          <div class="card">
+            <div class="card-title">
+              <i class="fas fa-comments"></i>
+              채팅 목록
+            </div>
+            <div id="chatList">
+              <div class="empty-state">
+                <i class="fas fa-comments"></i>
+                <div style="font-size: 16px; margin-top: 8px;">채팅 내역이 없습니다</div>
+                <div style="font-size: 14px; margin-top: 8px;">채용 담당자와 대화를 시작해보세요!</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 채용 공고 관리 탭 (구인자 전용) -->
+        <div id="tabMyJobs" class="tab-content">
+          <div class="card">
+            <div class="card-title">
+              <i class="fas fa-briefcase"></i>
+              내 채용 공고
+            </div>
+            <div style="margin-bottom: 20px;">
+              <a href="/job-post" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                새 공고 등록
+              </a>
+            </div>
+            <div id="myJobsList">
+              <div class="empty-state">
+                <i class="fas fa-briefcase"></i>
+                <div style="font-size: 16px; margin-top: 8px;">등록한 공고가 없습니다</div>
+                <div style="font-size: 14px; margin-top: 8px;">첫 채용 공고를 등록해보세요!</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 지원자 관리 탭 (구인자 전용) -->
+        <div id="tabApplicants" class="tab-content">
+          <div class="card">
+            <div class="card-title">
+              <i class="fas fa-users"></i>
+              지원자 및 채용 관리
+            </div>
+            
+            <!-- 필터 -->
+            <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+              <button onclick="filterApplicants('all')" class="filter-btn active" data-filter="all">
+                전체
+              </button>
+              <button onclick="filterApplicants('hired')" class="filter-btn" data-filter="hired">
+                채용 완료
+              </button>
+              <button onclick="filterApplicants('working')" class="filter-btn" data-filter="working">
+                근무 중
+              </button>
+              <button onclick="filterApplicants('completed')" class="filter-btn" data-filter="completed">
+                근무 완료
+              </button>
+            </div>
+            
+            <div id="applicantsList">
+              <div class="empty-state">
+                <i class="fas fa-users"></i>
+                <div style="font-size: 16px; margin-top: 8px;">지원자가 없습니다</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 노쇼 신고 관리 탭 -->
+        <div id="tabNoshowReports" class="tab-content">
+          <div class="card">
+            <div class="card-title">
+              <i class="fas fa-exclamation-triangle" style="color: #ef4444;"></i>
+              노쇼 신고 관리
+            </div>
+            
+            <!-- 안내 -->
+            <div style="background: linear-gradient(135deg, #fef2f2, #fee2e2); border-left: 4px solid #ef4444; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+              <div style="font-weight: 600; color: #991b1b; margin-bottom: 8px;">
+                <i class="fas fa-info-circle"></i> 노쇼 신고 안내
+              </div>
+              <ul style="font-size: 14px; color: #7f1d1d; margin-left: 20px; line-height: 1.8;">
+                <li>노쇼 신고는 관리자 검토 후 처리됩니다</li>
+                <li>승인 시 구직자의 신뢰도 점수가 차감됩니다</li>
+                <li>허위 신고 시 불이익을 받을 수 있습니다</li>
+              </ul>
+            </div>
+            
+            <!-- 필터 -->
+            <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+              <button onclick="filterNoshowReports('all')" class="filter-btn active" data-filter="all">
+                전체
+              </button>
+              <button onclick="filterNoshowReports('pending')" class="filter-btn" data-filter="pending">
+                <i class="fas fa-clock"></i> 검토 대기
+              </button>
+              <button onclick="filterNoshowReports('approved')" class="filter-btn" data-filter="approved">
+                <i class="fas fa-check-circle"></i> 승인됨
+              </button>
+              <button onclick="filterNoshowReports('rejected')" class="filter-btn" data-filter="rejected">
+                <i class="fas fa-times-circle"></i> 거절됨
+              </button>
+            </div>
+            
+            <div id="noshowReportsList">
+              <div class="empty-state">
+                <i class="fas fa-clipboard-list"></i>
+                <div style="font-size: 16px; margin-top: 8px;">신고 내역이 없습니다</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 프로필 수정 탭 -->
+        <div id="tabProfile" class="tab-content">
+          <!-- 신뢰도 점수 카드 (구직자만) -->
+          <div id="trustScoreCard" class="card jobseeker-only" style="display:none; margin-bottom: 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">
+                  <i class="fas fa-shield-alt"></i> 신뢰도 점수
+                </div>
+                <div style="font-size: 48px; font-weight: 700; line-height: 1;" id="trustScoreValue">
+                  100
+                </div>
+                <div style="font-size: 14px; opacity: 0.8; margin-top: 8px;">
+                  <span id="trustScoreStatus">우수</span> · <span id="trustScoreRank">상위 10%</span>
+                </div>
+              </div>
+              <div style="text-align: center;">
+                <div style="width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; position: relative;">
+                  <svg width="120" height="120" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg);">
+                    <circle cx="60" cy="60" r="50" stroke="rgba(255,255,255,0.3)" stroke-width="10" fill="none"/>
+                    <circle id="trustScoreCircle" cx="60" cy="60" r="50" stroke="white" stroke-width="10" fill="none" 
+                            stroke-dasharray="314.159" stroke-dashoffset="0" style="transition: stroke-dashoffset 1s ease;"/>
+                  </svg>
+                  <i class="fas fa-star" style="font-size: 40px; opacity: 0.9;"></i>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 신뢰도 안내 -->
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2);">
+              <div style="font-size: 13px; opacity: 0.9; line-height: 1.6;">
+                <i class="fas fa-info-circle"></i> 신뢰도 점수는 체험 완료, 정시 출근, 고용주 평가 등으로 상승하며, 노쇼 발생 시 감소합니다.
+              </div>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-title">
+              <i class="fas fa-user-edit"></i>
+              프로필 수정
+            </div>
+            <form id="profileForm">
+              <div class="form-group">
+                <label class="form-label">이름</label>
+                <input type="text" class="form-input" id="editName" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">휴대폰 번호</label>
+                <input type="tel" class="form-input" id="editPhone" disabled>
+              </div>
+              <div class="form-group">
+                <label class="form-label">이메일</label>
+                <input type="email" class="form-input" id="editEmail">
+              </div>
+              <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <i class="fas fa-save"></i>
+                저장하기
+              </button>
+            </form>
+          </div>
+        </div>
+        
+        <!-- 전자계약서 탭 -->
+        <div id="tabContracts" class="tab-content">
+          <div class="card">
+            <div class="card-title">
+              <i class="fas fa-file-contract"></i>
+              전자계약서 이력
+            </div>
+            
+            <!-- 검색 및 필터 -->
+            <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; background: #f9fafb; padding: 15px; border-radius: 8px;">
+              <input type="text" id="contractSearch" placeholder="🔍 회사명, 근로자명, 계약번호 검색..." 
+                     style="flex: 1; min-width: 200px; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;" 
+                     onkeyup="if(event.key==='Enter') filterContracts()">
+              
+              <select id="contractStatus" onchange="filterContracts()" 
+                      style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; background: white;">
+                <option value="">모든 상태</option>
+                <option value="active">진행중</option>
+                <option value="completed">완료</option>
+                <option value="terminated">종료</option>
+              </select>
+              
+              <select id="contractSort" onchange="filterContracts()" 
+                      style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; background: white;">
+                <option value="created_at:DESC">최신순</option>
+                <option value="created_at:ASC">오래된순</option>
+                <option value="work_start_date:DESC">근무일순 (최신)</option>
+                <option value="hourly_wage:DESC">시급순 (높은)</option>
+                <option value="hourly_wage:ASC">시급순 (낮은)</option>
+              </select>
+              
+              <button onclick="filterContracts()" class="btn-primary" style="padding: 10px 20px;">
+                <i class="fas fa-search"></i> 검색
+              </button>
+              
+              <button onclick="resetContractFilters()" style="padding: 10px 20px; background: #6b7280; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                <i class="fas fa-redo"></i> 초기화
+              </button>
+            </div>
+            
+            <!-- 액션 버튼 -->
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+              <button onclick="createNewContract()" class="btn-primary">
+                <i class="fas fa-plus"></i>
+                새 계약서 작성
+              </button>
+            </div>
+            
+            <div id="contractsList">
+              <div style="text-align: center; padding: 40px; color: #888;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 24px;"></i>
+                <p style="margin-top: 10px;">계약서 목록을 불러오는 중...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 구인자 인증 탭 -->
+        <div id="tabEmployer" class="tab-content">
+          <div class="card">
+            <div class="card-title">
+              <i class="fas fa-building"></i>
+              구인자 인증
+            </div>
+            
+            <div id="employerStatus">
+              <!-- 인증 상태가 표시됩니다 -->
+            </div>
+            
+            <div id="employerVerificationForm" style="display: none; margin-top: 20px;">
+              <div style="background: #E3F2FD; padding: 16px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #1976D2;">
+                <div style="font-weight: 600; color: #1565C0; margin-bottom: 8px;">
+                  <i class="fas fa-info-circle"></i>
+                  홈택스 자동 인증 시스템
+                </div>
+                <ul style="font-size: 13px; color: #424242; line-height: 1.8; padding-left: 20px; margin: 0;">
+                  <li>국세청 사업자등록정보와 자동으로 확인합니다</li>
+                  <li>유효한 사업자는 즉시 인증 완료됩니다</li>
+                  <li>별도의 서류 제출이 필요 없습니다</li>
+                </ul>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">사업자등록번호</label>
+                <input 
+                  type="text" 
+                  class="form-input" 
+                  id="verifyBusinessNumber" 
+                  placeholder="123-45-67890"
+                >
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">사업자명 (상호명)</label>
+                <input 
+                  type="text" 
+                  class="form-input" 
+                  id="verifyBusinessName" 
+                  placeholder="주식회사 알비"
+                >
+              </div>
+              
+              <button 
+                type="button"
+                id="submitVerificationButton"
+                class="btn btn-primary"
+                style="width: 100%;"
+                onclick="submitEmployerVerification()"
+                disabled
+              >
+                인증 신청하기
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 비밀번호 변경 탭 -->
+        <div id="tabPassword" class="tab-content">
+          <div class="card">
+            <div class="card-title">
+              <i class="fas fa-key"></i>
+              비밀번호 변경
+            </div>
+            <form id="passwordForm">
+              <div class="form-group">
+                <label class="form-label">현재 비밀번호</label>
+                <input type="password" class="form-input" id="currentPassword" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">새 비밀번호</label>
+                <input type="password" class="form-input" id="newPassword" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">새 비밀번호 확인</label>
+                <input type="password" class="form-input" id="confirmPassword" required>
+              </div>
+              <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <i class="fas fa-check"></i>
+                비밀번호 변경
+              </button>
+            </form>
+          </div>
+        </div>
+        
+        <!-- 회원탈퇴 탭 -->
+        <div id="tabDeleteAccount" class="tab-content">
+          <div class="card">
+            <div class="card-title">
+              <i class="fas fa-user-times"></i>
+              회원탈퇴
+            </div>
+            <div style="background: #FFF3E0; padding: 16px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #FF9800;">
+              <div style="font-weight: 600; color: #F57C00; margin-bottom: 8px;">
+                <i class="fas fa-exclamation-triangle"></i>
+                회원탈퇴 전 꼭 확인하세요!
+              </div>
+              <ul style="font-size: 14px; color: #666; line-height: 1.8; padding-left: 20px;">
+                <li>탈퇴 시 모든 개인정보와 활동 기록이 삭제됩니다.</li>
+                <li>보유하신 포인트는 소멸되며 복구할 수 없습니다.</li>
+                <li>진행 중인 예약이나 채팅은 모두 취소됩니다.</li>
+                <li>동일한 계정으로 재가입이 불가능합니다.</li>
+              </ul>
+            </div>
+            <form id="deleteAccountForm">
+              <div class="form-group">
+                <label class="form-label">비밀번호 확인</label>
+                <input type="password" class="form-input" id="deletePassword" placeholder="비밀번호를 입력하세요" required>
+              </div>
+              <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer;">
+                  <input type="checkbox" id="agreeDelete" required>
+                  위 내용을 모두 확인했으며, 회원탈퇴에 동의합니다.
+                </label>
+              </div>
+              <button type="submit" class="btn" style="width: 100%; background: #dc3545; color: white;">
+                <i class="fas fa-user-times"></i>
+                회원탈퇴
+              </button>
+          </div>
+        </div>
+        
+        <!-- 결제내역 탭 -->
+        <div id="tabPayments" class="tab-content">
+          <div class="card">
+            <div class="card-title">
+              <i class="fas fa-credit-card"></i>
+              결제내역
+            </div>
+            
+            <!-- 필터 -->
+            <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+              <button onclick="filterPayments('all')" class="filter-btn active" data-filter="all">
+                전체
+              </button>
+              <button onclick="filterPayments('completed')" class="filter-btn" data-filter="completed">
+                결제 완료
+              </button>
+              <button onclick="filterPayments('cancelled')" class="filter-btn" data-filter="cancelled">
+                취소/환불
+              </button>
+            </div>
+            
+            <div id="paymentsList">
+              <div class="empty-state">
+                <i class="fas fa-receipt"></i>
+                <div style="font-size: 16px; margin-top: 8px;">결제 내역이 없습니다</div>
+                <div style="font-size: 14px; margin-top: 8px;">구독을 시작해보세요!</div>
+                <a href="/payment.html" class="btn btn-primary" style="margin-top: 20px;">
+                  <i class="fas fa-shopping-cart"></i>
+                  구독하기
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 대시보드 탭 -->
+        <div id="tabDashboard" class="tab-content">
+          <div class="card">
+            <div class="card-title">
+              <i class="fas fa-chart-bar"></i>
+              나의 활동 대시보드
+            </div>
+            
+            <!-- 통계 요약 카드 -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+              <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 24px; border-radius: 12px;">
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">
+                  <i class="fas fa-comments"></i> 멘토 대화
+                </div>
+                <div style="font-size: 32px; font-weight: 700;" id="totalMentorChats">0</div>
+                <div style="font-size: 12px; opacity: 0.8; margin-top: 4px;">이번 달</div>
+              </div>
+              
+              <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 24px; border-radius: 12px;">
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">
+                  <i class="fas fa-video"></i> 면접 횟수
+                </div>
+                <div style="font-size: 32px; font-weight: 700;" id="totalInterviews">0</div>
+                <div style="font-size: 12px; opacity: 0.8; margin-top: 4px;">누적</div>
+              </div>
+              
+              <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 24px; border-radius: 12px;">
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">
+                  <i class="fas fa-star"></i> 평균 점수
+                </div>
+                <div style="font-size: 32px; font-weight: 700;" id="avgScore">0</div>
+                <div style="font-size: 12px; opacity: 0.8; margin-top: 4px;">전체</div>
+              </div>
+              
+              <div style="background: linear-gradient(135deg, #ec4899 0%, #be185d 100%); color: white; padding: 24px; border-radius: 12px;">
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">
+                  <i class="fas fa-trophy"></i> 성장률
+                </div>
+                <div style="font-size: 32px; font-weight: 700;" id="growthRate">+0%</div>
+                <div style="font-size: 12px; opacity: 0.8; margin-top: 4px;">지난 달 대비</div>
+              </div>
+            </div>
+            
+            <!-- 최근 활동 -->
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
+              <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #333;">
+                <i class="fas fa-clock"></i> 최근 활동
+              </h4>
+              <div id="recentActivities">
+                <div style="text-align: center; padding: 30px; color: #888;">
+                  <i class="fas fa-spinner fa-spin" style="font-size: 24px;"></i>
+                  <p style="margin-top: 10px;">활동 내역을 불러오는 중...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 구독관리 탭 -->
+        <div id="tabSubscription" class="tab-content">
+          <div class="card">
+            <div class="card-title">
+              <i class="fas fa-crown"></i>
+              구독 관리
+            </div>
+            
+            <!-- 구독 상태 카드 -->
+            <div id="subscriptionStatusCard">
+              <div style="text-align: center; padding: 40px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 32px; color: #667eea;"></i>
+                <div style="margin-top: 12px; color: #666;">구독 정보를 불러오는 중...</div>
+              </div>
+            </div>
+            
+            <!-- 플랜 변경 버튼 -->
+            <div style="text-align: center; margin-top: 20px;">
+              <a href="/payment.html" class="btn btn-primary">
+                <i class="fas fa-sync-alt"></i>
+                플랜 변경하기
+              </a>
+              <a href="/subscription-manage.html" class="btn btn-secondary" style="margin-left: 10px;">
+                <i class="fas fa-cog"></i>
+                상세 관리
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    console.log('🚀 마이페이지 로드 시작');
+    
+    // ============================================
+    // 전역 변수
+    // ============================================
+    let currentUser = null;
+    let userType = null;
+    let verificationFile = null;
+    
+    // ============================================
+    // 1. 페이지 초기화
+    // ============================================
+    window.addEventListener('DOMContentLoaded', async () => {
+      console.log('📱 DOMContentLoaded');
+      
+      // 로그인 체크
+      const userId = localStorage.getItem('albi_user_id');
+      const sessionToken = localStorage.getItem('albi_session_token');
+      
+      if (!userId || !sessionToken) {
+        alert('로그인이 필요합니다.');
+        window.location.href = '/login.html';
+        return;
+      }
+      
+      // 사용자 타입 설정
+      userType = localStorage.getItem('albi_user_type') || 'jobseeker';
+      updateUserTypeBadge();
+      
+      // 데이터 로드
+      await loadProfile();
+      
+      // 초기 탭 데이터 로드
+      await loadInterviewResults();
+      
+      // 탭 전환 이벤트
+      setupTabNavigation();
+      
+      // 폼 제출 이벤트
+      setupForms();
+
+      // 추천인 코드 및 포인트 내역 로드
+      await loadReferralInfo();
+      
+      console.log('✅ 마이페이지 초기화 완료');
+    });
+
+    // ============================================
+    // 추천인 코드 관련 함수
+    // ============================================
+    
+    // 추천인 정보 로드
+    async function loadReferralInfo() {
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        const response = await fetch('/api/referral/my-code', {
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // 추천인 코드 표시
+          document.getElementById('referralCode').textContent = data.referralCode;
+          
+          // 초대 링크 생성
+          const referralLink = `https://albi.kr/signup.html?ref=${data.referralCode}`;
+          document.getElementById('referralLink').value = referralLink;
+          
+          // 추천 통계 표시
+          document.getElementById('referralCount').textContent = data.stats.total || 0;
+          document.getElementById('hiredCount').textContent = data.stats.rewarded || 0;
+          
+          // 획득 포인트 계산 (가입당 50P + 고용당 200P)
+          const earnedPoints = (data.stats.total * 50) + (data.stats.rewarded * 200);
+          document.getElementById('earnedPoints').textContent = earnedPoints + 'P';
+        }
+        
+        // 나를 초대한 친구 정보 로드
+        await loadReferrerInfo();
+      } catch (error) {
+        console.error('추천인 정보 로드 오류:', error);
+      }
+
+    }
+
+    // 추천인 코드 복사
+    function copyReferralCode() {
+      const code = document.getElementById('referralCode').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        alert('추천인 코드가 복사되었습니다!\n' + code);
+      }).catch(err => {
+        console.error('복사 실패:', err);
+        alert('복사에 실패했습니다.');
+      });
+    }
+
+    // 추천 링크 복사
+    function copyReferralLink() {
+      const link = document.getElementById('referralLink').value;
+      navigator.clipboard.writeText(link).then(() => {
+        alert('초대 링크가 복사되었습니다!\n친구에게 공유해보세요!');
+      }).catch(err => {
+        console.error('복사 실패:', err);
+        alert('복사에 실패했습니다.');
+      });
+    }
+
+    // 추천 링크 공유
+    function shareReferralLink() {
+      const link = document.getElementById('referralLink').value;
+      const code = document.getElementById('referralCode').textContent;
+      
+      if (navigator.share) {
+        navigator.share({
+          title: '알비 추천',
+          text: `알비에서 같이 일자리 찾아요! 이 링크로 가입하면 50P 보너스!\n추천코드: ${code}`,
+          url: link
+        }).catch(err => {
+          console.log('공유 취소:', err);
+        });
+      } else {
+        copyReferralLink();
+      }
+    }
+
+    // 초대코드 입력 제출
+    async function submitReferralCode() {
+      const input = document.getElementById('referralCodeInput');
+      const code = input.value.trim().toUpperCase();
+      
+      if (!code) {
+        alert('초대코드를 입력해주세요.');
+        return;
+      }
+      
+      if (code.length !== 6) {
+        alert('초대코드는 6자리입니다.');
+        return;
+      }
+      
+      // 자신의 코드인지 확인
+      const myCode = document.getElementById('referralCode').textContent;
+      if (code === myCode) {
+        alert('자신의 초대코드는 입력할 수 없습니다.');
+        return;
+      }
+      
+      if (!confirm(`초대코드 "${code}"를 등록하시겠습니까?\n한 번 등록하면 변경할 수 없습니다.`)) {
+        return;
+      }
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        const response = await fetch('/api/users/referral/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionToken}`
+          },
+          body: JSON.stringify({ referral_code: code })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          alert(`✅ 초대코드가 등록되었습니다!\n추천인: ${data.referrer_name}\n보너스: 20P 지급`);
+          
+          // UI 업데이트
+          document.getElementById('referralInputForm').style.display = 'none';
+          document.getElementById('referrerDisplay').style.display = 'block';
+          document.getElementById('referrerName').textContent = data.referrer_name;
+          document.getElementById('referrerName2').textContent = data.referrer_name;
+          
+          // 포인트 새로고침
+          loadUserData();
+        } else {
+          alert('❌ ' + (data.message || '초대코드 등록에 실패했습니다.'));
+        }
+      } catch (error) {
+        console.error('초대코드 등록 오류:', error);
+        alert('초대코드 등록 중 오류가 발생했습니다.');
+      }
+    }
+    
+    // 추천인 정보 로드
+    async function loadReferrerInfo() {
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        const response = await fetch('/api/users/referrer', {
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.referrer) {
+          // 이미 추천인이 있는 경우
+          document.getElementById('referralInputForm').style.display = 'none';
+          document.getElementById('referrerDisplay').style.display = 'block';
+          document.getElementById('referrerName').textContent = data.referrer.name;
+          document.getElementById('referrerName2').textContent = data.referrer.name;
+        } else {
+          // 추천인이 없는 경우 입력 폼 표시
+          document.getElementById('referralInputForm').style.display = 'block';
+          document.getElementById('referrerDisplay').style.display = 'none';
+        }
+      } catch (error) {
+        console.error('추천인 정보 로드 오류:', error);
+        // 오류 시 입력 폼 표시
+        document.getElementById('referralInputForm').style.display = 'block';
+        document.getElementById('referrerDisplay').style.display = 'none';
+      }
+    }
+
+
+    // ============================================
+    // 2. 사용자 타입 배지 업데이트
+    // ============================================
+    function updateUserTypeBadge() {
+      const badge = document.getElementById('userTypeBadge');
+      if (userType === 'employer') {
+        badge.textContent = '구인자';
+        badge.className = 'user-type-badge employer';
+        // 구인자 전용 메뉴 표시
+        document.querySelectorAll('.employer-only').forEach(el => {
+          el.style.display = 'flex';
+        });
+      } else {
+        badge.textContent = '구직자';
+        badge.className = 'user-type-badge jobseeker';
+        // 구인자 전용 메뉴 숨김
+        document.querySelectorAll('.employer-only').forEach(el => {
+          el.style.display = 'none';
+        });
+      }
+    }
+    
+    // ============================================
+    // 3. 프로필 정보 로드
+    // ============================================
+    async function loadProfile() {
+      console.log('👤 프로필 로드 시작');
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        const response = await fetch('/api/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        });
+        
+        const data = await response.json();
+        console.log('📦 API 응답:', data);
+        
+        if (data.success && data.user) {
+          currentUser = data.user;
+          
+          // 프로필 정보 표시
+          document.getElementById('userName').textContent = currentUser.name || '-';
+          document.getElementById('userPhone').textContent = currentUser.phone || '-';
+          document.getElementById('userEmail').textContent = currentUser.email || '-';
+          
+          // 로그인 방식 표시
+          const loginMethodElement = document.getElementById('loginMethod');
+          console.log('👤 전체 유저 정보:', currentUser);
+          console.log('🔑 social_provider:', currentUser.social_provider);
+          console.log('📧 email:', currentUser.email);
+          
+          let loginMethod = '일반 로그인';
+          
+          // 1순위: social_provider 값 확인
+          if (currentUser.social_provider && currentUser.social_provider !== null && currentUser.social_provider !== 'null') {
+            const provider = String(currentUser.social_provider).toLowerCase().trim();
+            console.log('🔍 처리된 provider:', provider);
+            
+            const providerNames = {
+              'google': '구글 로그인',
+              'kakao': '카카오 로그인',
+              'naver': '네이버 로그인',
+              '1': '구글 로그인',
+              '2': '카카오 로그인',
+              '3': '네이버 로그인'
+            };
+            
+            loginMethod = providerNames[provider] || loginMethod;
+            console.log('✅ social_provider 기반 판단:', loginMethod);
+          }
+          // 2순위: 이메일 도메인으로 판단
+          else if (currentUser.email && currentUser.email !== '-') {
+            const email = String(currentUser.email).toLowerCase().trim();
+            console.log('📮 이메일 분석:', email);
+            
+            if (email.includes('gmail.com') || email.includes('googlemail.com')) {
+              loginMethod = '구글 로그인';
+              console.log('✅ Gmail 도메인 감지');
+            } else if (email.includes('hanmail.net') || email.includes('daum.net')) {
+              loginMethod = '카카오 로그인';
+              console.log('✅ Daum/Hanmail 도메인 감지');
+            } else if (email.includes('naver.com')) {
+              loginMethod = '네이버 로그인';
+              console.log('✅ Naver 도메인 감지');
+            } else {
+              loginMethod = '이메일 로그인';
+              console.log('📧 일반 이메일 로그인');
+            }
+          }
+          
+          console.log('🔑 최종 로그인 방식:', loginMethod);
+          
+          if (loginMethodElement) {
+            loginMethodElement.textContent = loginMethod;
+          } else {
+            console.error('❌ loginMethod 엘리먼트를 찾을 수 없음');
+          }
+          
+          // 포인트 표시
+          const points = currentUser.points || 0;
+          document.getElementById('userPoints').textContent = points.toLocaleString();
+          console.log('💰 포인트:', points);
+          
+          // 신뢰도 점수 표시 (구직자만)
+          if (userType === 'jobseeker') {
+            const trustScore = currentUser.trust_score !== undefined ? currentUser.trust_score : 100;
+            updateTrustScoreDisplay(trustScore);
+            document.getElementById('trustScoreCard').style.display = 'block';
+            console.log('⭐ 신뢰도 점수:', trustScore);
+          }
+          
+          // 프로필 수정 폼 채우기
+          document.getElementById('editName').value = currentUser.name || '';
+          document.getElementById('editPhone').value = currentUser.phone || '';
+          document.getElementById('editEmail').value = currentUser.email || '';
+          
+          console.log('✅ 프로필 로드 완료');
+        } else {
+          throw new Error(data.error || '프로필 로드 실패');
+        }
+      } catch (error) {
+        console.error('❌ 프로필 로드 에러:', error);
+        alert('프로필 정보를 불러올 수 없습니다.');
+      }
+    }
+    
+    // 신뢰도 점수 표시 업데이트
+    function updateTrustScoreDisplay(score) {
+      // 점수 값 표시
+      document.getElementById('trustScoreValue').textContent = score;
+      
+      // 원형 progress bar 업데이트
+      const circle = document.getElementById('trustScoreCircle');
+      const circumference = 314.159; // 2 * π * r (r=50)
+      const offset = circumference - (score / 100) * circumference;
+      circle.style.strokeDashoffset = offset;
+      
+      // 상태 텍스트 결정
+      let status = '';
+      let rank = '';
+      
+      if (score >= 90) {
+        status = '최우수';
+        rank = '상위 5%';
+      } else if (score >= 80) {
+        status = '우수';
+        rank = '상위 10%';
+      } else if (score >= 70) {
+        status = '양호';
+        rank = '상위 25%';
+      } else if (score >= 60) {
+        status = '보통';
+        rank = '상위 50%';
+      } else if (score >= 50) {
+        status = '주의 필요';
+        rank = '하위 50%';
+      } else {
+        status = '위험';
+        rank = '하위 25%';
+      }
+      
+      document.getElementById('trustScoreStatus').textContent = status;
+      document.getElementById('trustScoreRank').textContent = rank;
+      
+      // 카드 배경색 변경 (점수에 따라)
+      const card = document.getElementById('trustScoreCard');
+      if (score >= 80) {
+        card.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+      } else if (score >= 60) {
+        card.style.background = 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
+      } else {
+        card.style.background = 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)';
+      }
+    }
+    
+    // ============================================
+    // 4. 탭 네비게이션 설정
+    // ============================================
+    function setupTabNavigation() {
+      const navItems = document.querySelectorAll('.nav-item[data-tab]');
+      
+      navItems.forEach(item => {
+        item.addEventListener('click', () => {
+          const tabName = item.getAttribute('data-tab');
+          showTab(tabName, item);
+        });
+      });
+    }
+    
+    function showTab(tabName, navItem) {
+      console.log('📑 탭 전환:', tabName);
+      
+      // 모든 탭 숨기기
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.style.display = 'none';
+      });
+      
+      // 모든 네비게이션 비활성화
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      
+      // 선택된 탭 표시
+      const tabId = 'tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1);
+      const tabElement = document.getElementById(tabId);
+      if (tabElement) {
+        tabElement.style.display = 'block';
+      }
+      
+      // 선택된 네비게이션 활성화
+      if (navItem) {
+        navItem.classList.add('active');
+      }
+      
+      // 탭별 추가 로직
+      if (tabName === 'employer') {
+        loadEmployerStatus();
+      } else if (tabName === 'points') {
+        loadPointsTab();
+      } else if (tabName === 'referral') {
+        loadReferralData();
+      } else if (tabName === 'results') {
+        loadInterviewResults();
+      } else if (tabName === 'testResults') {
+        loadTestResults();
+      } else if (tabName === 'bookmarks') {
+        loadBookmarks();
+      } else if (tabName === 'applications') {
+        loadApplications();
+      } else if (tabName === 'hires') {
+        loadHires();
+      } else if (tabName === 'chats') {
+        loadChats();
+      } else if (tabName === 'myJobs') {
+        loadMyJobs();
+      } else if (tabName === 'applicants') {
+        loadApplicants();
+      } else if (tabName === 'noshowReports') {
+        loadNoshowReports();
+      } else if (tabName === 'contracts') {
+        loadContracts();
+      } else if (tabName === 'proposals') {
+        loadProposals();
+      } else if (tabName === 'payments') {
+        loadPayments();
+      } else if (tabName === 'dashboard') {
+        loadDashboard();
+      } else if (tabName === 'subscription') {
+        loadSubscription();
+      }
+    }
+    
+    // ============================================
+    // 4.5. 면접 결과 로드
+    // ============================================
+    async function loadInterviewResults() {
+      console.log('📋 면접 결과 로드 시작');
+      
+      const resultsDiv = document.getElementById('interviewResults');
+      resultsDiv.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 32px; color: #FF6B35;"></i><div style="margin-top: 12px;">로딩 중...</div></div>';
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        const response = await fetch('/api/mypage/interviews', {
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.interviews && data.interviews.length > 0) {
+          let html = '<div class="interview-list">';
+          
+          data.interviews.forEach(interview => {
+            const score = interview.overall_score || 0;
+            const scoreColor = score >= 80 ? '#4CAF50' : score >= 60 ? '#FF9800' : '#F44336';
+            const duration = Math.floor((interview.duration_seconds || 0) / 60);
+            const date = new Date(interview.completed_at).toLocaleDateString('ko-KR', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+            
+            const categoryIcons = {
+              'cafe': 'fa-coffee',
+              'convenience': 'fa-store',
+              'restaurant': 'fa-utensils',
+              'retail': 'fa-shopping-bag',
+              'service': 'fa-hands-helping',
+              'office': 'fa-briefcase'
+            };
+            const icon = categoryIcons[interview.job_category] || 'fa-briefcase';
+            
+            html += `
+              <div class="interview-card" onclick="viewInterviewDetail('${interview.id}')">
+                <div class="interview-header">
+                  <div class="interview-title">
+                    <i class="fas ${icon}"></i>
+                    <span>${interview.job_title || '미지정'}</span>
+                  </div>
+                  <div class="interview-score" style="color: ${scoreColor};">
+                    ${score.toFixed(1)}점
+                  </div>
+                </div>
+                <div class="interview-meta">
+                  <span><i class="fas fa-clock"></i> ${duration}분</span>
+                  <span><i class="fas fa-comments"></i> ${interview.question_count || 0}개 질문</span>
+                  <span><i class="fas fa-calendar"></i> ${date}</span>
+                </div>
+                <div class="interview-summary">
+                  ${interview.summary || '요약 정보가 없습니다.'}
+                </div>
+              </div>
+            `;
+          });
+          
+          html += '</div>';
+          resultsDiv.innerHTML = html;
+          
+          console.log('✅ 면접 결과 로드 완료:', data.interviews.length, '건');
+        } else {
+          resultsDiv.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-clipboard"></i>
+              <div style="font-size: 16px; margin-top: 8px;">아직 면접 결과가 없습니다</div>
+              <div style="font-size: 14px; margin-top: 8px;">AI 면접을 시작해보세요!</div>
+              <a href="/chat.html" class="btn btn-primary" style="margin-top: 20px;">
+                <i class="fas fa-comments"></i>
+                면접 시작하기
+              </a>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('❌ 면접 결과 로드 에러:', error);
+        resultsDiv.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-exclamation-circle" style="color: #FF6B35;"></i>
+            <div style="font-size: 16px; margin-top: 8px;">면접 결과를 불러올 수 없습니다</div>
+            <div style="font-size: 14px; margin-top: 8px;">잠시 후 다시 시도해주세요.</div>
+          </div>
+        `;
+      }
+    }
+    
+    // ============================================
+    // 직무적성 테스트 결과 로드
+    // ============================================
+    async function loadTestResults() {
+      console.log('🧠 테스트 결과 로드 시작');
+      
+      const resultsDiv = document.getElementById('testResultsList');
+      
+      try {
+        // localStorage에서 테스트 결과 로드
+        let savedTests = JSON.parse(localStorage.getItem('myTestResults') || '[]');
+        
+        // 중복 제거 (timestamp 기준)
+        const uniqueTests = [];
+        const seenTimestamps = new Set();
+        
+        savedTests.forEach(test => {
+          if (test.timestamp && !seenTimestamps.has(test.timestamp)) {
+            seenTimestamps.add(test.timestamp);
+            uniqueTests.push(test);
+          }
+        });
+        
+        // 중복이 제거되었으면 저장
+        if (uniqueTests.length < savedTests.length) {
+          console.log(`🧹 중복 제거: ${savedTests.length}개 → ${uniqueTests.length}개`);
+          localStorage.setItem('myTestResults', JSON.stringify(uniqueTests));
+          savedTests = uniqueTests;
+        }
+        
+        if (savedTests.length > 0) {
+          const typeEmojis = {
+            strategic: '🎯',
+            analytical: '📊',
+            communicative: '💬',
+            executive: '⚡'
+          };
+          
+          const typeNames = {
+            strategic: '전략형',
+            analytical: '분석형',
+            communicative: '소통형',
+            executive: '실행형'
+          };
+          
+          let html = '<div style="display: grid; gap: 16px;">';
+          
+          savedTests.forEach((test, index) => {
+            const emoji = typeEmojis[test.resultType.primary] || '🎯';
+            const typeName = typeNames[test.resultType.primary] || '전략형';
+            const date = new Date(test.timestamp).toLocaleDateString('ko-KR', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+            const confidence = test.confidence.percentage || 75;
+            
+            html += `
+              <div style="background: white; border: 2px solid #e5e5e5; border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.2s;" 
+                   onclick="viewTestResult(${index})"
+                   onmouseover="this.style.borderColor='#667eea'; this.style.boxShadow='0 4px 12px rgba(102,126,234,0.2)'"
+                   onmouseout="this.style.borderColor='#e5e5e5'; this.style.boxShadow='none'">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="font-size: 32px;">${emoji}</div>
+                    <div>
+                      <div style="font-size: 18px; font-weight: 700; color: #222;">${typeName}</div>
+                      <div style="font-size: 13px; color: #666;">${date}</div>
+                    </div>
+                  </div>
+                  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600;">
+                    신뢰도 ${confidence}%
+                  </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f0f0f0;">
+                  <div style="text-align: center;">
+                    <div style="font-size: 11px; color: #999; margin-bottom: 4px;">전략형</div>
+                    <div style="font-size: 15px; font-weight: 700; color: ${test.resultType.primary === 'strategic' ? '#667eea' : '#ddd'};">${test.scores.strategic || 0}</div>
+                  </div>
+                  <div style="text-align: center;">
+                    <div style="font-size: 11px; color: #999; margin-bottom: 4px;">분석형</div>
+                    <div style="font-size: 15px; font-weight: 700; color: ${test.resultType.primary === 'analytical' ? '#667eea' : '#ddd'};">${test.scores.analytical || 0}</div>
+                  </div>
+                  <div style="text-align: center;">
+                    <div style="font-size: 11px; color: #999; margin-bottom: 4px;">소통형</div>
+                    <div style="font-size: 15px; font-weight: 700; color: ${test.resultType.primary === 'communicative' ? '#667eea' : '#ddd'};">${test.scores.communicative || 0}</div>
+                  </div>
+                  <div style="text-align: center;">
+                    <div style="font-size: 11px; color: #999; margin-bottom: 4px;">실행형</div>
+                    <div style="font-size: 15px; font-weight: 700; color: ${test.resultType.primary === 'executive' ? '#667eea' : '#ddd'};">${test.scores.executive || 0}</div>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+          
+          html += '</div>';
+          resultsDiv.innerHTML = html;
+          
+          console.log('✅ 테스트 결과 로드 완료:', savedTests.length, '건');
+        } else {
+          resultsDiv.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-brain"></i>
+              <div style="font-size: 16px; margin-top: 8px;">아직 테스트 결과가 없습니다</div>
+              <div style="font-size: 14px; margin-top: 8px;">나의 업무 DNA를 찾아보세요!</div>
+              <a href="/job-test.html" class="btn btn-primary" style="margin-top: 20px;">
+                <i class="fas fa-play"></i>
+                테스트 시작하기
+              </a>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('❌ 테스트 결과 로드 에러:', error);
+        resultsDiv.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-exclamation-circle" style="color: #FF6B35;"></i>
+            <div style="font-size: 16px; margin-top: 8px;">테스트 결과를 불러올 수 없습니다</div>
+          </div>
+        `;
+      }
+    }
+    
+    // ============================================
+    // 테스트 결과 보기
+    // ============================================
+    function viewTestResult(index) {
+      console.log('🔍 테스트 결과 보기:', index);
+      
+      try {
+        // localStorage에서 테스트 결과 로드
+        const savedTests = JSON.parse(localStorage.getItem('myTestResults') || '[]');
+        
+        if (savedTests[index]) {
+          // 선택한 결과를 testResult에 저장
+          localStorage.setItem('testResult', JSON.stringify(savedTests[index]));
+          console.log('✅ testResult 저장 완료');
+          
+          // 결과 페이지로 이동
+          window.location.href = '/job-test-result.html';
+        } else {
+          console.error('❌ 테스트 결과를 찾을 수 없습니다:', index);
+          alert('테스트 결과를 불러올 수 없습니다.');
+        }
+      } catch (error) {
+        console.error('❌ 테스트 결과 로드 실패:', error);
+        alert('테스트 결과를 불러올 수 없습니다.');
+      }
+    }
+    
+    // ============================================
+    // 5. 구인자 인증 상태 로드
+    // ============================================
+    async function loadEmployerStatus() {
+      console.log('🏢 구인자 인증 상태 로드');
+      
+      const statusDiv = document.getElementById('employerStatus');
+      const formDiv = document.getElementById('employerVerificationForm');
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        const response = await fetch('/api/employer/verification-status', {
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.status) {
+          const status = data.status;
+          
+          if (status === 'approved' || currentUser?.business_registration_verified) {
+            // 인증 완료 - 사용자 타입을 구인자로 변경
+            if (userType !== 'employer') {
+              userType = 'employer';
+              localStorage.setItem('albi_user_type', 'employer');
+              updateUserTypeBadge();
+            }
+            
+            // 인증 완료
+            statusDiv.innerHTML = `
+              <div style="padding: 20px; background: #ecfdf5; border: 2px solid #10b981; border-radius: 8px; text-align: center;">
+                <i class="fas fa-check-circle" style="color: #10b981; font-size: 48px; margin-bottom: 12px;"></i>
+                <div style="font-size: 18px; font-weight: 700; color: #065f46; margin-bottom: 8px;">
+                  구인자 인증 완료
+                </div>
+                <div style="font-size: 14px; color: #047857; margin-bottom: 12px;">
+                  사업자등록증이 인증되었습니다. 이제 공고를 작성할 수 있습니다.
+                </div>
+                <div style="font-size: 13px; color: #059669; background: white; padding: 8px 12px; border-radius: 4px; display: inline-block;">
+                  <i class="fas fa-star"></i>
+                  구직자와 구인자 역할을 모두 사용할 수 있습니다!
+                </div>
+              </div>
+            `;
+            formDiv.style.display = 'none';
+          } else if (status === 'pending') {
+            // 심사 중
+            statusDiv.innerHTML = `
+              <div style="padding: 20px; background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; text-align: center;">
+                <i class="fas fa-clock" style="color: #f59e0b; font-size: 48px; margin-bottom: 12px;"></i>
+                <div style="font-size: 18px; font-weight: 700; color: #92400e; margin-bottom: 8px;">
+                  인증 심사 대기 중
+                </div>
+                <div style="font-size: 14px; color: #b45309;">
+                  사업자등록증 심사가 진행 중입니다. 최대 1-2일 정도 소요될 수 있습니다.
+                </div>
+              </div>
+            `;
+            formDiv.style.display = 'none';
+          } else if (status === 'rejected') {
+            // 거절됨
+            statusDiv.innerHTML = `
+              <div style="padding: 20px; background: #fef2f2; border: 2px solid #ef4444; border-radius: 8px; text-align: center;">
+                <i class="fas fa-times-circle" style="color: #ef4444; font-size: 48px; margin-bottom: 12px;"></i>
+                <div style="font-size: 18px; font-weight: 700; color: #991b1b; margin-bottom: 8px;">
+                  인증이 거절되었습니다
+                </div>
+                <div style="font-size: 14px; color: #dc2626; margin-bottom: 16px;">
+                  ${data.rejection_reason || '사업자등록증 정보가 일치하지 않습니다.'}
+                </div>
+                <button onclick="showVerificationForm()" class="btn btn-primary">
+                  다시 신청하기
+                </button>
+              </div>
+            `;
+            formDiv.style.display = 'none';
+          } else {
+            // 미신청
+            showDefaultEmployerStatus();
+          }
+        } else {
+          showDefaultEmployerStatus();
+        }
+      } catch (error) {
+        console.error('❌ 구인자 인증 상태 로드 에러:', error);
+        showDefaultEmployerStatus();
+      }
+    }
+    
+    function showDefaultEmployerStatus() {
+      const statusDiv = document.getElementById('employerStatus');
+      const formDiv = document.getElementById('employerVerificationForm');
+      
+      statusDiv.innerHTML = `
+        <div style="padding: 20px; background: #f3f4f6; border: 2px solid #d1d5db; border-radius: 8px; text-align: center;">
+          <i class="fas fa-info-circle" style="color: #6b7280; font-size: 48px; margin-bottom: 12px;"></i>
+          <div style="font-size: 18px; font-weight: 700; color: #374151; margin-bottom: 8px;">
+            구인자 인증이 필요합니다
+          </div>
+          <div style="font-size: 14px; color: #6b7280;">
+            공고를 작성하려면 사업자등록증 인증이 필요합니다.
+          </div>
+        </div>
+      `;
+      formDiv.style.display = 'block';
+      
+      // 입력 필드 이벤트 리스너 연결
+      setupVerificationFormListeners();
+    }
+    
+    function setupVerificationFormListeners() {
+      console.log('🔧 구인자 인증 폼 이벤트 리스너 설정');
+      
+      const businessNumberInput = document.getElementById('verifyBusinessNumber');
+      const businessNameInput = document.getElementById('verifyBusinessName');
+      const fileInput = document.getElementById('verifyBusinessFile');
+      
+      // 사업자등록번호 입력
+      if (businessNumberInput && !businessNumberInput.dataset.listenerAdded) {
+        businessNumberInput.addEventListener('input', () => {
+          console.log('📝 사업자등록번호 입력:', businessNumberInput.value);
+          checkFormValidity();
+        });
+        businessNumberInput.dataset.listenerAdded = 'true';
+        console.log('✅ 사업자등록번호 입력 이벤트 연결');
+      }
+      
+      // 사업자명 입력
+      if (businessNameInput && !businessNameInput.dataset.listenerAdded) {
+        businessNameInput.addEventListener('input', () => {
+          console.log('📝 사업자명 입력:', businessNameInput.value);
+          checkFormValidity();
+        });
+        businessNameInput.dataset.listenerAdded = 'true';
+        console.log('✅ 사업자명 입력 이벤트 연결');
+      }
+      
+      // 파일 업로드
+      if (fileInput && !fileInput.dataset.listenerAdded) {
+        fileInput.addEventListener('change', (e) => {
+          console.log('📁 파일 선택 이벤트 발생');
+          const file = e.target.files[0];
+          if (!file) return;
+          
+          const maxSize = 5 * 1024 * 1024; // 5MB
+          const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+          
+          if (file.size > maxSize) {
+            alert('파일 크기는 5MB를 초과할 수 없습니다.');
+            e.target.value = '';
+            return;
+          }
+          
+          if (!allowedTypes.includes(file.type)) {
+            alert('JPG 또는 PNG 파일만 업로드 가능합니다.');
+            e.target.value = '';
+            return;
+          }
+          
+          verificationFile = file;
+          console.log('✅ 파일 선택 완료:', file.name, (file.size / 1024).toFixed(1) + ' KB');
+          
+          // 파일 미리보기
+          const preview = document.getElementById('filePreview');
+          if (preview) {
+            preview.innerHTML = `
+              <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px;">
+                <i class="fas fa-file-image" style="color: #0284c7; font-size: 24px;"></i>
+                <div style="flex: 1;">
+                  <div style="font-size: 14px; font-weight: 600; color: #0c4a6e;">${file.name}</div>
+                  <div style="font-size: 12px; color: #0369a1;">${(file.size / 1024).toFixed(1)} KB</div>
+                </div>
+                <button onclick="removeFile()" type="button" style="background: none; border: none; color: #dc2626; cursor: pointer; font-size: 18px;">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            `;
+            preview.style.display = 'block';
+          }
+          
+          checkFormValidity();
+        });
+        fileInput.dataset.listenerAdded = 'true';
+        console.log('✅ 파일 업로드 이벤트 연결');
+      }
+    }
+    
+    function showVerificationForm() {
+      document.getElementById('employerStatus').innerHTML = '';
+      document.getElementById('employerVerificationForm').style.display = 'block';
+      
+      // 입력 필드 이벤트 리스너 연결
+      setupVerificationFormListeners();
+    }
+    
+    // ============================================
+    // 6. 파일 제거 함수 (홈택스 자동 인증에서는 불필요하지만 기존 코드 유지)
+    // ============================================
+    function removeFile() {
+      verificationFile = null;
+      const fileInput = document.getElementById('verifyBusinessFile');
+      if (fileInput) {
+        fileInput.value = '';
+      }
+      const preview = document.getElementById('filePreview');
+      if (preview) {
+        preview.style.display = 'none';
+      }
+      checkFormValidity();
+    }
+    
+    // ============================================
+    // 6. 폼 유효성 검사 (파일 필수 제거)
+    // ============================================
+    function checkFormValidity() {
+      const businessNumberInput = document.getElementById('verifyBusinessNumber');
+      const businessNameInput = document.getElementById('verifyBusinessName');
+      const submitButton = document.getElementById('submitVerificationButton');
+      
+      if (!businessNumberInput || !businessNameInput || !submitButton) {
+        console.log('⚠️ 폼 요소를 찾을 수 없음');
+        return;
+      }
+      
+      const businessNumber = businessNumberInput.value.trim();
+      const businessName = businessNameInput.value.trim();
+      
+      console.log('📝 폼 유효성 검사:', {
+        businessNumber,
+        businessName
+      });
+      
+      // 홈택스 자동 인증이므로 파일 불필요
+      if (businessNumber && businessName) {
+        submitButton.disabled = false;
+        submitButton.style.opacity = '1';
+        console.log('✅ 폼 활성화');
+      } else {
+        submitButton.disabled = true;
+        submitButton.style.opacity = '0.5';
+        console.log('❌ 폼 비활성화');
+      }
+    }
+    
+    // ============================================
+    // 7. 구인자 인증 신청 (홈택스 자동 인증)
+    // ============================================
+    async function submitEmployerVerification() {
+      console.log('📋 홈택스 자동 인증 시작');
+      
+      const businessNumber = document.getElementById('verifyBusinessNumber').value.trim();
+      const businessName = document.getElementById('verifyBusinessName').value.trim();
+      
+      console.log('📝 입력 데이터:', {
+        businessNumber,
+        businessName
+      });
+      
+      if (!businessNumber || !businessName) {
+        alert('사업자등록번호와 상호명을 모두 입력해주세요.');
+        return;
+      }
+      
+      const submitButton = document.getElementById('submitVerificationButton');
+      submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 홈택스 인증 중...';
+      submitButton.disabled = true;
+      
+      try {
+        const formData = new FormData();
+        formData.append('business_registration_number', businessNumber);
+        formData.append('business_name', businessName);
+        
+        console.log('📤 홈택스 API 호출 시작');
+        
+        const sessionToken = localStorage.getItem('albi_session_token');
+        console.log('🔑 세션 토큰:', sessionToken ? '존재' : '없음');
+        
+        // 자동 인증 API 호출
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 사업자등록번호 확인 중...';
+        
+        const response = await fetch('/api/employer/auto-verify', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`
+          },
+          body: formData
+        });
+        
+        console.log('📡 API 응답 상태:', response.status, response.statusText);
+        
+        const data = await response.json();
+        console.log('📦 API 응답 데이터:', data);
+        
+        if (data.success) {
+          if (data.verified) {
+            // 자동 인증 성공
+            alert('🎉 ' + data.message);
+            
+            // 사용자 정보 업데이트
+            currentUser.business_registration_verified = true;
+            currentUser.business_registration_number = businessNumber;
+            currentUser.business_name = businessName;
+          } else {
+            // 수동 승인 대기
+            alert('✅ ' + data.message);
+          }
+          
+          // 폼 초기화
+          document.getElementById('verifyBusinessNumber').value = '';
+          document.getElementById('verifyBusinessName').value = '';
+          removeFile();
+          
+          // 상태 다시 로드
+          loadEmployerStatus();
+        } else {
+          console.error('❌ API 에러:', data.error);
+          console.error('❌ 에러 상세:', data.details);
+          console.error('❌ 스택:', data.stack);
+          
+          let errorMsg = data.error || '알 수 없는 오류가 발생했습니다.';
+          if (data.details) {
+            errorMsg += '\n\n상세: ' + data.details;
+          }
+          if (data.stack) {
+            console.error('❌ 서버 스택 트레이스:', data.stack);
+          }
+          
+          alert('❌ 인증 실패: ' + errorMsg);
+          submitButton.innerHTML = '인증 신청하기';
+          submitButton.disabled = false;
+        }
+      } catch (error) {
+        console.error('❌ 구인자 인증 신청 에러:', error);
+        alert('❌ 인증 신청 중 오류가 발생했습니다: ' + error.message);
+        submitButton.innerHTML = '인증 신청하기';
+        submitButton.disabled = false;
+      }
+    }
+    
+    // ============================================
+    // 8. 폼 제출 설정
+    // ============================================
+    function setupForms() {
+      // 프로필 수정
+      document.getElementById('profileForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const name = document.getElementById('editName').value;
+        const email = document.getElementById('editEmail').value;
+        
+        try {
+          const sessionToken = localStorage.getItem('albi_session_token');
+          const response = await fetch('/api/mypage/profile', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${sessionToken}`
+            },
+            body: JSON.stringify({ name, email })
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            alert('프로필이 수정되었습니다!');
+            localStorage.setItem('albi_user_name', name);
+            await loadProfile();
+          } else {
+            throw new Error(data.error);
+          }
+        } catch (error) {
+          alert('프로필 수정 실패: ' + error.message);
+        }
+      });
+      
+      // 비밀번호 변경
+      document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        
+        if (newPassword !== confirmPassword) {
+          alert('새 비밀번호가 일치하지 않습니다.');
+          return;
+        }
+        
+        if (newPassword.length < 8) {
+          alert('새 비밀번호는 8자 이상이어야 합니다.');
+          return;
+        }
+        
+        try {
+          const sessionToken = localStorage.getItem('albi_session_token');
+          const response = await fetch('/api/mypage/password', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${sessionToken}`
+            },
+            body: JSON.stringify({ currentPassword, newPassword })
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            alert('비밀번호가 변경되었습니다!');
+            document.getElementById('passwordForm').reset();
+          } else {
+            throw new Error(data.error);
+          }
+        } catch (error) {
+          alert('비밀번호 변경 실패: ' + error.message);
+        }
+      });
+      
+      // 회원탈퇴
+      document.getElementById('deleteAccountForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const password = document.getElementById('deletePassword').value;
+        const agreed = document.getElementById('agreeDelete').checked;
+        
+        if (!agreed) {
+          alert('회원탈퇴 동의에 체크해주세요.');
+          return;
+        }
+        
+        if (!confirm('정말로 회원탈퇴를 진행하시겠습니까?\n\n모든 데이터가 삭제되며 복구할 수 없습니다.')) {
+          return;
+        }
+        
+        try {
+          const sessionToken = localStorage.getItem('albi_session_token');
+          const response = await fetch('/api/mypage/delete-account', {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${sessionToken}`
+            },
+            body: JSON.stringify({ password })
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            alert('회원탈퇴가 완료되었습니다.\n그동안 알비를 이용해주셔서 감사합니다.');
+            localStorage.clear();
+            window.location.href = '/';
+          } else {
+            throw new Error(data.error);
+          }
+        } catch (error) {
+          alert('회원탈퇴 실패: ' + error.message);
+        }
+      });
+    }
+    
+    // ============================================
+    // 9. 면접 결과 상세 보기
+    // ============================================
+    async function viewInterviewDetail(interviewId) {
+      console.log('🔍 면접 상세 보기:', interviewId);
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        const response = await fetch(`/api/mypage/interviews/${interviewId}`, {
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.interview) {
+          const interview = data.interview;
+          
+          // 강점과 개선사항 파싱
+          let strengths = [];
+          let improvements = [];
+          
+          try {
+            strengths = JSON.parse(interview.strengths || '[]');
+            improvements = JSON.parse(interview.improvements || '[]');
+          } catch (e) {
+            console.error('JSON 파싱 에러:', e);
+          }
+          
+          // 점수별 색상
+          const scoreColor = interview.overall_score >= 80 ? '#4CAF50' : 
+                            interview.overall_score >= 60 ? '#FF9800' : '#F44336';
+          
+          // 상세 정보 HTML
+          let detailHtml = `
+            <div style="padding: 20px;">
+              <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-file-alt"></i>
+                ${interview.job_title || '미지정'} 면접 결과
+              </h3>
+              
+              <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <div style="text-align: center; margin-bottom: 16px;">
+                  <div style="font-size: 48px; font-weight: 700; color: ${scoreColor};">
+                    ${(interview.overall_score || 0).toFixed(1)}점
+                  </div>
+                  <div style="font-size: 14px; color: #666; margin-top: 4px;">종합 점수</div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                  <div style="text-align: center;">
+                    <div style="font-size: 18px; font-weight: 600; color: #FF6B35;">
+                      ${(interview.communication_score || 0).toFixed(1)}
+                    </div>
+                    <div style="font-size: 12px; color: #666; margin-top: 4px;">의사소통</div>
+                  </div>
+                  <div style="text-align: center;">
+                    <div style="font-size: 18px; font-weight: 600; color: #FF6B35;">
+                      ${(interview.attitude_score || 0).toFixed(1)}
+                    </div>
+                    <div style="font-size: 12px; color: #666; margin-top: 4px;">태도</div>
+                  </div>
+                  <div style="text-align: center;">
+                    <div style="font-size: 18px; font-weight: 600; color: #FF6B35;">
+                      ${(interview.expertise_score || 0).toFixed(1)}
+                    </div>
+                    <div style="font-size: 12px; color: #666; margin-top: 4px;">전문성</div>
+                  </div>
+                </div>
+              </div>
+              
+              ${interview.summary ? `
+                <div style="margin-bottom: 20px;">
+                  <h4 style="font-size: 16px; margin-bottom: 12px; color: #333;">
+                    <i class="fas fa-comment-alt"></i> 종합 평가
+                  </h4>
+                  <p style="line-height: 1.6; color: #666;">${interview.summary}</p>
+                </div>
+              ` : ''}
+              
+              ${strengths.length > 0 ? `
+                <div style="margin-bottom: 20px;">
+                  <h4 style="font-size: 16px; margin-bottom: 12px; color: #333;">
+                    <i class="fas fa-check-circle" style="color: #4CAF50;"></i> 강점
+                  </h4>
+                  <ul style="list-style: none; padding: 0;">
+                    ${strengths.map(s => `<li style="padding: 8px 0; color: #666;"><i class="fas fa-angle-right" style="color: #4CAF50; margin-right: 8px;"></i>${s}</li>`).join('')}
+                  </ul>
+                </div>
+              ` : ''}
+              
+              ${improvements.length > 0 ? `
+                <div style="margin-bottom: 20px;">
+                  <h4 style="font-size: 16px; margin-bottom: 12px; color: #333;">
+                    <i class="fas fa-lightbulb" style="color: #FF9800;"></i> 개선사항
+                  </h4>
+                  <ul style="list-style: none; padding: 0;">
+                    ${improvements.map(i => `<li style="padding: 8px 0; color: #666;"><i class="fas fa-angle-right" style="color: #FF9800; margin-right: 8px;"></i>${i}</li>`).join('')}
+                  </ul>
+                </div>
+              ` : ''}
+              
+              <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button onclick="closeInterviewDetail()" class="btn btn-secondary" style="flex: 1;">
+                  <i class="fas fa-times"></i>
+                  닫기
+                </button>
+                <a href="/chat.html" class="btn btn-primary" style="flex: 1; text-align: center;">
+                  <i class="fas fa-comments"></i>
+                  다시 면접보기
+                </a>
+              </div>
+            </div>
+          `;
+          
+          // 모달 표시
+          const resultsDiv = document.getElementById('interviewResults');
+          resultsDiv.innerHTML = detailHtml;
+          
+        } else {
+          alert('면접 결과를 불러올 수 없습니다.');
+        }
+        
+      } catch (error) {
+        console.error('❌ 면접 상세 조회 에러:', error);
+        alert('면접 결과를 불러오는 중 오류가 발생했습니다.');
+      }
+    }
+    
+    function closeInterviewDetail() {
+      loadInterviewResults();
+    }
+    
+    // ============================================
+    // 8. 북마크 목록 로드
+    // ============================================
+    async function loadBookmarks() {
+      console.log('🔖 북마크 목록 로드 시작');
+      
+      const listDiv = document.getElementById('bookmarkList');
+      listDiv.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 32px; color: #FF6B35;"></i><div style="margin-top: 12px;">로딩 중...</div></div>';
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        console.log('🔑 세션 토큰:', sessionToken ? '있음' : '없음');
+        
+        const response = await fetch('/api/bookmarks/list', {
+          headers: { 'Authorization': `Bearer ${sessionToken}` }
+        });
+        
+        console.log('📡 응답 상태:', response.status);
+        const data = await response.json();
+        console.log('📦 응답 데이터:', data);
+        
+        if (data.success && data.bookmarks && data.bookmarks.length > 0) {
+          let html = '<div style="display: flex; flex-direction: column; gap: 16px;">';
+          
+          data.bookmarks.forEach(bookmark => {
+            const job = bookmark.job;
+            html += `
+              <div style="background: white; border: 1px solid #e5e5e5; border-radius: 8px; padding: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                  <div>
+                    <h3 style="font-size: 16px; font-weight: 600; color: #222; margin-bottom: 4px;">${job.title}</h3>
+                    <div style="font-size: 14px; color: #666;">${job.company_name || '회사명 미등록'}</div>
+                  </div>
+                  <button onclick="removeBookmark(${bookmark.id})" class="btn btn-secondary" style="padding: 6px 12px; font-size: 13px;">
+                    <i class="fas fa-times"></i>
+                    삭제
+                  </button>
+                </div>
+                <div style="display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; font-size: 13px; color: #666;">
+                  <span><i class="fas fa-map-marker-alt"></i> ${job.location || '-'}</span>
+                  <span><i class="fas fa-won-sign"></i> ${(job.hourly_wage || 0).toLocaleString()}원</span>
+                  <span><i class="fas fa-clock"></i> ${job.work_hours || '-'}</span>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <a href="/job-detail.html?id=${job.id}" class="btn btn-primary" style="flex: 1; text-align: center;">
+                    <i class="fas fa-eye"></i>
+                    상세보기
+                  </a>
+                  <button onclick="applyJob(${job.id})" class="btn btn-secondary" style="flex: 1;">
+                    <i class="fas fa-paper-plane"></i>
+                    지원하기
+                  </button>
+                </div>
+              </div>
+            `;
+          });
+          
+          html += '</div>';
+          listDiv.innerHTML = html;
+        } else {
+          listDiv.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-bookmark"></i>
+              <div style="font-size: 16px; margin-top: 8px;">저장한 공고가 없습니다</div>
+              <div style="font-size: 14px; margin-top: 8px;">관심있는 공고를 저장해보세요!</div>
+              <a href="/jobs.html" class="btn btn-primary" style="margin-top: 20px;">
+                <i class="fas fa-search"></i>
+                공고 찾기
+              </a>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('❌ 북마크 로드 에러:', error);
+        listDiv.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><div style="margin-top: 12px;">데이터를 불러오는 중 오류가 발생했습니다.</div></div>';
+      }
+    }
+    
+    async function removeBookmark(bookmarkId) {
+      if (!confirm('이 공고를 관심 목록에서 삭제하시겠습니까?')) return;
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        const response = await fetch(`/api/bookmarks/${bookmarkId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${sessionToken}` }
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+          alert('삭제되었습니다.');
+          loadBookmarks();
+        } else {
+          alert('삭제 실패: ' + (data.error || '알 수 없는 오류'));
+        }
+      } catch (error) {
+        console.error('❌ 북마크 삭제 에러:', error);
+        alert('삭제 중 오류가 발생했습니다.');
+      }
+    }
+    
+    // ============================================
+    // 9. 지원 목록 로드
+    // ============================================
+    async function loadApplications() {
+      console.log('📝 지원 목록 로드 시작');
+      
+      const listDiv = document.getElementById('applicationList');
+      listDiv.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 32px; color: #FF6B35;"></i><div style="margin-top: 12px;">로딩 중...</div></div>';
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        const response = await fetch('/api/mypage/applications', {
+          headers: { 'Authorization': `Bearer ${sessionToken}` }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.applications && data.applications.length > 0) {
+          let html = '<div style="display: flex; flex-direction: column; gap: 16px;">';
+          
+          data.applications.forEach(app => {
+            const job = app.job;
+            const statusInfo = {
+              'pending': { text: '검토 중', color: '#f59e0b', icon: 'clock' },
+              'accepted': { text: '합격', color: '#10b981', icon: 'check-circle' },
+              'rejected': { text: '불합격', color: '#ef4444', icon: 'times-circle' },
+              'withdrawn': { text: '취소됨', color: '#9ca3af', icon: 'ban' }
+            }[app.status] || { text: '알 수 없음', color: '#666', icon: 'question' };
+            
+            html += `
+              <div style="background: white; border: 1px solid #e5e5e5; border-radius: 8px; padding: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                  <div>
+                    <h3 style="font-size: 16px; font-weight: 600; color: #222; margin-bottom: 4px;">${job.title}</h3>
+                    <div style="font-size: 14px; color: #666;">${job.company_name || '회사명 미등록'}</div>
+                  </div>
+                  <div style="padding: 4px 12px; border-radius: 4px; background: ${statusInfo.color}20; color: ${statusInfo.color}; font-size: 13px; font-weight: 600;">
+                    <i class="fas fa-${statusInfo.icon}"></i>
+                    ${statusInfo.text}
+                  </div>
+                </div>
+                <div style="display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; font-size: 13px; color: #666;">
+                  <span><i class="fas fa-calendar"></i> 지원일: ${new Date(app.applied_at).toLocaleDateString()}</span>
+                  <span><i class="fas fa-map-marker-alt"></i> ${job.location || '-'}</span>
+                  <span><i class="fas fa-won-sign"></i> ${(job.hourly_wage || 0).toLocaleString()}원</span>
+                </div>
+                ${app.message ? `<div style="padding: 12px; background: #f8f9fa; border-radius: 4px; margin-bottom: 12px; font-size: 14px; color: #666;">💬 ${app.message}</div>` : ''}
+                <div style="display: flex; gap: 8px;">
+                  <a href="/job-detail.html?id=${job.id}" class="btn btn-primary" style="flex: 1; text-align: center;">
+                    <i class="fas fa-eye"></i>
+                    상세보기
+                  </a>
+                  ${app.status === 'pending' ? `<button onclick="withdrawApplication(${app.id})" class="btn btn-secondary" style="flex: 1;"><i class="fas fa-times"></i> 지원 취소</button>` : ''}
+                </div>
+              </div>
+            `;
+          });
+          
+          html += '</div>';
+          listDiv.innerHTML = html;
+        } else {
+          listDiv.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-file-alt"></i>
+              <div style="font-size: 16px; margin-top: 8px;">지원한 공고가 없습니다</div>
+              <div style="font-size: 14px; margin-top: 8px;">마음에 드는 공고에 지원해보세요!</div>
+              <a href="/jobs.html" class="btn btn-primary" style="margin-top: 20px;">
+                <i class="fas fa-search"></i>
+                공고 찾기
+              </a>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('❌ 지원 목록 로드 에러:', error);
+        listDiv.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><div style="margin-top: 12px;">데이터를 불러오는 중 오류가 발생했습니다.</div></div>';
+      }
+    }
+    
+    // 채용 확정 목록 로드
+    async function loadHires() {
+      console.log('✅ 채용 확정 목록 로드 시작');
+      
+      const listDiv = document.getElementById('hiresList');
+      listDiv.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 32px; color: #10b981;"></i><div style="margin-top: 12px;">로딩 중...</div></div>';
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        
+        // 채용 확정된 지원 목록 조회
+        const response = await fetch('/api/mypage/applications?status=hired', {
+          headers: { 'Authorization': `Bearer ${sessionToken}` }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.applications && data.applications.length > 0) {
+          const hiredApps = data.applications;
+          
+          // 통계 업데이트
+          document.getElementById('totalHires').textContent = hiredApps.length + '건';
+          document.getElementById('activeWorks').textContent = hiredApps.filter(app => app.status === 'hired').length + '건';
+          
+          // 총 수입 계산 (결제 금액의 예상 수입)
+          const totalPayments = hiredApps.reduce((sum, app) => sum + (app.payment_amount || 0), 0);
+          document.getElementById('totalEarnings').textContent = totalPayments.toLocaleString() + '원';
+          
+          // 채용 확정 목록 표시
+          let html = '<div style="display: flex; flex-direction: column; gap: 16px;">';
+          
+          hiredApps.forEach(app => {
+            const job = app.job;
+            const isPaid = app.payment_required && app.payment_amount > 0;
+            
+            html += `
+              <div style="background: white; border: 2px solid #10b981; border-radius: 12px; padding: 20px; position: relative; overflow: hidden;">
+                <!-- 채용 확정 배지 -->
+                <div style="position: absolute; top: 12px; right: 12px;">
+                  <div style="padding: 6px 16px; border-radius: 20px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; font-size: 13px; font-weight: 700; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+                    <i class="fas fa-check-circle"></i> 채용 확정
+                  </div>
+                </div>
+                
+                <!-- 회사 및 공고 정보 -->
+                <div style="margin-bottom: 16px; padding-right: 120px;">
+                  <h3 style="font-size: 20px; font-weight: 700; color: #059669; margin-bottom: 8px;">
+                    <i class="fas fa-building"></i> ${job.company_name || '회사명'}
+                  </h3>
+                  <div style="font-size: 16px; font-weight: 600; color: #222; margin-bottom: 4px;">
+                    ${job.title}
+                  </div>
+                  <div style="font-size: 14px; color: #666;">
+                    <i class="fas fa-map-marker-alt"></i> ${job.location || '-'}
+                  </div>
+                </div>
+                
+                <!-- 급여 및 근무 정보 -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px;">
+                  <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 3px solid #10b981;">
+                    <div style="font-size: 12px; color: #059669; margin-bottom: 4px;">시급</div>
+                    <div style="font-size: 18px; font-weight: 700; color: #059669;">
+                      ${(job.hourly_wage || 0).toLocaleString()}원
+                    </div>
+                  </div>
+                  <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 3px solid #10b981;">
+                    <div style="font-size: 12px; color: #059669; margin-bottom: 4px;">근무 형태</div>
+                    <div style="font-size: 14px; font-weight: 600; color: #059669;">
+                      ${job.job_type || '단기'}
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- 결제 정보 -->
+                ${isPaid ? `
+                  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+                    <div style="color: white; display: flex; justify-content: space-between; align-items: center;">
+                      <div>
+                        <div style="font-size: 12px; opacity: 0.9; margin-bottom: 4px;">
+                          <i class="fas fa-check-double"></i> 결제 완료 (채용 성공 수수료)
+                        </div>
+                        <div style="font-size: 20px; font-weight: 700;">
+                          ${(app.payment_amount || 0).toLocaleString()}원
+                        </div>
+                      </div>
+                      <div style="text-align: center;">
+                        <i class="fas fa-award" style="font-size: 32px; opacity: 0.5;"></i>
+                      </div>
+                    </div>
+                  </div>
+                ` : `
+                  <div style="background: #fef3c7; padding: 12px; border-radius: 8px; margin-bottom: 16px; border-left: 3px solid #f59e0b;">
+                    <div style="color: #d97706; font-size: 13px;">
+                      <i class="fas fa-clock"></i> 결제 대기 중
+                    </div>
+                  </div>
+                `}
+                
+                <!-- 지원 정보 -->
+                <div style="font-size: 13px; color: #666; margin-bottom: 16px;">
+                  <i class="fas fa-calendar-check"></i> 채용 확정일: ${new Date(app.updated_at || app.applied_at).toLocaleDateString('ko-KR')}
+                </div>
+                
+                <!-- 액션 버튼 -->
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                  <a href="/job-detail.html?id=${job.id}" class="btn btn-primary" style="flex: 1; min-width: 120px; text-align: center;">
+                    <i class="fas fa-eye"></i> 공고 상세
+                  </a>
+                  <a href="/contact.html" class="btn btn-secondary" style="flex: 1; min-width: 120px; text-align: center;">
+                    <i class="fas fa-phone"></i> 문의하기
+                  </a>
+                </div>
+                
+                ${app.message ? `
+                  <div style="margin-top: 16px; padding: 12px; background: #f8f9fa; border-radius: 8px; font-size: 14px; color: #666;">
+                    <div style="font-weight: 600; margin-bottom: 4px;">
+                      <i class="fas fa-comment"></i> 사장님 메시지:
+                    </div>
+                    ${app.message}
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          });
+          
+          html += '</div>';
+          listDiv.innerHTML = html;
+        } else {
+          // 채용 확정 내역 없음
+          document.getElementById('totalHires').textContent = '0건';
+          document.getElementById('activeWorks').textContent = '0건';
+          document.getElementById('totalEarnings').textContent = '0원';
+          
+          listDiv.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-check-circle" style="font-size: 48px; color: #10b981;"></i>
+              <div style="font-size: 18px; margin-top: 16px; font-weight: 600;">채용 확정 내역이 없습니다</div>
+              <div style="font-size: 14px; margin-top: 8px; color: #666;">
+                채용이 확정되면 여기에 표시됩니다
+              </div>
+              <a href="/jobs.html" class="btn btn-primary" style="margin-top: 20px;">
+                <i class="fas fa-search"></i>
+                공고 찾기
+              </a>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('❌ 채용 확정 목록 로드 에러:', error);
+        listDiv.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><div style="margin-top: 12px;">데이터를 불러오는 중 오류가 발생했습니다.</div></div>';
+      }
+    }
+    
+    async function withdrawApplication(appId) {
+      if (!confirm('지원을 취소하시겠습니까?')) return;
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        const response = await fetch(`/api/mypage/applications/${appId}/withdraw`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${sessionToken}` }
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+          alert('지원이 취소되었습니다.');
+          loadApplications();
+        } else {
+          alert('취소 실패: ' + (data.error || '알 수 없는 오류'));
+        }
+      } catch (error) {
+        console.error('❌ 지원 취소 에러:', error);
+        alert('취소 중 오류가 발생했습니다.');
+      }
+    }
+    
+    // ============================================
+    // 10. 채팅 목록 로드
+    // ============================================
+    async function loadChats() {
+      console.log('💬 채팅 목록 로드 시작');
+      
+      const listDiv = document.getElementById('chatList');
+      listDiv.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 32px; color: #FF6B35;"></i><div style="margin-top: 12px;">로딩 중...</div></div>';
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        const response = await fetch('/api/mypage/chats', {
+          headers: { 'Authorization': `Bearer ${sessionToken}` }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.chats && data.chats.length > 0) {
+          let html = '<div style="display: flex; flex-direction: column; gap: 12px;">';
+          
+          data.chats.forEach(chat => {
+            const unreadCount = userType === 'employer' ? chat.unread_count_employer : chat.unread_count_jobseeker;
+            const otherUser = userType === 'employer' ? chat.jobseeker_name : chat.employer_name;
+            
+            html += `
+              <div onclick="openChat(${chat.id})" style="background: white; border: 1px solid #e5e5e5; border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#FF6B35'" onmouseout="this.style.borderColor='#e5e5e5'">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                  <div style="font-size: 15px; font-weight: 600; color: #222;">${otherUser}</div>
+                  ${unreadCount > 0 ? `<div style="background: #FF6B35; color: white; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 12px;">${unreadCount}</div>` : ''}
+                </div>
+                ${chat.job_title ? `<div style="font-size: 13px; color: #999; margin-bottom: 8px;"><i class="fas fa-briefcase"></i> ${chat.job_title}</div>` : ''}
+                <div style="font-size: 14px; color: #666; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${chat.last_message || '메시지를 보내보세요'}</div>
+                <div style="font-size: 12px; color: #999; margin-top: 4px;">${chat.last_message_at ? new Date(chat.last_message_at).toLocaleString() : ''}</div>
+              </div>
+            `;
+          });
+          
+          html += '</div>';
+          listDiv.innerHTML = html;
+        } else {
+          listDiv.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-comments"></i>
+              <div style="font-size: 16px; margin-top: 8px;">채팅 내역이 없습니다</div>
+              <div style="font-size: 14px; margin-top: 8px;">채용 담당자와 대화를 시작해보세요!</div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('❌ 채팅 목록 로드 에러:', error);
+        listDiv.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><div style="margin-top: 12px;">데이터를 불러오는 중 오류가 발생했습니다.</div></div>';
+      }
+    }
+    
+    function openChat(roomId) {
+      window.location.href = `/chat-room.html?id=${roomId}`;
+    }
+    
+    // ============================================
+    // 11-1. 추가 유틸리티 함수들
+    // ============================================
+    
+    // 공고 지원하기
+    function applyJob(jobId) {
+      if (!confirm('이 공고에 지원하시겠습니까?')) return;
+      
+      window.location.href = `/job-detail.html?id=${jobId}&apply=true`;
+    }
+    
+    // ============================================
+    // 12. 로그아웃
+    // ============================================
+    async function loadMyJobs() {
+      console.log('💼 내 채용 공고 로드 시작');
+      
+      const listDiv = document.getElementById('myJobsList');
+      listDiv.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 32px; color: #FF6B35;"></i><div style="margin-top: 12px;">로딩 중...</div></div>';
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        console.log('🔑 세션 토큰:', sessionToken ? sessionToken.substring(0, 20) + '...' : 'null');
+        
+        const response = await fetch('/api/mypage/my-jobs', {
+          headers: { 'Authorization': `Bearer ${sessionToken}` }
+        });
+        
+        console.log('📡 API 응답 상태:', response.status, response.statusText);
+        
+        const data = await response.json();
+        console.log('📦 API 응답 데이터:', data);
+        
+        if (data.success && data.jobs && data.jobs.length > 0) {
+          console.log('✅ 공고 렌더링 시작, 공고 수:', data.jobs.length);
+          let html = '<div style="display: flex; flex-direction: column; gap: 16px;">';
+          
+          data.jobs.forEach((job, index) => {
+            console.log(`  📋 공고 ${index + 1}:`, job.title, job.id);
+            const statusInfo = {
+              'active': { text: '모집중', color: '#10b981', icon: 'check-circle' },
+              'closed': { text: '마감', color: '#9ca3af', icon: 'times-circle' },
+              'pending': { text: '검토중', color: '#f59e0b', icon: 'clock' }
+            }[job.status] || { text: '알 수 없음', color: '#666', icon: 'question' };
+            
+            html += `
+              <div style="background: white; border: 1px solid #e5e5e5; border-radius: 8px; padding: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                  <div>
+                    <h3 style="font-size: 16px; font-weight: 600; color: #222; margin-bottom: 4px;">${(job.title || '제목 없음').replace(/"/g, '&quot;').replace(/'/g, '&#39;')}</h3>
+                    <div style="font-size: 14px; color: #666;">${(job.company_name || '알비').replace(/"/g, '&quot;').replace(/'/g, '&#39;')}</div>
+                  </div>
+                  <div style="padding: 4px 12px; border-radius: 4px; background: ${statusInfo.color}20; color: ${statusInfo.color}; font-size: 13px; font-weight: 600;">
+                    <i class="fas fa-${statusInfo.icon}"></i>
+                    ${statusInfo.text}
+                  </div>
+                </div>
+                <div style="display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; font-size: 13px; color: #666;">
+                  <span><i class="fas fa-calendar"></i> 등록일: ${new Date(job.created_at).toLocaleDateString()}</span>
+                  <span><i class="fas fa-map-marker-alt"></i> ${(job.address || '-').replace(/"/g, '&quot;')}</span>
+                  <span><i class="fas fa-won-sign"></i> ${(job.hourly_wage || 0).toLocaleString()}원</span>
+                  <span><i class="fas fa-users"></i> 지원자: ${job.application_count || 0}명</span>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <a href="/job-detail.html?id=${job.id}" class="btn btn-primary" style="flex: 1; text-align: center;">
+                    <i class="fas fa-eye"></i>
+                    상세보기
+                  </a>
+                  <button onclick="editJob('${job.id}')" class="btn btn-secondary" style="flex: 1;">
+                    <i class="fas fa-edit"></i>
+                    수정
+                  </button>
+                  ${job.status === 'active' ? `<button onclick="closeJob('${job.id}')" class="btn btn-secondary" style="flex: 1;"><i class="fas fa-ban"></i> 마감</button>` : ''}
+                </div>
+              </div>
+            `;
+          });
+          
+          html += '</div>';
+          console.log('🎨 HTML 생성 완료, 길이:', html.length);
+          listDiv.innerHTML = html;
+          console.log('✅ DOM 업데이트 완료');
+        } else {
+          console.log('⚠️ 공고가 없거나 조건 불일치:', { success: data.success, hasJobs: !!data.jobs, jobCount: data.jobs?.length });
+          listDiv.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-briefcase"></i>
+              <div style="font-size: 16px; margin-top: 8px;">등록한 공고가 없습니다</div>
+              <div style="font-size: 14px; margin-top: 8px;">첫 채용 공고를 등록해보세요!</div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('❌ 채용 공고 로드 에러:', error);
+        console.error('❌ 에러 스택:', error.stack);
+        listDiv.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><div style="margin-top: 12px;">데이터를 불러오는 중 오류가 발생했습니다.</div></div>';
+      }
+    }
+    
+    function editJob(jobId) {
+      window.location.href = `/job-post?id=${jobId}`;
+    }
+    
+    async function closeJob(jobId) {
+      if (!confirm('이 공고를 마감하시겠습니까?')) return;
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        const response = await fetch(`/api/mypage/my-jobs/${jobId}/close`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${sessionToken}` }
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+          alert('공고가 마감되었습니다.');
+          loadMyJobs();
+        } else {
+          alert('마감 실패: ' + (data.error || '알 수 없는 오류'));
+        }
+      } catch (error) {
+        console.error('❌ 공고 마감 에러:', error);
+        alert('마감 중 오류가 발생했습니다.');
+      }
+    }
+    
+    // ============================================
+    // 13. 전자계약서 관리
+    // ============================================
+    async function loadContracts(filters = {}) {
+      console.log('📄 전자계약서 목록 로드 시작', filters);
+      
+      const listDiv = document.getElementById('contractsList');
+      listDiv.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 32px; color: #FF6B35;"></i><div style="margin-top: 12px;">로딩 중...</div></div>';
+      
+      try {
+        // 사용자 정보 가져오기
+        const userName = localStorage.getItem('albi_user_name') || 'unknown';
+        
+        // 쿼리 파라미터 구성
+        const params = new URLSearchParams({
+          userId: userName,
+          userType: 'worker'
+        });
+        
+        if (filters.status) params.append('status', filters.status);
+        if (filters.search) params.append('search', filters.search);
+        if (filters.sortBy) params.append('sortBy', filters.sortBy);
+        if (filters.order) params.append('order', filters.order);
+        
+        const response = await fetch(`/api/contracts?${params.toString()}`);
+        const data = await response.json();
+        
+        if (data.success && data.data && data.data.length > 0) {
+          let html = '<div style="display: flex; flex-direction: column; gap: 16px;">';
+          
+          data.data.forEach(contract => {
+            const createdDate = new Date(contract.created_at * 1000).toLocaleDateString('ko-KR');
+            const statusInfo = {
+              'active': { text: '진행중', color: '#10b981', icon: 'check-circle' },
+              'completed': { text: '완료', color: '#3b82f6', icon: 'check' },
+              'terminated': { text: '종료', color: '#ef4444', icon: 'times-circle' }
+            }[contract.status] || { text: contract.status, color: '#888', icon: 'question-circle' };
+            
+            html += `
+              <div style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; transition: all 0.2s; cursor: pointer;" 
+                   onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" 
+                   onmouseout="this.style.boxShadow='none'"
+                   onclick="viewContract('${contract.contract_id}')">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                  <div style="flex: 1;">
+                    <div style="font-size: 18px; font-weight: 600; color: #1f2937; margin-bottom: 8px;">
+                      ${contract.employer_company}
+                    </div>
+                    <div style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">
+                      <i class="fas fa-calendar-alt" style="color: #9ca3af; margin-right: 6px;"></i>
+                      ${contract.work_start_date} ${contract.work_end_date ? '~ ' + contract.work_end_date : ''}
+                    </div>
+                    <div style="color: #6b7280; font-size: 14px;">
+                      <i class="fas fa-won-sign" style="color: #9ca3af; margin-right: 6px;"></i>
+                      시급 ${Number(contract.hourly_wage).toLocaleString()}원
+                    </div>
+                  </div>
+                  <div style="text-align: right;">
+                    <span style="display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; background: ${statusInfo.color}20; color: ${statusInfo.color};">
+                      <i class="fas fa-${statusInfo.icon}" style="margin-right: 4px;"></i>
+                      ${statusInfo.text}
+                    </span>
+                    <div style="color: #9ca3af; font-size: 12px; margin-top: 8px;">
+                      ${createdDate}
+                    </div>
+                  </div>
+                </div>
+                <div style="padding-top: 12px; border-top: 1px solid #f3f4f6; display: flex; gap: 8px;">
+                  <button onclick="event.stopPropagation(); viewContractPDF('${contract.contract_id}')" 
+                          style="flex: 1; padding: 8px; background: #f97316; color: white; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; transition: background 0.2s;"
+                          onmouseover="this.style.background='#ea580c'"
+                          onmouseout="this.style.background='#f97316'">
+                    <i class="fas fa-file-pdf"></i> PDF 보기
+                  </button>
+                  <button onclick="event.stopPropagation(); changeContractStatus('${contract.contract_id}', '${contract.status}')" 
+                          style="flex: 1; padding: 8px; background: #6b7280; color: white; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; transition: background 0.2s;"
+                          onmouseover="this.style.background='#4b5563'"
+                          onmouseout="this.style.background='#6b7280'">
+                    <i class="fas fa-sync-alt"></i> 상태변경
+                  </button>
+                  <button onclick="event.stopPropagation(); downloadContractPDF('${contract.contract_id}')" 
+                          style="flex: 1; padding: 8px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; transition: background 0.2s;"
+                          onmouseover="this.style.background='#2563eb'"
+                          onmouseout="this.style.background='#3b82f6'">
+                    <i class="fas fa-download"></i> 다운로드
+                  </button>
+                </div>
+              </div>
+            `;
+          });
+          
+          html += '</div>';
+          // 결과 수 표시
+          html = `<div style="margin-bottom: 15px; color: #6b7280; font-size: 14px;">
+            <i class="fas fa-file-contract"></i> 총 ${data.count}건의 계약서
+          </div>` + html;
+          listDiv.innerHTML = html;
+        } else {
+          listDiv.innerHTML = `
+            <div style="text-align: center; padding: 60px 20px; color: #888;">
+              <i class="fas fa-file-contract" style="font-size: 48px; color: #ddd; margin-bottom: 16px;"></i>
+              <p style="font-size: 16px; margin-bottom: 8px;">${filters.search || filters.status ? '검색 결과가 없습니다' : '등록된 계약서가 없습니다'}</p>
+              <p style="font-size: 14px; color: #aaa; margin-bottom: 20px;">${filters.search || filters.status ? '다른 조건으로 검색해보세요' : '새 계약서를 작성해보세요'}</p>
+              <button onclick="createNewContract()" style="padding: 12px 24px; background: #f97316; color: white; border: none; border-radius: 8px; font-size: 14px; cursor: pointer;">
+                <i class="fas fa-plus"></i> 새 계약서 작성
+              </button>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('계약서 목록 로드 오류:', error);
+        listDiv.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #ef4444;">
+            <i class="fas fa-exclamation-circle" style="font-size: 32px; margin-bottom: 12px;"></i>
+            <p>계약서 목록을 불러올 수 없습니다</p>
+            <button onclick="loadContracts()" style="margin-top: 16px; padding: 10px 20px; background: #f97316; color: white; border: none; border-radius: 6px; cursor: pointer;">
+              <i class="fas fa-redo"></i> 다시 시도
+            </button>
+          </div>
+        `;
+      }
+    }
+    
+    function filterContracts() {
+      const search = document.getElementById('contractSearch').value.trim();
+      const status = document.getElementById('contractStatus').value;
+      const sortValue = document.getElementById('contractSort').value;
+      const [sortBy, order] = sortValue.split(':');
+      
+      loadContracts({ search, status, sortBy, order });
+    }
+    
+    function resetContractFilters() {
+      document.getElementById('contractSearch').value = '';
+      document.getElementById('contractStatus').value = '';
+      document.getElementById('contractSort').value = 'created_at:DESC';
+      loadContracts();
+    }
+    
+    let selectedContractId = null;
+    let selectedCurrentStatus = null;
+    let selectedNewStatus = null;
+    
+    async function changeContractStatus(contractId, currentStatus) {
+      selectedContractId = contractId;
+      selectedCurrentStatus = currentStatus;
+      selectedNewStatus = null;
+      
+      const statusOptions = {
+        'active': '진행중',
+        'completed': '완료',
+        'terminated': '종료'
+      };
+      
+      // 모달 표시
+      const modal = document.getElementById('statusChangeModal');
+      modal.style.display = 'flex';
+      
+      // 현재 상태 표시
+      document.getElementById('currentStatusDisplay').textContent = statusOptions[currentStatus];
+      
+      // 상태 옵션 설정
+      const statusButtons = document.querySelectorAll('.status-option');
+      statusButtons.forEach(button => {
+        const status = button.dataset.status;
+        
+        // 현재 상태는 비활성화
+        if (status === currentStatus) {
+          button.classList.add('disabled');
+          button.style.cursor = 'not-allowed';
+          button.disabled = true;
+        } else {
+          button.classList.remove('disabled', 'selected');
+          button.style.cursor = 'pointer';
+          button.disabled = false;
+          
+          // 클릭 이벤트
+          button.onclick = () => selectStatus(status);
+        }
+      });
+      
+      // 확인 버튼 비활성화
+      document.getElementById('confirmStatusChange').disabled = true;
+    }
+    
+    function selectStatus(status) {
+      selectedNewStatus = status;
+      
+      // 모든 버튼에서 selected 제거
+      document.querySelectorAll('.status-option').forEach(btn => {
+        btn.classList.remove('selected');
+      });
+      
+      // 선택된 버튼에 selected 추가
+      const selectedButton = document.querySelector(`.status-option[data-status="${status}"]`);
+      if (selectedButton && !selectedButton.classList.contains('disabled')) {
+        selectedButton.classList.add('selected');
+        document.getElementById('confirmStatusChange').disabled = false;
+      }
+    }
+    
+    function closeStatusModal() {
+      document.getElementById('statusChangeModal').style.display = 'none';
+      selectedContractId = null;
+      selectedCurrentStatus = null;
+      selectedNewStatus = null;
+    }
+    
+    // 상태 변경 확인 함수
+    async function confirmStatusChange() {
+      if (!selectedNewStatus) return;
+      
+      const statusOptions = {
+        'active': '진행중',
+        'completed': '완료',
+        'terminated': '종료'
+      };
+      
+      const button = document.getElementById('confirmStatusChange');
+      
+      try {
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 변경 중...';
+        
+        const response = await fetch(`/api/contracts/${selectedContractId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: selectedNewStatus })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          alert(`✅ 계약 상태가 "${statusOptions[selectedNewStatus]}"(으)로 변경되었습니다.`);
+          closeStatusModal();
+          loadContracts(); // 목록 새로고침
+        } else {
+          throw new Error(data.error);
+        }
+      } catch (error) {
+        console.error('상태 변경 오류:', error);
+        alert('❌ 상태 변경에 실패했습니다.\n\n' + error.message);
+        button.disabled = false;
+        button.innerHTML = '변경하기';
+      }
+    }
+    
+    function createNewContract() {
+      window.location.href = '/contract.html';
+    }
+    
+    function viewContract(contractId) {
+      console.log('계약서 상세:', contractId);
+      // TODO: 상세 모달 표시
+      viewContractPDF(contractId);
+    }
+    
+    function viewContractPDF(contractId) {
+      window.open(`/api/contracts/${contractId}?format=pdf`, '_blank');
+    }
+    
+    function downloadContractPDF(contractId) {
+      const link = document.createElement('a');
+      link.href = `/api/contracts/${contractId}?format=pdf`;
+      link.download = `contract-${contractId}.html`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+    
+    // ============================================
+    // 14. 로그아웃
+    // ============================================
+    // ============================================
+    // 추천인 관련 함수
+    // ============================================
+    
+    // 포인트 수입/지출 내역 로드
+    async function loadPointTransactions() {
+      console.log('💰 포인트 거래 내역 로드 시작');
+      
+      const transactionsDiv = document.getElementById('pointTransactions');
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        
+        // 친구 초대 API에서 포인트 내역 가져오기
+        const response = await fetch('/api/mypage/referrals', {
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.pointHistory && data.pointHistory.length > 0) {
+          let html = '<div style="display: flex; flex-direction: column; gap: 12px;">';
+          
+          data.pointHistory.forEach(item => {
+            const isPositive = item.amount > 0;
+            const amountClass = isPositive ? 'positive' : 'negative';
+            const amountText = isPositive ? `+${item.amount}` : item.amount;
+            const icon = isPositive ? 'fa-arrow-up' : 'fa-arrow-down';
+            const bgColor = isPositive ? '#e8f5e9' : '#ffebee';
+            const textColor = isPositive ? '#2e7d32' : '#c62828';
+            
+            const date = new Date(item.created_at).toLocaleString('ko-KR', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+            
+            html += `
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px; background: ${bgColor}; border-radius: 8px; border-left: 4px solid ${textColor};">
+                <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+                  <div style="width: 40px; height: 40px; border-radius: 50%; background: ${textColor}; display: flex; align-items: center; justify-content: center; color: white;">
+                    <i class="fas ${icon}"></i>
+                  </div>
+                  <div style="flex: 1;">
+                    <div style="font-size: 15px; font-weight: 600; color: #333; margin-bottom: 4px;">${item.description}</div>
+                    <div style="font-size: 13px; color: #666;">${date}</div>
+                  </div>
+                </div>
+                <div style="font-size: 20px; font-weight: 700; color: ${textColor};">
+                  ${amountText}P
+                </div>
+              </div>
+            `;
+          });
+          
+          html += '</div>';
+          transactionsDiv.innerHTML = html;
+          
+          console.log('✅ 포인트 거래 내역 로드 완료:', data.pointHistory.length, '건');
+        } else {
+          transactionsDiv.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-coins" style="font-size: 48px; color: #ddd;"></i>
+              <div style="font-size: 16px; margin-top: 12px; color: #666;">아직 포인트 내역이 없습니다</div>
+              <div style="font-size: 14px; margin-top: 8px; color: #999;">친구를 초대하거나 AI 면접을 완료하면<br>포인트가 적립됩니다!</div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('❌ 포인트 거래 내역 로드 에러:', error);
+        transactionsDiv.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ff6b35;"></i>
+            <div style="font-size: 16px; margin-top: 12px; color: #666;">포인트 내역을 불러올 수 없습니다</div>
+            <div style="font-size: 14px; margin-top: 8px; color: #999;">잠시 후 다시 시도해주세요</div>
+          </div>
+        `;
+      }
+    }
+
+    // 포인트 내역 탭 전용 로드 함수
+    async function loadPointsTab() {
+      console.log('💰 포인트 내역 탭 로드 시작');
+      
+      // 추천인 코드와 통계 로드
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        
+        if (!sessionToken) {
+          console.error('❌ 세션 토큰이 없습니다.');
+          document.getElementById('referralCode').textContent = '로그인 필요';
+          return;
+        }
+        
+        const response = await fetch('/api/mypage/referrals', {
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // 추천인 코드 표시
+          const referralCode = data.referralCode || '------';
+          document.getElementById('referralCode').textContent = referralCode;
+          document.getElementById('referralLink').value = `https://albi.kr/signup.html?ref=${referralCode}`;
+          
+          // 통계 표시
+          document.getElementById('referralCount').textContent = data.stats.total || 0;
+          document.getElementById('hiredCount').textContent = data.stats.hired || 0;
+          document.getElementById('earnedPoints').textContent = `${data.stats.totalPoints || 0}P`;
+          
+          console.log('✅ 추천인 코드 로드 완료:', referralCode);
+        }
+      } catch (error) {
+        console.error('❌ 추천인 코드 로드 에러:', error);
+      }
+      
+      // 포인트 거래 내역 로드
+      await loadPointTransactions();
+    }
+
+    async function loadReferralData() {
+      console.log('🔄 추천인 데이터 로드 중...');
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        
+        if (!sessionToken) {
+          console.error('❌ 세션 토큰이 없습니다.');
+          document.getElementById('myReferralCode').textContent = '로그인 필요';
+          return;
+        }
+        
+        console.log('📡 API 요청 시작: /api/mypage/referrals');
+        const response = await fetch('/api/mypage/referrals', {
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        });
+        
+        console.log('📡 응답 상태:', response.status);
+        const data = await response.json();
+        console.log('📦 API 응답 데이터:', data);
+        
+        if (data.success) {
+          // 추천인 코드 표시
+          const referralCode = data.referralCode || '-';
+          console.log('✅ 추천인 코드:', referralCode);
+          document.getElementById('myReferralCode').textContent = referralCode;
+          
+          // 통계 표시
+          document.getElementById('totalReferrals').textContent = data.stats.total || 0;
+          document.getElementById('hiredReferrals').textContent = data.stats.hired || 0;
+          document.getElementById('referralPoints').textContent = `${data.stats.totalPoints || 0}P`;
+          
+          // 친구 목록 표시
+          const listDiv = document.getElementById('referralList');
+          if (data.referrals && data.referrals.length > 0) {
+            let html = '<div style="display: flex; flex-direction: column; gap: 12px;">';
+            
+            data.referrals.forEach(friend => {
+              const statusColor = 
+                friend.status === 'hired' ? '#28a745' : '#6c757d';
+              
+              const statusText = 
+                friend.status === 'hired' ? '고용 성공' : '가입 완료';
+              
+              const rewardText = friend.reward_given ? 
+                `<i class="fas fa-check-circle" style="color: #28a745;"></i> 가입 보상 지급` : 
+                `<i class="fas fa-clock" style="color: #ffc107;"></i> 가입 보상 대기`;
+              
+              const hireRewardText = friend.hire_reward_given ? 
+                `<br><i class="fas fa-check-circle" style="color: #28a745;"></i> 고용 보상 지급` : '';
+              
+              html += `
+                <div style="padding: 16px; background: #f8f9fa; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <div style="font-size: 16px; font-weight: 600; color: #333;">${friend.name || '알 수 없음'}</div>
+                    <div style="font-size: 13px; color: #666; margin-top: 4px;">
+                      ${new Date(friend.created_at).toLocaleDateString('ko-KR')} 가입
+                    </div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="display: inline-block; padding: 4px 12px; background: ${statusColor}; color: white; border-radius: 12px; font-size: 12px; font-weight: 600; margin-bottom: 4px;">
+                      ${statusText}
+                    </div>
+                    <div style="font-size: 12px; color: #666;">
+                      ${rewardText}${hireRewardText}
+                    </div>
+                  </div>
+                </div>
+              `;
+            });
+            
+            html += '</div>';
+            listDiv.innerHTML = html;
+          } else {
+            listDiv.innerHTML = `
+              <div class="empty-state">
+                <i class="fas fa-user-plus"></i>
+                <div style="font-size: 16px; margin-top: 8px;">아직 초대한 친구가 없습니다</div>
+                <div style="font-size: 14px; margin-top: 8px; color: #999;">위의 추천 코드를 친구에게 공유해보세요!</div>
+              </div>
+            `;
+          }
+          
+          console.log('✅ 추천인 데이터 로드 완료');
+        } else {
+          console.error('❌ 추천인 데이터 로드 실패:', data.error);
+          document.getElementById('myReferralCode').textContent = 'API 오류';
+          alert('추천인 정보를 불러올 수 없습니다: ' + (data.error || '알 수 없는 오류'));
+        }
+      } catch (error) {
+        console.error('❌ 추천인 데이터 로드 에러:', error);
+        document.getElementById('myReferralCode').textContent = '오류';
+        alert('추천인 정보 로드 중 오류가 발생했습니다: ' + error.message);
+      }
+    }
+    
+    function copyReferralCode() {
+      const code = document.getElementById('myReferralCode').textContent;
+      if (code && code !== '-') {
+        navigator.clipboard.writeText(code).then(() => {
+          alert(`추천 코드 "${code}"가 복사되었습니다!`);
+        }).catch(err => {
+          console.error('복사 실패:', err);
+          alert('복사에 실패했습니다. 직접 선택해서 복사해주세요.');
+        });
+      }
+    }
+    
+    function shareReferralLink() {
+      const code = document.getElementById('myReferralCode').textContent;
+      if (code && code !== '-') {
+        const link = `https://albi.kr/signup.html?ref=${code}`;
+        const text = `🎁 알비에 초대합니다!\n\n1시간 일자리 체험 플랫폼 알비에서\n함께 일자리를 찾아보세요!\n\n👉 ${link}\n\n이 링크로 가입하면 20P + 저도 30P를 받아요!`;
+        
+        if (navigator.share) {
+          navigator.share({
+            title: '알비 친구 초대',
+            text: text
+          }).catch(err => {
+            if (err.name !== 'AbortError') {
+              console.error('공유 실패:', err);
+              fallbackShare(link, text);
+            }
+          });
+        } else {
+          fallbackShare(link, text);
+        }
+      }
+    }
+    
+    function fallbackShare(link, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('초대 메시지가 복사되었습니다!\n친구에게 공유해보세요.');
+      }).catch(err => {
+        console.error('복사 실패:', err);
+        prompt('아래 링크를 복사하여 친구에게 공유하세요:', link);
+      });
+    }
+
+    async function logout() {
+      if (!confirm('로그아웃하시겠습니까?')) {
+        return;
+      }
+      
+      const sessionToken = localStorage.getItem('albi_session_token');
+      
+      try {
+        if (sessionToken) {
+          await fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${sessionToken}`
+            }
+          });
+        }
+      } catch (error) {
+        console.error('로그아웃 API 에러:', error);
+      }
+      
+      localStorage.removeItem('albi_user_id');
+      localStorage.removeItem('albi_user_name');
+      localStorage.removeItem('albi_user_type');
+      localStorage.removeItem('albi_session_token');
+      localStorage.removeItem('albi_user_email');
+      
+      alert('로그아웃되었습니다.');
+      window.location.href = '/login.html';
+    }
+
+    // ============================================
+    // 체험 제안 목록 로드
+    // ============================================
+    async function loadProposals() {
+      console.log('📨 체험 제안 목록 로드 시작');
+      
+      const proposalsDiv = document.getElementById('proposalsList');
+      proposalsDiv.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 32px; color: #FF6B35;"></i><div style="margin-top: 12px;">로딩 중...</div></div>';
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        
+        if (!sessionToken) {
+          proposalsDiv.innerHTML = '<div class="empty-state"><i class="fas fa-lock"></i><div style="font-size: 16px; margin-top: 8px;">로그인이 필요합니다</div></div>';
+          return;
+        }
+        
+        const response = await fetch('/api/proposals/my', {
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.proposals) {
+          if (data.proposals.length === 0) {
+            proposalsDiv.innerHTML = `
+              <div class="empty-state">
+                <i class="fas fa-handshake"></i>
+                <div style="font-size: 16px; margin-top: 8px;">받은 체험 제안이 없습니다</div>
+                <div style="font-size: 14px; margin-top: 8px;">AI 면접을 완료하고 매칭을 기다려보세요!</div>
+                <a href="/chat.html" class="btn btn-primary" style="margin-top: 20px;">
+                  <i class="fas fa-comments"></i>
+                  AI 면접 보기
+                </a>
+              </div>
+            `;
+            return;
+          }
+          
+          let html = '<div style="display: grid; gap: 16px;">';
+          
+          data.proposals.forEach(proposal => {
+            const statusColors = {
+              'pending': { bg: '#fef3c7', text: '#92400e', label: '대기 중' },
+              'accepted': { bg: '#d1fae5', text: '#065f46', label: '수락됨' },
+              'rejected': { bg: '#fee2e2', text: '#991b1b', label: '거절됨' },
+              'expired': { bg: '#f3f4f6', text: '#6b7280', label: '만료됨' }
+            };
+            
+            const status = statusColors[proposal.status] || statusColors['pending'];
+            const createdDate = new Date(proposal.created_at).toLocaleDateString('ko-KR');
+            
+            html += `
+              <div style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; background: white;">
+                <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 16px;">
+                  <div style="flex: 1;">
+                    <div style="font-size: 18px; font-weight: 600; color: #1f2937; margin-bottom: 4px;">
+                      ${proposal.employer_name || '익명 사장님'}
+                    </div>
+                    <div style="font-size: 14px; color: #6b7280;">
+                      ${createdDate}
+                    </div>
+                  </div>
+                  <div style="background: ${status.bg}; color: ${status.text}; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600;">
+                    ${status.label}
+                  </div>
+                </div>
+                
+                <div style="background: #f9fafb; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                  <div style="font-size: 14px; color: #374151; line-height: 1.6;">
+                    ${proposal.message || '1시간 체험 제안을 드립니다!'}
+                  </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; font-size: 14px;">
+                  <div>
+                    <span style="color: #6b7280;">등급:</span>
+                    <span style="font-weight: 600; color: #1f2937; margin-left: 4px;">${proposal.jobseeker_grade || 'C'}급</span>
+                  </div>
+                  <div>
+                    <span style="color: #6b7280;">점수:</span>
+                    <span style="font-weight: 600; color: #1f2937; margin-left: 4px;">${proposal.jobseeker_score || 0}점</span>
+                  </div>
+                  <div>
+                    <span style="color: #6b7280;">매칭:</span>
+                    <span style="font-weight: 600; color: #1f2937; margin-left: 4px;">${proposal.match_score || 0}점</span>
+                  </div>
+                  ${proposal.proposed_wage ? `
+                    <div>
+                      <span style="color: #6b7280;">시급:</span>
+                      <span style="font-weight: 600; color: #1f2937; margin-left: 4px;">${proposal.proposed_wage.toLocaleString()}원</span>
+                    </div>
+                  ` : ''}
+                </div>
+                
+                ${proposal.status === 'pending' ? `
+                  <div style="display: flex; gap: 8px;">
+                    <button onclick="acceptProposal('${proposal.id}')" class="btn btn-primary" style="flex: 1;">
+                      <i class="fas fa-check"></i>
+                      수락하기
+                    </button>
+                    <button onclick="rejectProposal('${proposal.id}')" class="btn" style="flex: 1; background: #f3f4f6; color: #6b7280;">
+                      <i class="fas fa-times"></i>
+                      거절하기
+                    </button>
+                  </div>
+                ` : proposal.status === 'accepted' ? `
+                  <div style="background: #d1fae5; border: 1px solid #10b981; border-radius: 8px; padding: 12px; font-size: 14px;">
+                    <div style="font-weight: 600; color: #065f46; margin-bottom: 4px;">
+                      <i class="fas fa-phone"></i>
+                      연락처 정보
+                    </div>
+                    <div style="color: #047857;">
+                      ${proposal.employer_phone ? `전화: ${proposal.employer_phone}<br>` : ''}
+                      ${proposal.employer_email ? `이메일: ${proposal.employer_email}` : ''}
+                    </div>
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          });
+          
+          html += '</div>';
+          proposalsDiv.innerHTML = html;
+        } else {
+          throw new Error(data.error || '제안 목록을 불러올 수 없습니다');
+        }
+      } catch (error) {
+        console.error('체험 제안 로드 오류:', error);
+        proposalsDiv.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div style="font-size: 16px; margin-top: 8px;">제안 목록을 불러오는데 실패했습니다</div>
+            <div style="font-size: 14px; margin-top: 8px;">${error.message}</div>
+            <button onclick="loadProposals()" class="btn btn-primary" style="margin-top: 20px;">
+              <i class="fas fa-redo"></i>
+              다시 시도
+            </button>
+          </div>
+        `;
+      }
+    }
+    
+    // 체험 제안 수락
+    async function acceptProposal(proposalId) {
+      if (!confirm('이 체험 제안을 수락하시겠습니까?\n\n수락하면 구인자의 연락처가 공유됩니다.')) {
+        return;
+      }
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        
+        const response = await fetch(`/api/proposals/${proposalId}/accept`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          alert(`✅ ${data.message}\n\n연락처:\n${data.employer_contact?.phone || ''}\n${data.employer_contact?.email || ''}`);
+          loadProposals(); // 목록 새로고침
+        } else {
+          alert('❌ ' + (data.error || '제안 수락에 실패했습니다.'));
+        }
+      } catch (error) {
+        console.error('제안 수락 오류:', error);
+        alert('제안 수락 중 오류가 발생했습니다.');
+      }
+    }
+    
+    // 체험 제안 거절
+    async function rejectProposal(proposalId) {
+      if (!confirm('이 체험 제안을 거절하시겠습니까?')) {
+        return;
+      }
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        
+        const response = await fetch(`/api/proposals/${proposalId}/reject`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          alert('✅ ' + data.message);
+          loadProposals(); // 목록 새로고침
+        } else {
+          alert('❌ ' + (data.error || '제안 거절에 실패했습니다.'));
+        }
+      } catch (error) {
+        console.error('제안 거절 오류:', error);
+        alert('제안 거절 중 오류가 발생했습니다.');
+      }
+    }
+    
+    // ============================================
+    // 지원자 관리 (구인자용)
+    // ============================================
+    
+    let allApplicants = [];
+    let currentNoshowApplication = null;
+    
+    async function loadApplicants() {
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        const response = await fetch('/api/mypage/hires', {
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        });
+        
+        const data = await response.json();
+        console.log('📊 API 응답:', data);
+        
+        if (data.success) {
+          allApplicants = data.hires || [];
+          displayApplicants(allApplicants);
+        } else {
+          console.error('❌ API 오류:', data.error, data.errorDetails);
+          alert('지원자 목록을 불러올 수 없습니다.\n\n오류: ' + data.error + '\n상세: ' + (data.errorDetails || '없음'));
+        }
+      } catch (error) {
+        console.error('지원자 로드 오류:', error);
+      }
+    }
+    
+    function filterApplicants(filter) {
+      // 필터 버튼 활성화 상태 변경
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        if (btn.dataset.filter === filter) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+      
+      let filtered = allApplicants;
+      if (filter !== 'all') {
+        filtered = allApplicants.filter(app => app.status === filter);
+      }
+      
+      displayApplicants(filtered);
+    }
+    
+    function displayApplicants(applicants) {
+      const container = document.getElementById('applicantsList');
+      
+      if (applicants.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-users"></i>
+            <div style="font-size: 16px; margin-top: 8px;">지원자가 없습니다</div>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = applicants.map(app => `
+        <div class="applicant-card">
+          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+            <div>
+              <h4 style="margin: 0 0 8px 0; font-size: 16px;">${app.job_title || '공고 정보 없음'}</h4>
+              <div style="color: #6b7280; font-size: 14px; margin-bottom: 8px;">
+                <i class="fas fa-user"></i> ${app.applicant_name || '지원자'}
+                ${app.applicant_phone ? ` · <i class="fas fa-phone"></i> ${app.applicant_phone}` : ''}
+              </div>
+              <div style="font-size: 13px; color: #6b7280; margin-bottom: 8px;">
+                <i class="fas fa-star"></i> 신뢰도: ${app.trust_score || 100}점
+                ${app.requested_date ? ` · <i class="fas fa-calendar"></i> ${app.requested_date} ${app.requested_time || ''}` : ''}
+              </div>
+              <span class="applicant-status ${app.status}">${getStatusText(app.status)}</span>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 12px; color: #6b7280; margin-bottom: 8px;">
+                ${new Date(app.created_at).toLocaleDateString('ko-KR')}
+              </div>
+              ${app.status === 'approved' || app.status === 'working' ? `
+                <button onclick="openNoshowModal('${app.id}', '${app.applicant_name}', '${app.job_title}')" 
+                        class="btn" 
+                        style="padding: 6px 12px; font-size: 13px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                  <i class="fas fa-exclamation-triangle"></i> 노쇼 신고
+                </button>
+              ` : ''}
+            </div>
+          </div>
+          
+          ${app.approved_date ? `
+          <div style="background: #f9fafb; padding: 12px; border-radius: 8px; font-size: 14px;">
+            <div style="margin-bottom: 4px;">
+              <i class="fas fa-calendar-alt"></i> 승인일: ${app.approved_date} ${app.approved_time || ''}
+            </div>
+            ${app.completed_at ? `
+            <div>
+              <i class="fas fa-calendar-check"></i> 완료일: ${new Date(app.completed_at).toLocaleDateString('ko-KR')}
+            </div>
+            ` : ''}
+            ${app.rating ? `
+            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
+              <i class="fas fa-star" style="color: #fbbf24;"></i> 평가: ${app.rating}점
+              ${app.review ? `<div style="font-size: 13px; color: #6b7280; margin-top: 4px;">${app.review}</div>` : ''}
+            </div>
+            ` : ''}
+          </div>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+    
+    function getStatusText(status) {
+      const statusMap = {
+        'pending': '승인 대기',
+        'approved': '승인됨',
+        'rejected': '거절됨',
+        'working': '근무 중',
+        'completed': '완료',
+        'cancelled': '취소됨',
+        'immediate_apply': '바로채용 지원'
+      };
+      return statusMap[status] || status;
+    }
+    
+    function openNoshowModal(applicationId, workerName, jobTitle) {
+      currentNoshowApplication = { applicationId, workerName, jobTitle };
+      
+      document.getElementById('noshowApplicantInfo').innerHTML = `
+        <div style="font-weight: 600; margin-bottom: 8px;">신고 대상</div>
+        <div style="font-size: 14px; color: #6b7280;">
+          <div style="margin-bottom: 4px;"><i class="fas fa-user"></i> ${workerName}</div>
+          <div><i class="fas fa-briefcase"></i> ${jobTitle}</div>
+        </div>
+      `;
+      
+      document.getElementById('noshowReason').value = '';
+      document.getElementById('noshowEvidence').value = '';
+      document.getElementById('noshowModal').style.display = 'flex';
+    }
+    
+    function closeNoshowModal() {
+      document.getElementById('noshowModal').style.display = 'none';
+      currentNoshowApplication = null;
+    }
+    
+    async function submitNoshowReport() {
+      const reason = document.getElementById('noshowReason').value.trim();
+      
+      if (!reason) {
+        alert('신고 사유를 입력해주세요.');
+        return;
+      }
+      
+      if (!currentNoshowApplication) {
+        alert('지원 정보가 없습니다.');
+        return;
+      }
+      
+      if (!confirm('노쇼를 신고하시겠습니까?\n\n관리자 검토 후 해당 구직자의 신뢰도 점수가 차감됩니다.')) {
+        return;
+      }
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        const evidence = document.getElementById('noshowEvidence').value.trim();
+        
+        const response = await fetch('/api/noshow/report', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            application_id: currentNoshowApplication.applicationId,
+            reason: reason,
+            evidence: evidence || null
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          alert('✅ ' + data.message);
+          closeNoshowModal();
+          // 신고 목록 페이지로 이동하거나 새로고침
+        } else {
+          alert('❌ ' + (data.error || '노쇼 신고에 실패했습니다.'));
+        }
+      } catch (error) {
+        console.error('노쇼 신고 오류:', error);
+        alert('노쇼 신고 중 오류가 발생했습니다.');
+      }
+    }
+    
+    // ============================================
+    // 노쇼 신고 목록 관리
+    // ============================================
+    
+    let allNoshowReports = [];
+    
+    async function loadNoshowReports() {
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        const response = await fetch('/api/noshow/my-reports', {
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        });
+        
+        const data = await response.json();
+        console.log('📊 노쇼 신고 목록:', data);
+        
+        if (data.success) {
+          allNoshowReports = data.reports || [];
+          displayNoshowReports(allNoshowReports);
+        } else {
+          console.error('❌ API 오류:', data.error);
+        }
+      } catch (error) {
+        console.error('노쇼 신고 목록 로드 오류:', error);
+      }
+    }
+    
+    function filterNoshowReports(filter) {
+      // 필터 버튼 활성화 상태 변경
+      document.querySelectorAll('#tabNoshowReports .filter-btn').forEach(btn => {
+        if (btn.dataset.filter === filter) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+      
+      let filtered = allNoshowReports;
+      if (filter !== 'all') {
+        filtered = allNoshowReports.filter(report => report.status === filter);
+      }
+      
+      displayNoshowReports(filtered);
+    }
+    
+    function displayNoshowReports(reports) {
+      const container = document.getElementById('noshowReportsList');
+      
+      if (reports.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-clipboard-list"></i>
+            <div style="font-size: 16px; margin-top: 8px;">신고 내역이 없습니다</div>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = reports.map(report => `
+        <div class="applicant-card" style="border-left: 4px solid ${getStatusColor(report.status)};">
+          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+            <div style="flex: 1;">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <h4 style="margin: 0; font-size: 16px;">${report.job_title || '공고 정보 없음'}</h4>
+                <span class="applicant-status ${report.status}" style="background: ${getStatusBg(report.status)}; color: ${getStatusTextColor(report.status)};">
+                  ${getNoshowStatusText(report.status)}
+                </span>
+              </div>
+              <div style="color: #6b7280; font-size: 14px; margin-bottom: 8px;">
+                <i class="fas fa-user"></i> 신고 대상: <strong>${report.reported_user_name || '구직자'}</strong>
+                ${report.reported_user_phone ? ` · <i class="fas fa-phone"></i> ${report.reported_user_phone}` : ''}
+              </div>
+              <div style="font-size: 13px; color: #6b7280; margin-bottom: 8px;">
+                <i class="fas fa-calendar"></i> 신고일: ${new Date(report.created_at).toLocaleString('ko-KR')}
+              </div>
+            </div>
+            <div style="text-align: right;">
+              ${report.trust_score_deducted ? `
+                <div style="background: #fee2e2; color: #991b1b; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                  <i class="fas fa-minus-circle"></i> -${report.trust_score_deducted}점 차감
+                </div>
+              ` : ''}
+              ${report.status === 'pending' ? `
+                <div style="background: #fef3c7; color: #92400e; padding: 6px 12px; border-radius: 6px; font-size: 13px;">
+                  <i class="fas fa-clock"></i> 검토 대기 중
+                </div>
+              ` : ''}
+            </div>
+          </div>
+          
+          <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+            <div style="font-weight: 600; color: #374151; margin-bottom: 6px;">
+              <i class="fas fa-align-left"></i> 신고 사유
+            </div>
+            <div style="font-size: 14px; color: #6b7280; line-height: 1.6;">
+              ${report.reason || '-'}
+            </div>
+            ${report.evidence ? `
+              <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
+                <div style="font-weight: 600; color: #374151; margin-bottom: 4px; font-size: 13px;">
+                  <i class="fas fa-paperclip"></i> 증거 자료
+                </div>
+                <div style="font-size: 13px; color: #6b7280;">
+                  ${report.evidence}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+          
+          ${report.admin_notes ? `
+          <div style="background: ${report.status === 'approved' ? '#f0fdf4' : '#fef2f2'}; padding: 12px; border-radius: 8px; border: 1px solid ${report.status === 'approved' ? '#bbf7d0' : '#fecaca'};">
+            <div style="font-weight: 600; color: ${report.status === 'approved' ? '#166534' : '#991b1b'}; margin-bottom: 6px;">
+              <i class="fas fa-user-shield"></i> 관리자 검토 의견
+            </div>
+            <div style="font-size: 14px; color: ${report.status === 'approved' ? '#166534' : '#991b1b'};">
+              ${report.admin_notes}
+            </div>
+            ${report.resolved_at ? `
+              <div style="font-size: 12px; color: #6b7280; margin-top: 6px;">
+                <i class="fas fa-clock"></i> ${new Date(report.resolved_at).toLocaleString('ko-KR')}
+              </div>
+            ` : ''}
+          </div>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+    
+    function getNoshowStatusText(status) {
+      const statusMap = {
+        'pending': '검토 대기',
+        'approved': '승인됨',
+        'rejected': '거절됨'
+      };
+      return statusMap[status] || status;
+    }
+    
+    function getStatusColor(status) {
+      const colorMap = {
+        'pending': '#f59e0b',
+        'approved': '#10b981',
+        'rejected': '#ef4444'
+      };
+      return colorMap[status] || '#6b7280';
+    }
+    
+    function getStatusBg(status) {
+      const bgMap = {
+        'pending': '#fef3c7',
+        'approved': '#d1fae5',
+        'rejected': '#fee2e2'
+      };
+      return bgMap[status] || '#f3f4f6';
+    }
+    
+    function getStatusTextColor(status) {
+      const colorMap = {
+        'pending': '#92400e',
+        'approved': '#065f46',
+        'rejected': '#991b1b'
+      };
+      return colorMap[status] || '#374151';
+    }
+    
+    // ============================================
+    // 결제내역 탭 함수
+    // ============================================
+    async function loadPayments() {
+      console.log('💳 결제내역 로드 시작');
+      const paymentsDiv = document.getElementById('paymentsList');
+      paymentsDiv.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 32px; color: #667eea;"></i><div style="margin-top: 12px;">로딩 중...</div></div>';
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        const userId = localStorage.getItem('albi_user_id');
+        
+        const response = await fetch(`/api/subscription/payments?user_id=${userId}`, {
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.payments && data.payments.length > 0) {
+          let html = '<div style="display: flex; flex-direction: column; gap: 16px;">';
+          
+          data.payments.forEach(payment => {
+            const date = new Date(payment.created_at).toLocaleDateString('ko-KR');
+            const statusClass = payment.status === 'completed' ? 'positive' : 'negative';
+            const statusText = payment.status === 'completed' ? '결제 완료' : '취소/환불';
+            
+            html += `
+              <div class="point-item">
+                <div class="point-info">
+                  <i class="fas fa-credit-card" style="color: #667eea;"></i>
+                  <div>
+                    <div class="point-description">${payment.order_name || 'Albi 구독'}</div>
+                    <div class="point-date">${date} · ${statusText}</div>
+                  </div>
+                </div>
+                <div class="point-amount ${statusClass}">₩${payment.amount.toLocaleString()}</div>
+              </div>
+            `;
+          });
+          
+          html += '</div>';
+          paymentsDiv.innerHTML = html;
+        } else {
+          paymentsDiv.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-receipt"></i>
+              <div style="font-size: 16px; margin-top: 8px;">결제 내역이 없습니다</div>
+              <div style="font-size: 14px; margin-top: 8px;">구독을 시작해보세요!</div>
+              <a href="/payment.html" class="btn btn-primary" style="margin-top: 20px;">
+                <i class="fas fa-shopping-cart"></i>
+                구독하기
+              </a>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('결제내역 로드 에러:', error);
+        paymentsDiv.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-exclamation-circle" style="color: #FF6B35;"></i>
+            <div style="font-size: 16px; margin-top: 8px;">결제내역을 불러올 수 없습니다</div>
+          </div>
+        `;
+      }
+    }
+    
+    function filterPayments(filter) {
+      // 필터 버튼 활성화
+      document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelector(`.filter-btn[data-filter="${filter}"]`).classList.add('active');
+      
+      // 필터링 로직은 추후 구현
+      loadPayments();
+    }
+    
+    // ============================================
+    // 대시보드 탭 함수
+    // ============================================
+    async function loadDashboard() {
+      console.log('📊 대시보드 로드 시작');
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        const userId = localStorage.getItem('albi_user_id');
+        
+        // 통계 데이터 로드
+        const response = await fetch(`/api/mypage/stats?user_id=${userId}`, {
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          document.getElementById('totalMentorChats').textContent = data.stats?.mentor_chats || 0;
+          document.getElementById('totalInterviews').textContent = data.stats?.interviews || 0;
+          document.getElementById('avgScore').textContent = data.stats?.avg_score ? data.stats.avg_score.toFixed(1) : '0';
+          document.getElementById('growthRate').textContent = data.stats?.growth_rate ? `+${data.stats.growth_rate}%` : '+0%';
+        }
+        
+        // 최근 활동 로드
+        await loadRecentActivities();
+      } catch (error) {
+        console.error('대시보드 로드 에러:', error);
+      }
+    }
+    
+    async function loadRecentActivities() {
+      const activitiesDiv = document.getElementById('recentActivities');
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        const userId = localStorage.getItem('albi_user_id');
+        
+        const response = await fetch(`/api/mypage/recent-activities?user_id=${userId}&limit=5`, {
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.activities && data.activities.length > 0) {
+          let html = '<div style="display: flex; flex-direction: column; gap: 12px;">';
+          
+          data.activities.forEach(activity => {
+            const date = new Date(activity.created_at).toLocaleDateString('ko-KR', {
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+            
+            html += `
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <i class="fas ${activity.icon || 'fa-circle'}" style="color: #667eea;"></i>
+                  <div>
+                    <div style="font-size: 14px; font-weight: 500; color: #333;">${activity.title}</div>
+                    <div style="font-size: 12px; color: #666;">${date}</div>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+          
+          html += '</div>';
+          activitiesDiv.innerHTML = html;
+        } else {
+          activitiesDiv.innerHTML = `
+            <div style="text-align: center; padding: 30px; color: #888;">
+              <i class="fas fa-inbox"></i>
+              <p style="margin-top: 10px;">최근 활동이 없습니다</p>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('최근 활동 로드 에러:', error);
+        activitiesDiv.innerHTML = `
+          <div style="text-align: center; padding: 30px; color: #888;">
+            <i class="fas fa-inbox"></i>
+            <p style="margin-top: 10px;">최근 활동이 없습니다</p>
+          </div>
+        `;
+      }
+    }
+    
+    // ============================================
+    // 구독관리 탭 함수
+    // ============================================
+    async function loadSubscription() {
+      console.log('👑 구독관리 로드 시작');
+      const statusCard = document.getElementById('subscriptionStatusCard');
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        const userId = localStorage.getItem('albi_user_id');
+        
+        const response = await fetch(`/api/subscription/status?user_id=${userId}`, {
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.subscribed && data.subscription) {
+          const sub = data.subscription;
+          const expiresDate = new Date(sub.expires_at).toLocaleDateString('ko-KR');
+          const nextPaymentDate = sub.next_payment_date ? new Date(sub.next_payment_date).toLocaleDateString('ko-KR') : '-';
+          
+          const planNames = {
+            'basic': 'Basic',
+            'standard': 'Standard',
+            'premium': 'Premium',
+            'unlimited': 'Unlimited'
+          };
+          
+          const planColors = {
+            'basic': '#6b7280',
+            'standard': '#3b82f6',
+            'premium': '#a855f7',
+            'unlimited': '#f59e0b'
+          };
+          
+          statusCard.innerHTML = `
+            <div style="background: linear-gradient(135deg, ${planColors[sub.plan] || '#667eea'} 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">현재 플랜</div>
+                  <div style="font-size: 36px; font-weight: 700;">${planNames[sub.plan] || sub.plan}</div>
+                  <div style="font-size: 18px; margin-top: 8px;">₩${sub.price.toLocaleString()}/월</div>
+                </div>
+                <div style="text-align: center;">
+                  <i class="fas fa-crown" style="font-size: 60px; opacity: 0.3;"></i>
+                </div>
+              </div>
+              
+              <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2);">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                  <div>
+                    <div style="font-size: 12px; opacity: 0.8;">구독 상태</div>
+                    <div style="font-size: 16px; font-weight: 600; margin-top: 4px;">
+                      ${sub.status === 'active' ? '✅ 활성' : '❌ 비활성'}
+                    </div>
+                  </div>
+                  <div>
+                    <div style="font-size: 12px; opacity: 0.8;">다음 결제일</div>
+                    <div style="font-size: 16px; font-weight: 600; margin-top: 4px;">${nextPaymentDate}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 사용량 정보 -->
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+              <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #333;">
+                <i class="fas fa-chart-line"></i> 이번 달 사용량
+              </h4>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <span style="font-size: 14px; color: #666;">멘토 대화</span>
+                <span style="font-size: 18px; font-weight: 700; color: #667eea;">${sub.total_messages_used || 0}회</span>
+              </div>
+              ${sub.plan !== 'unlimited' ? `
+                <div style="background: #e5e7eb; height: 8px; border-radius: 4px; overflow: hidden;">
+                  <div style="background: #667eea; height: 100%; width: ${Math.min(100, (sub.total_messages_used / getMessageLimit(sub.plan)) * 100)}%;"></div>
+                </div>
+                <div style="font-size: 12px; color: #888; margin-top: 8px; text-align: right;">
+                  ${getMessageLimit(sub.plan)}회 중 ${sub.total_messages_used || 0}회 사용
+                </div>
+              ` : `
+                <div style="text-align: center; padding: 16px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 8px; color: white; font-weight: 600;">
+                  <i class="fas fa-infinity"></i> 무제한 플랜
+                </div>
+              `}
+            </div>
+          `;
+        } else {
+          statusCard.innerHTML = `
+            <div style="text-align: center; padding: 60px; background: #f8f9fa; border-radius: 12px;">
+              <i class="fas fa-crown" style="font-size: 60px; color: #ddd;"></i>
+              <div style="font-size: 18px; font-weight: 600; margin-top: 16px; color: #666;">활성화된 구독이 없습니다</div>
+              <div style="font-size: 14px; margin-top: 8px; color: #888;">지금 구독하고 AI 멘토를 만나보세요!</div>
+              <a href="/payment.html" class="btn btn-primary" style="margin-top: 24px; display: inline-block;">
+                <i class="fas fa-shopping-cart"></i>
+                구독하기
+              </a>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('구독정보 로드 에러:', error);
+        statusCard.innerHTML = `
+          <div style="text-align: center; padding: 40px;">
+            <i class="fas fa-exclamation-circle" style="font-size: 48px; color: #ef4444;"></i>
+            <div style="font-size: 16px; margin-top: 12px; color: #666;">구독 정보를 불러올 수 없습니다</div>
+          </div>
+        `;
+      }
+    }
+    
+    function getMessageLimit(plan) {
+      const limits = {
+        'basic': 100,
+        'standard': 200,
+        'premium': 500,
+        'unlimited': Infinity
+      };
+      return limits[plan] || 0;
+    }
+  </script>
+  
+  <!-- 상태변경 모달 -->
+  <div id="statusChangeModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; justify-content: center; align-items: center;">
+    <div style="background: white; border-radius: 16px; padding: 30px; max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+      <h3 style="margin: 0 0 20px 0; font-size: 20px; color: #1f2937;">
+        <i class="fas fa-sync-alt" style="color: #f97316;"></i>
+        계약 상태 변경
+      </h3>
+      
+      <div style="margin-bottom: 20px; padding: 15px; background: #f9fafb; border-radius: 8px;">
+        <div style="font-size: 14px; color: #6b7280; margin-bottom: 5px;">현재 상태</div>
+        <div id="currentStatusDisplay" style="font-size: 18px; font-weight: 600; color: #1f2937;"></div>
+      </div>
+      
+      <div style="margin-bottom: 25px;">
+        <label style="display: block; margin-bottom: 10px; font-weight: 500; color: #374151;">변경할 상태 선택</label>
+        <div id="statusOptions" style="display: flex; flex-direction: column; gap: 10px;">
+          <button class="status-option" data-status="active" style="padding: 15px; border: 2px solid #e5e7eb; border-radius: 8px; background: white; cursor: pointer; text-align: left; transition: all 0.2s; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-play-circle" style="color: #10b981; font-size: 20px;"></i>
+            <div>
+              <div style="font-weight: 600; color: #1f2937;">진행중</div>
+              <div style="font-size: 12px; color: #6b7280;">계약이 정상적으로 진행 중입니다</div>
+            </div>
+          </button>
+          <button class="status-option" data-status="completed" style="padding: 15px; border: 2px solid #e5e7eb; border-radius: 8px; background: white; cursor: pointer; text-align: left; transition: all 0.2s; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-check-circle" style="color: #3b82f6; font-size: 20px;"></i>
+            <div>
+              <div style="font-weight: 600; color: #1f2937;">완료</div>
+              <div style="font-size: 12px; color: #6b7280;">계약 기간이 종료되었습니다</div>
+            </div>
+          </button>
+          <button class="status-option" data-status="terminated" style="padding: 15px; border: 2px solid #e5e7eb; border-radius: 8px; background: white; cursor: pointer; text-align: left; transition: all 0.2s; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-times-circle" style="color: #ef4444; font-size: 20px;"></i>
+            <div>
+              <div style="font-weight: 600; color: #1f2937;">종료</div>
+              <div style="font-size: 12px; color: #6b7280;">계약이 중도 해지되었습니다</div>
+            </div>
+          </button>
+        </div>
+      </div>
+      
+      <div style="display: flex; gap: 10px;">
+        <button onclick="closeStatusModal()" style="flex: 1; padding: 12px; background: #e5e7eb; color: #374151; border: none; border-radius: 8px; font-weight: 500; cursor: pointer;">
+          취소
+        </button>
+        <button id="confirmStatusChange" onclick="confirmStatusChange()" style="flex: 1; padding: 12px; background: #f97316; color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer;" disabled>
+          변경하기
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <style>
+    .status-option:hover {
+      border-color: #f97316 !important;
+      background: #fff7ed !important;
+    }
+    .status-option.selected {
+      border-color: #f97316 !important;
+      background: #fff7ed !important;
+    }
+    .status-option.disabled {
+      opacity: 0.5;
+      cursor: not-allowed !important;
+    }
+  </style>
+  
+  <!-- 노쇼 신고 모달 -->
+  <div id="noshowModal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; padding: 20px; border-radius: 12px 12px 0 0;">
+        <h3 style="margin: 0; font-size: 20px;">
+          <i class="fas fa-exclamation-triangle"></i> 노쇼 신고
+        </h3>
+        <button onclick="closeNoshowModal()" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 24px;">
+        <div style="background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+          <p style="margin: 0; font-size: 14px; color: #991b1b;">
+            <i class="fas fa-info-circle"></i> 노쇼 신고 시 관리자 검토 후 해당 구직자의 신뢰도 점수가 차감됩니다.
+          </p>
+        </div>
+        
+        <div id="noshowApplicantInfo" style="background: #f9fafb; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+          <!-- 지원자 정보 표시 -->
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">신고 사유 <span style="color: #ef4444;">*</span></label>
+          <textarea id="noshowReason" class="form-input" rows="4" placeholder="노쇼 상황을 자세히 설명해주세요..." required></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">증거 자료 (선택)</label>
+          <input type="text" id="noshowEvidence" class="form-input" placeholder="증거 사진 URL 또는 설명">
+          <small style="color: #6b7280; font-size: 12px;">예: 메시지 스크린샷 URL, 통화 기록 등</small>
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 24px;">
+          <button onclick="closeNoshowModal()" class="btn" style="flex: 1; background: #e5e7eb; color: #374151;">
+            취소
+          </button>
+          <button onclick="submitNoshowReport()" class="btn btn-primary" style="flex: 1; background: #ef4444;">
+            <i class="fas fa-exclamation-triangle"></i> 신고하기
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div id="footer-container"></div>
+  <script src="/footer.js"></script>
+</body>
+</html>

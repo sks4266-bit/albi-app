@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>페이지를 찾을 수 없습니다 - Albi AI 면접</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-2xl w-full text-center fade-in">
+        <!-- 404 아이콘 -->
+        <div class="mb-8 float-animation">
+            <i class="fas fa-robot text-9xl text-blue-500 mb-4"></i>
+        </div>
+
+        <!-- 404 타이틀 -->
+        <h1 class="text-6xl md:text-8xl font-bold text-gray-800 mb-4">
+            404
+        </h1>
+        
+        <h2 class="text-2xl md:text-3xl font-semibold text-gray-700 mb-4">
+            페이지를 찾을 수 없습니다
+        </h2>
+
+        <p class="text-gray-600 mb-8 text-lg">
+            죄송합니다. 요청하신 페이지가 존재하지 않거나 이동되었습니다.
+        </p>
+
+        <!-- 추천 링크 -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <h3 class="text-xl font-semibold text-gray-800 mb-6 flex items-center justify-center gap-2">
+                <i class="fas fa-compass text-blue-500"></i>
+                추천 페이지
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- AI 면접 -->
+                <a href="/chat" class="group bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl p-6 transition-all duration-300 transform hover:scale-105 hover:shadow-lg">
+                    <i class="fas fa-comments text-3xl mb-3 group-hover:scale-110 transition-transform"></i>
+                    <h4 class="font-semibold text-lg mb-2">AI 면접</h4>
+                    <p class="text-sm opacity-90">실전 면접 연습하기</p>
+                </a>
+
+                <!-- AI 멘토 -->
+                <a href="/mentor-chat" class="group bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl p-6 transition-all duration-300 transform hover:scale-105 hover:shadow-lg">
+                    <i class="fas fa-user-tie text-3xl mb-3 group-hover:scale-110 transition-transform"></i>
+                    <h4 class="font-semibold text-lg mb-2">AI 멘토</h4>
+                    <p class="text-sm opacity-90">취업 상담 받기</p>
+                </a>
+
+                <!-- 음성 멘토링 -->
+                <a href="/voice-mentor" class="group bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl p-6 transition-all duration-300 transform hover:scale-105 hover:shadow-lg">
+                    <i class="fas fa-microphone text-3xl mb-3 group-hover:scale-110 transition-transform"></i>
+                    <h4 class="font-semibold text-lg mb-2">음성 멘토링</h4>
+                    <p class="text-sm opacity-90">음성으로 대화하기</p>
+                </a>
+
+                <!-- 포트폴리오 -->
+                <a href="/portfolio" class="group bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl p-6 transition-all duration-300 transform hover:scale-105 hover:shadow-lg">
+                    <i class="fas fa-briefcase text-3xl mb-3 group-hover:scale-110 transition-transform"></i>
+                    <h4 class="font-semibold text-lg mb-2">포트폴리오</h4>
+                    <p class="text-sm opacity-90">이력서 작성하기</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- 홈 버튼 -->
+        <div class="flex gap-4 justify-center">
+            <a href="/" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center gap-2">
+                <i class="fas fa-home"></i>
+                홈으로 돌아가기
+            </a>
+            
+            <button onclick="history.back()" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center gap-2">
+                <i class="fas fa-arrow-left"></i>
+                이전 페이지
+            </button>
+        </div>
+
+        <!-- 도움말 -->
+        <div class="mt-8 text-gray-500 text-sm">
+            <p>문제가 계속되면 <a href="mailto:albi260128@gmail.com" class="text-blue-600 hover:text-blue-700 underline">지원팀</a>에 문의해주세요.</p>
+        </div>
+    </div>
+
+    <script>
+        // 페이지 로드 시 에러 로깅 (선택사항)
+        console.log('404 Error:', {
+            url: window.location.href,
+            referrer: document.referrer,
+            timestamp: new Date().toISOString()
+        });
+    </script>
+</body>
+</html>

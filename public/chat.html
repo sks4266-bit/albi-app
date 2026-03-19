@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- SEO Meta Tags -->
+  <title>AI 면접 연습 - 알비 | 실전 면접 시뮬레이션</title>
+  <meta name="description" content="AI와 실전 면접 연습! 실시간 피드백으로 면접 실력 향상. 음성 인식 지원. 무료 체험 가능.">
+  <meta name="keywords" content="AI 면접, 면접 연습, 면접 시뮬레이션, 알바 면접, 취업 면접, AI 피드백">
+  <link rel="canonical" href="https://albi.kr/chat">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="AI 면접 연습 - 알비">
+  <meta property="og:description" content="AI와 실전 면접 연습! 실시간 피드백으로 면접 실력 향상.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://albi.kr/chat">
+  <meta property="og:image" content="https://albi.kr/static/icons/icon-512x512.png">
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="AI 면접 연습 - 알비">
+  <meta name="twitter:description" content="AI와 실전 면접 연습! 무료 체험 가능.">
+  <meta name="twitter:image" content="https://albi.kr/static/icons/icon-512x512.png">
+  
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#6366f1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="알비 면접">
+  <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
+  
+  <!-- 캐시 방지 -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+    }
+    .chat-bubble-enter {
+      animation: slideIn 0.3s ease-out;
+    }
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    /* 타이핑 커서 애니메이션 */
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+    .typing-cursor::after {
+      content: '|';
+      animation: blink 1s infinite;
+    }
+    /* 로딩 점 애니메이션 */
+    @keyframes bounce {
+      0%, 80%, 100% { 
+        transform: translateY(0);
+      }
+      40% { 
+        transform: translateY(-10px);
+      }
+    }
+    .progress-step {
+      transition: all 0.3s;
+    }
+    .progress-step.active {
+      background: #FF6B35;
+      color: white;
+    }
+    .progress-step.completed {
+      background: #10B981;
+      color: white;
+    }
+    .quick-answer-btn:hover {
+      transform: scale(1.05);
+    }
+    
+    /* 모바일 최적화 스타일 */
+    @media (max-width: 640px) {
+      /* 네비게이션 로고 크기 축소 */
+      nav img {
+        width: 24px !important;
+        height: 24px !important;
+      }
+      nav .text-2xl {
+        font-size: 1.25rem !important; /* 20px */
+      }
+      
+      /* 헤더 아이콘 및 텍스트 크기 축소 */
+      .header-mascot {
+        width: 36px !important;
+        height: 36px !important;
+      }
+      .text-xl {
+        font-size: 1rem !important; /* 16px */
+      }
+      
+      /* 사용자 정보 영역 축소 */
+      #userInfo {
+        padding: 0.375rem 0.75rem !important; /* py-1.5 px-3 */
+        font-size: 0.75rem !important; /* text-xs */
+      }
+      
+      /* 진행 단계 텍스트 더 작게 */
+      .progress-step {
+        padding: 0.375rem 0.25rem !important;
+        font-size: 0.625rem !important; /* 10px */
+      }
+      
+      /* 채팅 버블 크기 축소 */
+      .chat-bubble-avatar {
+        width: 32px !important;
+        height: 32px !important;
+      }
+      .chat-bubble-avatar img {
+        width: 24px !important;
+        height: 24px !important;
+      }
+      
+      /* 채팅 메시지 패딩 축소 */
+      .chat-message {
+        padding: 0.75rem !important; /* p-3 */
+        font-size: 0.875rem !important; /* text-sm */
+        line-height: 1.4 !important;
+      }
+      
+      /* 빠른 답변 버튼 크기 축소 */
+      .quick-answer-btn {
+        padding: 0.5rem 0.75rem !important; /* py-2 px-3 */
+        font-size: 0.75rem !important; /* text-xs */
+      }
+      
+      /* 입력창 높이 축소 */
+      #userInput {
+        padding: 0.75rem !important;
+        font-size: 0.875rem !important;
+      }
+      
+      /* 전송 버튼 크기 축소 */
+      #sendButton {
+        padding: 0.75rem 1rem !important;
+        font-size: 0.875rem !important;
+      }
+      
+      /* 알림 드롭다운 너비 조정 */
+      #notificationDropdown {
+        width: 85vw !important;
+        max-width: 320px !important;
+      }
+    }
+  </style>
+  <link href="/footer.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+  <!-- 네비게이션 -->
+  <nav class="bg-white shadow-sm border-b sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+      <a href="/" class="flex items-center space-x-2">
+        <img src="/albi-mascot.svg" alt="알비" style="width: 32px; height: 32px;">
+        <span class="text-2xl font-bold text-orange-500">알비 AI 매칭</span>
+      </a>
+      <div class="flex items-center gap-3">
+        <button onclick="resetInterview()" class="text-sm text-gray-600 hover:text-orange-500 transition">
+          <i class="fas fa-redo mr-1"></i>
+          <span class="hidden sm:inline">다시 시작</span>
+        </button>
+        <a href="/jobs" class="text-sm text-gray-600 hover:text-orange-500 transition">
+          <i class="fas fa-briefcase mr-1"></i>
+          <span class="hidden sm:inline">알바 둘러보기</span>
+        </a>
+        <a href="/" class="text-sm text-gray-600 hover:text-orange-500 transition">
+          <i class="fas fa-arrow-left mr-1"></i>
+          홈으로
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 메인 콘텐츠 -->
+  <main class="flex-1 flex flex-col max-w-5xl mx-auto w-full">
+    <!-- 헤더 & 진행 단계 -->
+    <div class="bg-white border-b">
+      <div class="p-4">
+        <!-- 사용자 타입 선택 -->
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-2 sm:space-x-3">
+            <img src="/albi-mascot.svg" alt="알비" class="header-mascot" style="width: 48px; height: 48px;">
+            <div>
+              <h1 class="text-base sm:text-xl font-bold">AI 스마트 매칭</h1>
+              <p class="text-xs sm:text-sm text-gray-600">당신에게 딱 맞는 일자리를 찾아드립니다</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-1 sm:space-x-3">
+            <!-- 사용자 정보 표시 -->
+            <div id="userInfo" class="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-1 sm:py-2 bg-gray-100 rounded-full">
+              <i id="userIcon" class="fas fa-user text-blue-500 text-sm"></i>
+              <span id="userName" class="text-xs sm:text-sm font-bold text-gray-700 hidden sm:inline">로딩 중...</span>
+            </div>
+            <!-- 마이페이지 버튼 -->
+            <a href="/mypage.html" class="px-2 sm:px-3 py-2 rounded-full text-sm text-gray-600 hover:bg-gray-100 transition" title="마이페이지">
+              <i class="fas fa-user-circle"></i>
+            </a>
+            <!-- 알림 버튼 -->
+            <div class="relative">
+              <button onclick="toggleNotifications()" class="px-2 sm:px-3 py-2 rounded-full text-sm text-gray-600 hover:bg-gray-100 transition relative" title="알림">
+                <i class="fas fa-bell"></i>
+                <span id="notificationBadge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center font-bold text-[10px] sm:text-xs">0</span>
+              </button>
+              
+              <!-- 알림 드롭다운 -->
+              <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50" style="max-height: 400px; overflow-y: auto;">
+                <div class="p-3 border-b border-gray-200 flex justify-between items-center">
+                  <h3 class="font-bold text-gray-800">알림</h3>
+                  <button onclick="markAllAsRead()" class="text-xs text-orange-500 hover:text-orange-600">모두 읽음</button>
+                </div>
+                <div id="notificationList" class="divide-y divide-gray-100">
+                  <!-- 알림 목록이 여기에 표시됩니다 -->
+                </div>
+              </div>
+            </div>
+            <!-- 로그아웃 버튼 -->
+            <button onclick="logout()" class="px-2 sm:px-3 py-2 rounded-full text-sm text-gray-600 hover:bg-gray-100 transition" title="로그아웃">
+              <i class="fas fa-sign-out-alt"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 진행 단계 표시 -->
+        <div id="progressBar" class="flex items-center justify-between gap-2">
+          <div class="progress-step active flex-1 text-center py-2 rounded-lg text-xs font-bold transition">
+            1. 기본정보
+          </div>
+          <div class="progress-step flex-1 text-center py-2 rounded-lg text-xs font-bold bg-gray-200 text-gray-600 transition">
+            2. 성향분석
+          </div>
+          <div class="progress-step flex-1 text-center py-2 rounded-lg text-xs font-bold bg-gray-200 text-gray-600 transition">
+            3. 경험분석
+          </div>
+          <div class="progress-step flex-1 text-center py-2 rounded-lg text-xs font-bold bg-gray-200 text-gray-600 transition">
+            4. 매칭결과
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 모드 선택 UI -->
+    <div id="modeSelector" class="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-purple-200 p-4" style="display: none;">
+      <div class="max-w-2xl mx-auto">
+        <div class="text-center mb-4">
+          <div class="text-2xl mb-2">🤔</div>
+          <h3 class="text-lg font-bold text-gray-800 mb-1">면접 모드를 선택해주세요</h3>
+          <p class="text-sm text-gray-600">현재 계정은 <span id="currentModeText"></span>이지만, 원하는 모드로 면접을 볼 수 있습니다.</p>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- 구직자 모드 -->
+          <button onclick="selectInterviewMode('jobseeker')" class="mode-card bg-white p-4 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:shadow-lg transition text-left">
+            <div class="flex items-start gap-3">
+              <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-user text-blue-600 text-xl"></i>
+              </div>
+              <div class="flex-1">
+                <h4 class="font-bold text-gray-800 mb-1">구직자 모드</h4>
+                <p class="text-xs text-gray-600 mb-2">일자리를 찾고 있어요</p>
+                <div class="text-xs text-blue-600">
+                  ✓ AI 면접 완료 시 20P<br>
+                  ✓ 맞춤 공고 추천<br>
+                  ✓ 1시간 체험 제안 수신
+                </div>
+              </div>
+            </div>
+          </button>
+          
+          <!-- 구인자 모드 -->
+          <button onclick="selectInterviewMode('employer')" class="mode-card bg-white p-4 rounded-xl border-2 border-gray-200 hover:border-orange-500 hover:shadow-lg transition text-left">
+            <div class="flex items-start gap-3">
+              <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-building text-orange-600 text-xl"></i>
+              </div>
+              <div class="flex-1">
+                <h4 class="font-bold text-gray-800 mb-1">구인자 모드</h4>
+                <p class="text-xs text-gray-600 mb-2">직원을 채용하고 싶어요</p>
+                <div class="text-xs text-orange-600">
+                  ✓ AI가 적합한 인재 추천<br>
+                  ✓ 매칭된 구직자 정보 제공<br>
+                  ✓ 1시간 체험 제안 발송
+                </div>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 채팅 영역 -->
+    <div id="chatArea" class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-gray-50">
+      <!-- 초기 환영 메시지 -->
+      <div class="flex items-start space-x-2 sm:space-x-3 chat-bubble-enter">
+        <div class="chat-bubble-avatar w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+          <img src="/albi-mascot.svg" alt="알비" style="width: 24px; height: 24px;">
+        </div>
+        <div class="chat-message bg-white p-3 sm:p-4 rounded-2xl rounded-tl-none shadow-sm border max-w-[85%] sm:max-w-[70%]">
+          <div class="font-bold text-orange-500 mb-1 sm:mb-2 text-sm sm:text-base">안녕하세요! 알비 AI 매칭 시스템입니다 🐝</div>
+          <div class="mb-2 sm:mb-3 text-xs sm:text-sm">저는 당신의 <strong>성격, 성향, 경험</strong>을 종합적으로 분석하여<br class="hidden sm:inline">가장 잘 맞는 일자리를 찾아드립니다.</div>
+          <div class="bg-blue-50 p-2 sm:p-3 rounded-lg text-xs sm:text-sm mb-2 sm:mb-3">
+            <div class="font-bold text-blue-700 mb-1">✨ AI 매칭의 장점</div>
+            <ul class="text-[11px] sm:text-xs text-gray-700 space-y-0.5 sm:space-y-1">
+              <li>• 성향 분석으로 직장 분위기 궁합 예측</li>
+              <li>• 경험 기반 맞춤 추천</li>
+              <li>• 1시간 체험 자동 연계</li>
+            </ul>
+          </div>
+          <div>먼저, <strong>어떤 종류의 알바</strong>에 관심이 있으신가요?</div>
+          <div class="text-xs text-gray-500 mt-2">방금 전</div>
+        </div>
+      </div>
+
+      <!-- 빠른 답변 버튼 -->
+      <div id="quickAnswers" class="flex flex-wrap gap-1.5 sm:gap-2 px-3 sm:px-4">
+        <button onclick="quickAnswer('카페')" class="quick-answer-btn px-3 py-1.5 sm:px-4 sm:py-2 bg-white border-2 border-orange-200 rounded-full text-xs sm:text-sm hover:border-orange-500 hover:bg-orange-50 transition">
+          ☕ 카페
+        </button>
+        <button onclick="quickAnswer('편의점')" class="quick-answer-btn px-3 py-1.5 sm:px-4 sm:py-2 bg-white border-2 border-orange-200 rounded-full text-xs sm:text-sm hover:border-orange-500 hover:bg-orange-50 transition">
+          🏪 편의점
+        </button>
+        <button onclick="quickAnswer('음식점')" class="quick-answer-btn px-3 py-1.5 sm:px-4 sm:py-2 bg-white border-2 border-orange-200 rounded-full text-xs sm:text-sm hover:border-orange-500 hover:bg-orange-50 transition">
+          🍽️ 음식점
+        </button>
+        <button onclick="quickAnswer('매장/판매')" class="quick-answer-btn px-3 py-1.5 sm:px-4 sm:py-2 bg-white border-2 border-orange-200 rounded-full text-xs sm:text-sm hover:border-orange-500 hover:bg-orange-50 transition">
+          👕 매장/판매
+        </button>
+        <button onclick="quickAnswer('패스트푸드')" class="quick-answer-btn px-3 py-1.5 sm:px-4 sm:py-2 bg-white border-2 border-orange-200 rounded-full text-xs sm:text-sm hover:border-orange-500 hover:bg-orange-50 transition">
+          🍔 패스트푸드
+        </button>
+      </div>
+    </div>
+
+    <!-- 입력 영역 -->
+    <div class="border-t bg-white p-3 sm:p-4">
+      <div class="flex space-x-2 sm:space-x-3">
+        <input 
+          type="text" 
+          id="messageInput" 
+          placeholder="메시지를 입력하세요... (Enter로 전송)" 
+          class="flex-1 border-2 border-gray-200 rounded-lg px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base focus:border-orange-500 focus:outline-none transition"
+          autocomplete="off"
+        >
+        <button 
+          onclick="sendMessage()" 
+          id="sendBtn" 
+          class="bg-orange-500 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg hover:bg-orange-600 transition font-bold disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+      <div class="mt-2 text-[10px] sm:text-xs text-gray-500 text-center">
+        💡 솔직하게 답변할수록 더 정확한 매칭이 가능합니다
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // userType을 localStorage에서 복원 (기본값: 'jobseeker')
+    let userType = localStorage.getItem('albi_user_type') || 'jobseeker';
+    let currentJobType = null; // 선택된 업종 (cafe, cvs, restaurant, retail, fastfood)
+    let isLoading = false;
+    let currentStep = 0; // 0: 기본정보, 1: 성향분석, 2: 경험분석, 3: 매칭결과
+    let userProfile = {
+      interests: [],
+      personality: {},
+      experience: {},
+      preferences: {}
+    };
+    let conversationHistory = [];
+    
+    // ⏰ 세션 타이머 (25분 경과 시 알림)
+    let sessionStartTime = Date.now();
+    let expiryWarningShown = false;
+    
+    function checkSessionExpiry() {
+      const elapsed = Date.now() - sessionStartTime;
+      const minutes = Math.floor(elapsed / 60000);
+      
+      // 25분 경과 시 경고
+      if (minutes >= 25 && !expiryWarningShown) {
+        expiryWarningShown = true;
+        showExpiryWarning();
+      }
+    }
+    
+    function showExpiryWarning() {
+      const warningHTML = `
+        <div class="fixed top-4 right-4 z-50 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded shadow-lg max-w-md">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <i class="fas fa-exclamation-triangle text-yellow-400 text-2xl"></i>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm font-medium text-yellow-800">
+                ⏰ 세션 만료 임박!
+              </p>
+              <p class="mt-1 text-sm text-yellow-700">
+                면접 세션이 5분 후 만료됩니다. 빠르게 답변을 완료해주세요.
+              </p>
+            </div>
+            <button onclick="this.parentElement.parentElement.remove()" class="ml-auto">
+              <i class="fas fa-times text-yellow-400"></i>
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', warningHTML);
+      
+      // 3초 후 자동으로 사라지게
+      setTimeout(() => {
+        const warning = document.querySelector('.fixed.top-4.right-4');
+        if (warning) warning.remove();
+      }, 10000);
+    }
+    
+    // 1분마다 세션 만료 체크
+    setInterval(checkSessionExpiry, 60000);
+    
+    // ✨ 적성검사 결과 불러오기
+    let testResult = null;
+    try {
+      const savedTestResult = localStorage.getItem('testResult');
+      if (savedTestResult) {
+        testResult = JSON.parse(savedTestResult);
+        console.log('✅ 적성검사 결과 불러오기 성공:', testResult);
+        
+        // 적성검사 결과를 userProfile에 추가
+        if (testResult) {
+          userProfile.testResult = testResult;
+          userProfile.personality = {
+            type: testResult.resultType?.primary || 'unknown',
+            confidence: testResult.confidence || 0,
+            dimensions: testResult.dimensions || {}
+          };
+        }
+      } else {
+        console.log('⚠️ 적성검사 결과가 없습니다. AI면접만 진행합니다.');
+      }
+    } catch (error) {
+      console.error('❌ 적성검사 결과 불러오기 실패:', error);
+    }
+    
+    // 페이지 로드 시 로그인 체크 및 사용자 정보 표시
+    window.addEventListener('DOMContentLoaded', async function() {
+      // ✅ 버전 확인
+      console.log('🔥 Page Version: v3.1-Auto-Interview (Build: 2026-02-26T18:30:00Z)');
+      
+      // ✨ URL 파라미터 확인 (적성검사 완료 후 진입 여부)
+      const urlParams = new URLSearchParams(window.location.search);
+      const fromTest = urlParams.get('from') === 'test';
+      
+      if (fromTest) {
+        console.log('✅ 적성검사 완료 후 AI 면접 자동 진입!');
+        // URL에서 파라미터 제거 (새로고침 시 재진입 방지)
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+      
+      // 로그인 정보 확인
+      const userId = localStorage.getItem('albi_user_id');
+      const userName = localStorage.getItem('albi_user_name');
+      const savedUserType = localStorage.getItem('albi_user_type');
+      const sessionToken = localStorage.getItem('albi_session_token');
+      
+      // 로그인하지 않은 경우
+      if (!userId || !sessionToken) {
+        // ✨ 적성검사 완료 후 진입 시 회원가입/로그인 유도
+        if (fromTest) {
+          if (confirm('AI 면접을 시작하려면 로그인이 필요합니다.\n\n적성검사 결과는 저장되어 있으니 안심하세요!\n\n로그인 페이지로 이동하시겠어요?')) {
+            // 적성검사 결과를 세션 스토리지에 임시 저장 (로그인 후 복원)
+            const testResult = localStorage.getItem('testResult');
+            if (testResult) {
+              sessionStorage.setItem('pendingTestResult', testResult);
+            }
+            window.location.href = '/login.html?redirect=chat';
+          } else {
+            window.location.href = '/';
+          }
+        } else {
+          if (confirm('로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠어요?')) {
+            window.location.href = '/login.html';
+          } else {
+            window.location.href = '/';
+          }
+        }
+        return;
+      }
+      
+      // userType 자동 설정
+      if (savedUserType) {
+        userType = savedUserType;
+        console.log('[면접 시작] 사용자 타입:', userType);
+      }
+      
+      // ✨ 적성검사 완료 후 진입 시 자동으로 구직자 모드 선택
+      if (fromTest) {
+        console.log('🚀 적성검사 완료 → 구직자 면접 자동 시작');
+        selectInterviewMode('jobseeker');
+        
+        // 환영 메시지 (적성검사 완료 버전)
+        const testResult = localStorage.getItem('testResult');
+        if (testResult) {
+          try {
+            const result = JSON.parse(testResult);
+            const personalityType = result.resultType?.primary || '균형잡힌';
+            addMessage('assistant', `🎉 적성검사 완료를 축하합니다!<br><br>분석 결과, ${userName}님은 <strong>${personalityType}</strong> 성향이시네요!<br><br>이제 AI 면접관과 대화하면서 딱 맞는 일자리를 찾아드릴게요. 편하게 답변해주세요! 😊`);
+          } catch (e) {
+            addMessage('assistant', `🎉 적성검사 완료를 축하합니다, ${userName}님!<br><br>이제 AI 면접관과 대화하면서 딱 맞는 일자리를 찾아드릴게요. 편하게 답변해주세요! 😊`);
+          }
+        } else {
+          addMessage('assistant', `안녕하세요, ${userName}님! AI 면접을 시작하겠습니다. 😊`);
+        }
+      } else {
+        // 일반 진입 시 모드 선택 UI 표시
+        showModeSelector();
+      }
+      
+      // 알림 로드
+      loadNotifications();
+    });
+    
+    // 모드 선택 UI 표시
+    function showModeSelector() {
+      const modeSelector = document.getElementById('modeSelector');
+      const currentModeText = document.getElementById('currentModeText');
+      const savedUserType = localStorage.getItem('albi_user_type');
+      
+      // 현재 계정 타입 표시
+      if (savedUserType === 'employer') {
+        currentModeText.textContent = '구인자 계정';
+      } else {
+        currentModeText.textContent = '구직자 계정';
+      }
+      
+      // 모드 선택 UI 표시
+      modeSelector.style.display = 'block';
+    }
+    
+    // 면접 모드 선택
+    function selectInterviewMode(mode) {
+      console.log('선택된 면접 모드:', mode);
+      
+      // 면접 세션의 userType만 변경 (localStorage는 유지)
+      userType = mode;
+      
+      // UI 업데이트
+      const userIcon = document.getElementById('userIcon');
+      const userNameEl = document.getElementById('userName');
+      const userName = localStorage.getItem('albi_user_name');
+      
+      if (mode === 'employer') {
+        userIcon.className = 'fas fa-building text-orange-500';
+        userNameEl.textContent = `${userName || '사용자'} (구인자 면접)`;
+      } else {
+        userIcon.className = 'fas fa-user text-blue-500';
+        userNameEl.textContent = `${userName || '사용자'} (구직자 면접)`;
+      }
+      
+      // 모드 선택 UI 숨기기
+      document.getElementById('modeSelector').style.display = 'none';
+      
+      // 환영 메시지 업데이트
+      updateWelcomeMessage(mode);
+      
+      // 알림 표시
+      const modeText = mode === 'employer' ? '구인자' : '구직자';
+      addMessage('assistant', `✅ ${modeText} 모드로 면접을 시작합니다!<br><br>이번 면접 결과는 ${modeText} 프로필로 저장되며, 언제든지 다른 모드로 면접을 다시 볼 수 있습니다.`);
+    }
+    
+    // 환영 메시지 업데이트
+    function updateWelcomeMessage(mode) {
+      // 기존 환영 메시지는 유지하고, 추가 안내만 표시
+      console.log('환영 메시지 업데이트:', mode);
+    }
+
+    // AI 질문 시나리오
+    const interviewQuestions = {
+      jobseeker: {
+        basic: [
+          "어떤 업종에 관심이 있으신가요?",
+          "희망 근무 시간대는 언제인가요? (예: 오전, 오후, 야간, 주말)",
+          "어느 지역에서 일하고 싶으신가요?",
+          "희망 시급이나 급여 조건이 있으신가요?"
+        ],
+        personality: [
+          "사람들과 대화하는 것을 좋아하시나요? 아니면 혼자 집중해서 일하는 것을 선호하시나요?",
+          "새로운 일을 배우는 것을 좋아하시나요? 반복적인 업무가 더 편하신가요?",
+          "빠르게 변화하는 환경이 좋으신가요? 안정적인 환경을 선호하시나요?",
+          "체력적으로 활동적인 일과 정적인 일 중 어떤 것이 더 맞으신가요?"
+        ],
+        experience: [
+          "알바 경험이 있으신가요? 있다면 어떤 일을 하셨나요?",
+          "이전 알바에서 가장 좋았던 점과 힘들었던 점은 무엇인가요?",
+          "특별히 잘하시는 것이나 자신 있는 분야가 있나요?",
+          "피하고 싶은 업무나 환경이 있다면 말씀해주세요."
+        ]
+      },
+      employer: {
+        basic: [
+          "어떤 업종의 사업장이신가요?",
+          "필요한 근무 시간대와 요일을 알려주세요.",
+          "제공할 수 있는 시급은 얼마인가요?",
+          "급구인가요? 언제부터 근무 가능한 분을 찾으시나요?"
+        ],
+        personality: [
+          "어떤 성격의 직원과 함께 일하고 싶으신가요?",
+          "매장이나 사업장의 분위기는 어떤가요? (활발함, 조용함, 체계적, 자유로움 등)",
+          "경험이 중요한가요? 아니면 배우려는 의지가 더 중요한가요?",
+          "빠른 적응력과 꼼꼼함 중 무엇이 더 중요한가요?"
+        ],
+        requirements: [
+          "주요 업무 내용을 자세히 설명해주세요.",
+          "신입도 지원 가능한가요? 교육은 제공되나요?",
+          "장기 근무를 원하시나요? 단기도 괜찮으신가요?",
+          "추가로 제공할 수 있는 혜택이 있나요? (식사, 교통비 등)"
+        ]
+      }
+    };
+
+    // ========================================
+    // 📢 알림 기능
+    // ========================================
+    
+    // 알림 로드
+    async function loadNotifications() {
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        if (!sessionToken) return;
+        
+        const response = await fetch('/api/notifications?limit=10', {
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          const { notifications, unreadCount } = data.data;
+          
+          // 배지 업데이트
+          const badge = document.getElementById('notificationBadge');
+          if (unreadCount > 0) {
+            badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+            badge.classList.remove('hidden');
+          } else {
+            badge.classList.add('hidden');
+          }
+          
+          // 알림 목록 렌더링
+          const listContainer = document.getElementById('notificationList');
+          if (notifications.length === 0) {
+            listContainer.innerHTML = `
+              <div class="p-4 text-center text-gray-500 text-sm">
+                <i class="fas fa-bell-slash text-2xl mb-2"></i>
+                <div>알림이 없습니다</div>
+              </div>
+            `;
+          } else {
+            listContainer.innerHTML = notifications.map(notif => renderNotification(notif)).join('');
+          }
+        }
+      } catch (error) {
+        console.error('Load notifications error:', error);
+      }
+    }
+    
+    // 알림 렌더링
+    function renderNotification(notif) {
+      const date = new Date(notif.created_at);
+      const timeAgo = getTimeAgo(date);
+      const unreadClass = notif.is_read ? '' : 'bg-blue-50';
+      
+      const iconMap = {
+        'proposal_received': '📩',
+        'proposal_accepted': '✅',
+        'proposal_rejected': '❌'
+      };
+      
+      const icon = iconMap[notif.type] || '📢';
+      
+      return `
+        <div class="p-3 hover:bg-gray-50 cursor-pointer ${unreadClass}" onclick="handleNotificationClick('${notif.id}', '${notif.link}', ${notif.is_read})">
+          <div class="flex items-start gap-2">
+            <div class="text-2xl">${icon}</div>
+            <div class="flex-1">
+              <div class="font-semibold text-sm text-gray-800">${notif.title}</div>
+              <div class="text-xs text-gray-600 mt-1">${notif.message}</div>
+              <div class="text-xs text-gray-400 mt-1">${timeAgo}</div>
+            </div>
+            ${!notif.is_read ? '<div class="w-2 h-2 bg-orange-500 rounded-full"></div>' : ''}
+          </div>
+        </div>
+      `;
+    }
+    
+    // 시간 경과 표시
+    function getTimeAgo(date) {
+      const now = new Date();
+      const diff = Math.floor((now - date) / 1000); // 초 단위
+      
+      if (diff < 60) return '방금 전';
+      if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
+      if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
+      if (diff < 604800) return `${Math.floor(diff / 86400)}일 전`;
+      return date.toLocaleDateString('ko-KR');
+    }
+    
+    // 알림 드롭다운 토글
+    function toggleNotifications() {
+      const dropdown = document.getElementById('notificationDropdown');
+      const isHidden = dropdown.classList.contains('hidden');
+      
+      if (isHidden) {
+        dropdown.classList.remove('hidden');
+        loadNotifications();
+      } else {
+        dropdown.classList.add('hidden');
+      }
+    }
+    
+    // 알림 클릭 처리
+    async function handleNotificationClick(notifId, link, isRead) {
+      try {
+        // 읽지 않은 알림이면 읽음 처리
+        if (!isRead) {
+          const sessionToken = localStorage.getItem('albi_session_token');
+          await fetch(`/api/notifications/${notifId}/read`, {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${sessionToken}`
+            }
+          });
+        }
+        
+        // 링크로 이동
+        if (link) {
+          window.location.href = link;
+        }
+      } catch (error) {
+        console.error('Handle notification click error:', error);
+      }
+    }
+    
+    // 모두 읽음 처리
+    async function markAllAsRead() {
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        const response = await fetch('/api/notifications/read-all', {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          loadNotifications();
+        }
+      } catch (error) {
+        console.error('Mark all as read error:', error);
+      }
+    }
+    
+    // 페이지 클릭 시 드롭다운 닫기
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('notificationDropdown');
+      const notifButton = e.target.closest('[onclick="toggleNotifications()"]');
+      
+      if (!dropdown.classList.contains('hidden') && !notifButton && !dropdown.contains(e.target)) {
+        dropdown.classList.add('hidden');
+      }
+    });
+
+    // 로그아웃 함수
+    async function logout() {
+      if (!confirm('로그아웃하시겠습니까?')) {
+        return;
+      }
+      
+      const sessionToken = localStorage.getItem('albi_session_token');
+      
+      try {
+        // 서버에 로그아웃 요청
+        if (sessionToken) {
+          await fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ sessionToken })
+          });
+        }
+      } catch (error) {
+        console.error('Logout error:', error);
+      } finally {
+        // localStorage 초기화
+        localStorage.removeItem('albi_user_id');
+        localStorage.removeItem('albi_user_name');
+        localStorage.removeItem('albi_user_type');
+        localStorage.removeItem('albi_session_token');
+        localStorage.removeItem('albi_session_user_id');
+        localStorage.removeItem('albi_remember');
+        
+        // 로그인 페이지로 이동
+        window.location.href = '/login.html';
+      }
+    }
+
+    // ✨ 진행률 표시 함수 (매개변수 추가)
+    function updateProgressBar(step = null) {
+      if (step !== null) {
+        currentStep = step - 1; // 0-indexed로 변환
+      }
+      
+      const steps = document.querySelectorAll('.progress-step');
+      steps.forEach((stepEl, index) => {
+        if (index < currentStep) {
+          stepEl.className = 'progress-step completed flex-1 text-center py-2 rounded-lg text-xs font-bold transition';
+        } else if (index === currentStep) {
+          stepEl.className = 'progress-step active flex-1 text-center py-2 rounded-lg text-xs font-bold transition';
+        } else {
+          stepEl.className = 'progress-step flex-1 text-center py-2 rounded-lg text-xs font-bold bg-gray-200 text-gray-600 transition';
+        }
+      });
+    }
+
+    function getTimeString() {
+      const now = new Date();
+      return now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // ========================================
+    // ✨ 타이핑 효과로 메시지 추가
+    // ========================================
+    function addMessage(role, content, withCard = null) {
+      const chatArea = document.getElementById('chatArea');
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'chat-bubble-enter';
+      
+      if (role === 'user') {
+        messageDiv.innerHTML = `
+          <div class="flex items-start space-x-3 flex-row-reverse space-x-reverse">
+            <div class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center flex-shrink-0">
+              👤
+            </div>
+            <div class="bg-blue-500 text-white p-4 rounded-2xl rounded-tr-none max-w-[70%]">
+              <div>${escapeHtml(content)}</div>
+              <div class="text-xs opacity-75 mt-2">${getTimeString()}</div>
+            </div>
+          </div>
+        `;
+        chatArea.appendChild(messageDiv);
+        chatArea.scrollTop = chatArea.scrollHeight;
+      } else {
+        // AI 메시지는 타이핑 효과
+        messageDiv.innerHTML = `
+          <div class="flex items-start space-x-3">
+            <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+              <img src="/albi-mascot.svg" alt="알비" style="width: 32px; height: 32px;">
+            </div>
+            <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border max-w-[70%]">
+              <div id="typing-content"></div>
+              ${withCard ? withCard : ''}
+              <div class="text-xs text-gray-500 mt-2">${getTimeString()}</div>
+            </div>
+          </div>
+        `;
+        chatArea.appendChild(messageDiv);
+        
+        // 타이핑 효과 시작
+        typeMessage(content, messageDiv.querySelector('#typing-content'));
+      }
+      
+      // 빠른 답변 버튼 숨기기
+      if (role === 'user') {
+        const quickAnswers = document.getElementById('quickAnswers');
+        if (quickAnswers) quickAnswers.remove();
+      }
+    }
+
+    // ========================================
+    // ⌨️ 타이핑 효과 함수
+    // ========================================
+    function typeMessage(content, element) {
+      let index = 0;
+      const speed = 20; // 타이핑 속도 (ms)
+      
+      // HTML 태그를 보존하면서 타이핑
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = content;
+      const textContent = tempDiv.textContent || tempDiv.innerText || '';
+      
+      element.textContent = ''; // 초기화
+      
+      function type() {
+        if (index < textContent.length) {
+          element.textContent += textContent.charAt(index);
+          index++;
+          
+          // 스크롤 자동 이동
+          const chatArea = document.getElementById('chatArea');
+          chatArea.scrollTop = chatArea.scrollHeight;
+          
+          setTimeout(type, speed);
+        } else {
+          // 타이핑 완료 후 HTML 적용 (줄바꿈 등)
+          element.innerHTML = content;
+        }
+      }
+      
+      type();
+    }
+
+    // ========================================
+    // ⏳ 개선된 로딩 표시
+    // ========================================
+    function showLoading() {
+      const chatArea = document.getElementById('chatArea');
+      const loadingDiv = document.createElement('div');
+      loadingDiv.id = 'loading';
+      loadingDiv.className = 'flex items-start space-x-3 chat-bubble-enter';
+      
+      const loadingMessages = [
+        '알비가 생각하고 있어요...',
+        '답변을 준비하고 있어요...',
+        '면접 질문을 고르는 중...',
+        '프로필을 분석하고 있어요...',
+        '잠시만 기다려주세요...'
+      ];
+      const randomMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
+      
+      loadingDiv.innerHTML = `
+        <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+          <img src="/albi-mascot.svg" alt="알비" style="width: 32px; height: 32px;" class="animate-pulse">
+        </div>
+        <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border">
+          <div class="flex items-center space-x-2">
+            <div class="flex space-x-1">
+              <div class="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style="animation-delay: 0ms"></div>
+              <div class="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style="animation-delay: 150ms"></div>
+              <div class="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style="animation-delay: 300ms"></div>
+            </div>
+            <span class="text-gray-600 text-sm">${randomMessage}</span>
+          </div>
+        </div>
+      `;
+      chatArea.appendChild(loadingDiv);
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    function hideLoading() {
+      const loading = document.getElementById('loading');
+      if (loading) loading.remove();
+    }
+
+    // ========================================
+    // 🎯 빠른 답변 버튼 클릭 (업종 자동 감지)
+    // ========================================
+    let isQuickAnswerClick = false; // ✨ UI 버튼 클릭 플래그
+    let interviewResult = null; // ✨ 면접 완료 결과 저장
+    
+    function quickAnswer(answer) {
+      // 업종 매핑
+      const jobTypeMapping = {
+        '카페': 'cafe',
+        '편의점': 'cvs',
+        '음식점': 'restaurant',
+        '매장/판매': 'retail',
+        '패스트푸드': 'fastfood'
+      };
+      
+      // 업종 감지 및 설정
+      if (jobTypeMapping[answer]) {
+        currentJobType = jobTypeMapping[answer];
+        console.log('🎯 Selected job type:', currentJobType, '(' + answer + ')');
+        
+        // 🔥 기존 세션 초기화 (새로운 면접 시작)
+        // localStorage에서 세션 ID 제거
+        localStorage.removeItem('albi_session_user_id');
+        console.log('🔄 Cleared existing session for new job type');
+        
+        // 빠른 답변 버튼 숨기기
+        const quickAnswers = document.getElementById('quickAnswers');
+        if (quickAnswers) {
+          quickAnswers.style.display = 'none';
+        }
+        
+        // ✨ 이것은 UI 버튼 클릭이므로 플래그 설정
+        isQuickAnswerClick = true;
+      }
+      
+      const input = document.getElementById('messageInput');
+      input.value = answer;
+      sendMessage();
+    }
+
+    async function sendMessage() {
+      if (isLoading) return;
+      
+      const input = document.getElementById('messageInput');
+      const message = input.value.trim();
+      if (!message) {
+        alert('메시지를 입력해주세요.');
+        return;
+      }
+      
+      // 사용자 메시지 표시
+      addMessage('user', message);
+      conversationHistory.push({ role: 'user', content: message });
+      input.value = '';
+      isLoading = true;
+      document.getElementById('sendBtn').disabled = true;
+      
+      // 로딩 표시
+      showLoading();
+      
+      try {
+        // 세션 ID 생성 또는 가져오기 (localStorage 사용)
+        let sessionUserId = localStorage.getItem('albi_session_user_id');
+        if (!sessionUserId) {
+          sessionUserId = 'user-' + Date.now() + '-' + Math.random().toString(36).substring(2, 9);
+          localStorage.setItem('albi_session_user_id', sessionUserId);
+          console.log('🆕 New session created:', sessionUserId);
+        } else {
+          console.log('♻️ Existing session:', sessionUserId);
+        }
+        
+        console.log('📤 Sending message:', message);
+        
+        // 🔥 jobType 결정: 메시지에서 자동 감지 또는 currentJobType 사용
+        // 백엔드에서 메시지를 파싱하므로 프론트엔드는 기본값만 전달
+        const selectedJobType = currentJobType || 'cafe';
+        console.log('🎯 Using job type:', selectedJobType, '(백엔드에서 메시지 기반 자동 감지)');
+        
+        // API 호출: AlbiInterviewEngine 또는 EmployerInterviewEngine 사용
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            message, 
+            userId: sessionUserId, // 세션 유지
+            userType: userType, // 'jobseeker' 또는 'employer'
+            jobType: selectedJobType, // 기본값 (백엔드에서 메시지로 override)
+            testResult: testResult, // ✨ 적성검사 결과 전달
+            isQuickAnswer: isQuickAnswerClick // ✨ UI 버튼 클릭 여부 전달
+          })
+        });
+        
+        // 플래그 초기화
+        isQuickAnswerClick = false;
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('📥 Received response:', data);
+        
+        // 🔍 디버그: 전체 응답 구조 확인
+        console.log('🔍 Response structure:', {
+          hasSessionData: !!data.data?.sessionData,
+          hasDebug: !!data.data?.sessionData?.debug,
+          debug: data.data?.sessionData?.debug
+        });
+        
+        // 🔍 디버그: debug 객체 상세 출력
+        if (data.data?.sessionData?.debug) {
+          console.log('🔍 Debug details:', JSON.stringify(data.data.sessionData.debug, null, 2));
+        }
+        
+        // 🔍 디버그: questionSource 확인
+        if (data.data?.sessionData?.debug?.questionSource) {
+          console.log('🎯 Question Source:', data.data.sessionData.debug.questionSource);
+          
+          // 화면에 표시 (개발자용)
+          if (data.data.sessionData.debug.questionSource === 'fallback') {
+            console.warn('⚠️ WARNING: GPT-4 실패, 기본 질문 사용됨!');
+          } else {
+            console.log('✅ SUCCESS: GPT-4 질문 사용됨!');
+          }
+        } else {
+          console.warn('⚠️ WARNING: Debug info not found in response!');
+        }
+        
+        hideLoading();
+        
+        if (data.success && data.data) {
+          // AI 응답 표시 (백엔드에서 온 응답 그대로 사용)
+          console.log('✅ Adding AI message:', data.data.content.substring(0, 50) + '...');
+          addMessage('assistant', data.data.content);
+          conversationHistory.push({ role: 'assistant', content: data.data.content });
+          
+          // 진행 상태 업데이트
+          if (data.data.sessionData) {
+            const session = data.data.sessionData;
+            
+            // 진행률 업데이트: progress는 "3/15" 형태
+            if (session.progress) {
+              const [current, total] = session.progress.split('/').map(Number);
+              const percentage = Math.floor((current / total) * 100);
+              
+              // 단계 업데이트: 0-25% = 기본정보, 26-50% = 성향분석, 51-75% = 경험분석, 76-100% = 매칭결과
+              let step = 1;
+              if (percentage > 75) step = 4;
+              else if (percentage > 50) step = 3;
+              else if (percentage > 25) step = 2;
+              else step = 1;
+              
+              updateProgressBar(step);
+              console.log(`📊 Progress: ${session.progress} (${percentage}%) → Step ${step}`);
+            }
+            
+            // 완료 또는 탈락 처리
+            if (session.status === 'completed') {
+              updateProgressBar(4); // 마지막 단계로
+              
+              // 구직자 면접 완료
+              if (userType === 'jobseeker' && data.data.profile) {
+                console.log('✅ Jobseeker Interview Completed! Final Result:', data.data.profile);
+                
+                // 결과 카드 표시
+                setTimeout(() => {
+                  showResultCard(data.data.profile);
+                }, 500);
+              }
+              // 구인자 면접 완료
+              else if (userType === 'employer' && session.matches) {
+                console.log('✅ Employer Interview Completed! Matched Candidates:', session.matches);
+                
+                // 추천 구직자 카드 표시
+                setTimeout(() => {
+                  showMatchedCandidates(session.matches, session.requirement);
+                }, 500);
+              }
+            } else if (session.status === 'rejected' && data.data.profile) {
+              console.log('❌ Interview Rejected:', data.data.profile);
+              
+              // 탈락 카드 표시
+              setTimeout(() => {
+                showRejectionCard(data.data.profile);
+              }, 500);
+            }
+          }
+        } else {
+          throw new Error(data.error || '응답 처리 실패');
+        }
+        
+      } catch (error) {
+        console.error('❌ Error:', error);
+        console.error('❌ Error details:', {
+          message: error.message,
+          stack: error.stack
+        });
+        hideLoading();
+        
+        // 🔍 에러 상세 정보 표시 (개발/디버깅용)
+        const errorDetails = error.message || '알 수 없는 오류';
+        console.error('🔍 Full error object:', error);
+        
+        // 폴백: 오류 메시지 표시
+        addMessage('assistant', `죄송해요, 일시적인 오류가 발생했어요. 😅<br>잠시 후 다시 시도해주세요!<br><br><small style="color: #999;">오류: ${errorDetails}</small>`);
+      } finally {
+        isLoading = false;
+        document.getElementById('sendBtn').disabled = false;
+        input.focus();
+      }
+    }
+
+    function generateFallbackResponse(message) {
+      const lowerMsg = message.toLowerCase();
+      
+      // 간단한 키워드 기반 응답
+      if (lowerMsg.includes('카페') || lowerMsg.includes('커피')) {
+        currentStep = Math.min(currentStep + 1, 3);
+        updateProgressBar();
+        return '카페 알바에 관심이 있으시군요! ☕<br><br>카페는 고객 응대가 많은 편이에요. <strong>사람들과 대화하는 것을 좋아하시나요?</strong>';
+      } else if (lowerMsg.includes('편의점')) {
+        currentStep = Math.min(currentStep + 1, 3);
+        updateProgressBar();
+        return '편의점 알바에 관심이 있으시군요! 🏪<br><br>편의점은 다양한 업무를 동시에 해야 해요. <strong>멀티태스킹이 가능하신가요?</strong>';
+      } else if (lowerMsg.includes('좋아') || lowerMsg.includes('괜찮') || lowerMsg.includes('가능')) {
+        currentStep = Math.min(currentStep + 1, 3);
+        updateProgressBar();
+        return '좋아요! 그렇다면 <strong>이전에 알바 경험이 있으신가요?</strong> 있다면 어떤 일을 하셨는지 알려주세요.';
+      } else if (lowerMsg.includes('없') || lowerMsg.includes('처음')) {
+        currentStep = Math.min(currentStep + 1, 3);
+        updateProgressBar();
+        return '알겠습니다. 처음이시라면 교육이 잘 되어 있는 곳이 좋겠네요!<br><br><strong>체력적으로 활동적인 일</strong>과 <strong>정적인 일</strong> 중 어떤 것이 더 맞으실 것 같나요?';
+      } else {
+        return '답변 감사합니다! 더 자세히 알려주시면 더 정확한 추천이 가능해요. 😊';
+      }
+    }
+
+    function resetInterview() {
+      if (confirm('면접을 다시 시작하시겠어요? 현재 진행 내용이 모두 초기화됩니다.')) {
+        // localStorage 세션 삭제
+        localStorage.removeItem('albi_session_user_id');
+        console.log('🔄 Session reset');
+        
+        // 페이지 새로고침
+        window.location.reload();
+      }
+    }
+
+    // ========================================
+    // 💼 면접 제안 기능
+    // ========================================
+    
+    // 면접 제안 보내기
+    async function sendProposal(jobseekerId, matchScore, grade, totalScore, requirementId) {
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        
+        if (!sessionToken) {
+          alert('로그인이 필요합니다.');
+          window.location.href = '/login.html';
+          return;
+        }
+        
+        // 확인 다이얼로그
+        const confirmed = confirm(`이 구직자에게 1시간 체험 제안을 보내시겠어요?\n\n등급: ${grade}\n총점: ${totalScore}점\n매칭 점수: ${matchScore}점`);
+        
+        if (!confirmed) {
+          return;
+        }
+        
+        // API 호출
+        const response = await fetch('/api/proposals/send', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionToken}`
+          },
+          body: JSON.stringify({
+            jobseekerId,
+            matchScore,
+            jobseekerGrade: grade,
+            jobseekerScore: totalScore,
+            employerRequirementId: requirementId,
+            message: `안녕하세요! 귀하의 프로필을 보고 저희 매장에 적합하다고 판단하여 1시간 체험 제안을 드립니다. 연락 기다리겠습니다!`
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          alert('✅ ' + result.message + '\n\n구직자가 체험 제안을 수락하면 연락처가 공유됩니다.');
+        } else {
+          alert('❌ ' + (result.error || '체험 제안 전송에 실패했습니다.'));
+        }
+      } catch (error) {
+        console.error('Send proposal error:', error);
+        alert('체험 제안 전송 중 오류가 발생했습니다.');
+      }
+    }
+    
+    // 구직자 상세 정보 보기
+    async function viewCandidateDetail(jobseekerId) {
+      alert('🚧 구직자 상세 정보 기능은 준비 중입니다.');
+      // TODO: 구직자 상세 프로필 모달 표시
+    }
+
+    // ========================================
+    // 🎯 면접 완료 결과 카드 표시
+    // ========================================
+    function showResultCard(profile) {
+      const chatArea = document.getElementById('chatArea');
+      const resultCard = document.createElement('div');
+      resultCard.className = 'chat-bubble-enter mt-4';
+      
+      // ✅ 면접 결과 저장 (맞춤 공고 추천용)
+      interviewResult = {
+        job_type: profile.job_type || currentJobType,
+        final_grade: profile.final_grade || 'C',
+        total_score: profile.total_score || 0,
+        recommendation: profile.recommendation || '검토 필요',
+        strengths: profile.strengths || [],
+        concerns: profile.concerns || [],
+        one_liner: profile.one_liner || '면접 결과를 확인하세요',
+        trial_focus: profile.trial_focus || ''
+      };
+      console.log('✅ Interview result saved:', interviewResult);
+      
+      const grade = profile.final_grade || 'C';
+      const totalScore = profile.total_score || 0;
+      const recommendation = profile.recommendation || '검토 필요';
+      const oneLiner = profile.one_liner || '면접 결과를 확인하세요';
+      
+      // 등급별 색상
+      const gradeColors = {
+        'S': 'bg-purple-500',
+        'A': 'bg-blue-500',
+        'B': 'bg-green-500',
+        'C': 'bg-yellow-500',
+        'F': 'bg-red-500'
+      };
+      const gradeColor = gradeColors[grade] || 'bg-gray-500';
+      
+      resultCard.innerHTML = `
+        <div class="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-2xl shadow-lg border-2 border-orange-300">
+          <div class="text-center mb-4">
+            <div class="text-4xl mb-2">🎉</div>
+            <div class="text-2xl font-bold text-orange-600 mb-2">면접 완료!</div>
+            <div class="text-sm text-gray-600">${oneLiner}</div>
+            <div class="mt-2 bg-green-500 text-white px-4 py-2 rounded-full text-sm font-bold inline-block">
+              🎁 20P 적립 완료!
+            </div>
+          </div>
+          
+          <div class="bg-white p-4 rounded-xl mb-4">
+            <div class="flex items-center justify-between mb-3">
+              <div class="text-lg font-bold">최종 등급</div>
+              <div class="${gradeColor} text-white text-2xl font-bold w-12 h-12 rounded-full flex items-center justify-center">
+                ${grade}
+              </div>
+            </div>
+            <div class="text-sm text-gray-600 mb-2">총점: ${totalScore}점</div>
+            <div class="text-sm font-bold ${recommendation === '추천' ? 'text-green-600' : recommendation === '조건부 추천' ? 'text-yellow-600' : 'text-red-600'}">
+              ${recommendation}
+            </div>
+          </div>
+          
+          ${profile.strengths && profile.strengths.length > 0 ? `
+          <div class="bg-green-50 p-3 rounded-lg mb-3">
+            <div class="font-bold text-green-700 mb-2">✅ 강점</div>
+            <ul class="text-sm text-green-600 space-y-1">
+              ${profile.strengths.map(s => `<li>• ${s}</li>`).join('')}
+            </ul>
+          </div>
+          ` : ''}
+          
+          ${profile.concerns && profile.concerns.length > 0 ? `
+          <div class="bg-yellow-50 p-3 rounded-lg mb-3">
+            <div class="font-bold text-yellow-700 mb-2">⚠️ 주의사항</div>
+            <ul class="text-sm text-yellow-600 space-y-1">
+              ${profile.concerns.map(c => `<li>• ${c}</li>`).join('')}
+            </ul>
+          </div>
+          ` : ''}
+          
+          ${profile.trial_focus ? `
+          <div class="bg-blue-50 p-3 rounded-lg mb-3">
+            <div class="font-bold text-blue-700 mb-2">🎯 1시간 체험 포인트</div>
+            <div class="text-sm text-blue-600">${profile.trial_focus}</div>
+          </div>
+          ` : ''}
+          
+          <!-- 자동매칭 진행 중 알림 -->
+          <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg mb-3 border-2 border-purple-200">
+            <div class="flex items-center mb-2">
+              <div class="animate-pulse mr-2">🤝</div>
+              <div class="font-bold text-purple-700">자동 매칭 진행 중</div>
+            </div>
+            <div class="text-sm text-gray-700 mb-2">
+              알비가 당신의 프로필을 분석하여 최적의 일자리를 찾고 있어요!
+            </div>
+            <div class="text-xs text-gray-600">
+              • 업종: ${profile.job_type === 'cafe' ? '카페' : profile.job_type === 'cvs' ? '편의점' : profile.job_type === 'restaurant' ? '음식점' : profile.job_type === 'retail' ? '매장/판매' : '패스트푸드'}<br>
+              • 등급: ${grade}급 (${totalScore}점)<br>
+              • 추천: ${recommendation}<br>
+              • 매칭 조건을 충족하는 사장님들에게 프로필이 전송됩니다
+            </div>
+          </div>
+          
+          <div class="mt-4 space-y-3">
+            <!-- AI 멘토 상담 버튼 (NEW - 최상단) -->
+            <a href="/mentor-chat" class="block w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-4 rounded-xl font-bold hover:from-blue-600 hover:to-purple-700 transition shadow-lg text-center">
+              <div class="flex items-center justify-center gap-2">
+                <span class="text-xl">🤖</span>
+                <span>AI 멘토와 취업 상담하기</span>
+              </div>
+              <div class="text-xs opacity-80 mt-1">이력서, 자소서, 커리어 고민 모두 상담 가능</div>
+            </a>
+            
+            <!-- 맞춤 공고 보기 버튼 -->
+            <button onclick="goToRecommendedJobs()" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-4 rounded-xl font-bold hover:from-purple-600 hover:to-pink-600 transition shadow-lg flex items-center justify-center gap-2">
+              <span class="text-xl">🎯</span>
+              <span>나에게 맞는 공고 보기</span>
+              <span class="text-sm opacity-80">(AI 추천)</span>
+            </button>
+            
+            <!-- 서브 버튼들 -->
+            <div class="flex gap-2">
+              <button onclick="resetInterview()" class="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition">
+                새로운 면접
+              </button>
+              <button onclick="viewMyProfile()" class="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition">
+                내 프로필
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      chatArea.appendChild(resultCard);
+      chatArea.scrollTop = chatArea.scrollHeight;
+      
+      // 입력 필드 비활성화
+      document.getElementById('messageInput').disabled = true;
+      document.getElementById('sendBtn').disabled = true;
+    }
+
+    // ========================================
+    // ❌ 면접 탈락 카드 표시
+    // ========================================
+    function showRejectionCard(profile) {
+      const chatArea = document.getElementById('chatArea');
+      const resultCard = document.createElement('div');
+      resultCard.className = 'chat-bubble-enter mt-4';
+      
+      // ✅ 면접 결과 저장 (탈락이어도 저장)
+      interviewResult = {
+        job_type: profile.job_type || currentJobType,
+        final_grade: profile.final_grade || 'F',
+        total_score: profile.total_score || 0,
+        recommendation: '비추천',
+        strengths: profile.strengths || [],
+        concerns: profile.concerns || [],
+        one_liner: profile.one_liner || '면접이 종료되었습니다',
+        critical_reason: profile.critical_reason || ''
+      };
+      console.log('❌ Interview result saved (rejected):', interviewResult);
+      
+      const reason = profile.critical_reason || profile.one_liner || '면접이 종료되었습니다';
+      
+      resultCard.innerHTML = `
+        <div class="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-2xl shadow-lg border-2 border-red-300">
+          <div class="text-center mb-4">
+            <div class="text-4xl mb-2">😔</div>
+            <div class="text-2xl font-bold text-red-600 mb-2">면접 종료</div>
+            <div class="text-sm text-gray-600">채용을 권장하지 않습니다</div>
+          </div>
+          
+          <div class="bg-white p-4 rounded-xl mb-4">
+            <div class="font-bold text-gray-700 mb-2">종료 사유</div>
+            <div class="text-sm text-red-600">${reason}</div>
+          </div>
+          
+          <div class="bg-yellow-50 p-3 rounded-lg mb-4">
+            <div class="font-bold text-yellow-700 mb-2">💡 개선 포인트</div>
+            <div class="text-sm text-gray-600">
+              • 질문에 구체적으로 답변해주세요<br>
+              • 긍정적인 태도를 보여주세요<br>
+              • 관련 경험이나 역량을 강조해주세요
+            </div>
+          </div>
+          
+          <div class="mt-4 text-center">
+            <button onclick="resetInterview()" class="bg-orange-500 text-white px-6 py-3 rounded-full font-bold hover:bg-orange-600 transition">
+              다시 도전하기
+            </button>
+          </div>
+        </div>
+      `;
+      
+      chatArea.appendChild(resultCard);
+      chatArea.scrollTop = chatArea.scrollHeight;
+      
+      // 입력 필드 비활성화
+      document.getElementById('messageInput').disabled = true;
+      document.getElementById('sendBtn').disabled = true;
+    }
+
+    // ========================================
+    // 🤝 추천 구직자 카드 표시 (구인자용)
+    // ========================================
+    function showMatchedCandidates(matches, requirement) {
+      const chatArea = document.getElementById('chatArea');
+      const resultCard = document.createElement('div');
+      resultCard.className = 'chat-bubble-enter mt-4';
+      
+      // 업종 한글 변환
+      const jobTypeNames = {
+        'cafe': '카페',
+        'cvs': '편의점',
+        'restaurant': '음식점',
+        'retail': '매장/판매',
+        'fastfood': '패스트푸드'
+      };
+      const jobTypeName = jobTypeNames[requirement.job_type] || requirement.job_type;
+      
+      // 등급별 색상
+      const gradeColors = {
+        'S': 'bg-purple-500',
+        'A': 'bg-blue-500',
+        'B': 'bg-green-500',
+        'C': 'bg-yellow-500',
+        'F': 'bg-red-500'
+      };
+      
+      resultCard.innerHTML = `
+        <div class="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-2xl shadow-lg border-2 border-orange-300">
+          <div class="text-center mb-4">
+            <div class="text-4xl mb-2">🎉</div>
+            <div class="text-2xl font-bold text-orange-600 mb-2">매칭 완료!</div>
+            <div class="text-sm text-gray-600">최적의 구직자를 찾았습니다</div>
+          </div>
+          
+          <!-- 요구사항 요약 -->
+          <div class="bg-white p-4 rounded-xl mb-4">
+            <div class="font-bold text-gray-700 mb-2">📋 요구사항</div>
+            <div class="text-sm text-gray-600 space-y-1">
+              <div>🏢 <strong>${requirement.business_name}</strong></div>
+              <div>📍 ${jobTypeName} • ${requirement.region}</div>
+              <div>💰 시급 ${requirement.hourly_wage.toLocaleString()}원</div>
+              <div>⭐ 최소 ${requirement.min_grade}급 이상</div>
+            </div>
+          </div>
+          
+          <!-- 추천 구직자 목록 -->
+          <div class="space-y-3">
+            <div class="font-bold text-gray-700 mb-2">🤝 추천 구직자 Top ${matches.length}</div>
+            
+            ${matches.length === 0 ? `
+              <div class="bg-yellow-50 p-4 rounded-lg text-center">
+                <div class="text-6xl mb-3">😔</div>
+                <div class="text-yellow-800 font-bold mb-2">조건에 맞는 구직자를 찾지 못했습니다</div>
+                <div class="text-yellow-600 text-sm mb-3">
+                  아직 해당 조건의 구직자가 AI 면접을 완료하지 않았습니다.<br>
+                  요구사항을 조정하거나 잠시 후 다시 시도해주세요.
+                </div>
+                <div class="text-xs text-gray-600 bg-white p-3 rounded-lg">
+                  💡 <strong>팁:</strong> 최소 등급을 낮추거나 시급을 높이면 더 많은 구직자를 매칭할 수 있습니다.
+                </div>
+              </div>
+            ` : matches.map((candidate, index) => {
+              const gradeColor = gradeColors[candidate.final_grade] || 'bg-gray-500';
+              
+              return `
+                <div class="bg-white p-4 rounded-xl shadow-sm border hover:shadow-md transition">
+                  <div class="flex items-start justify-between mb-2">
+                    <div class="flex items-center space-x-3">
+                      <div class="${gradeColor} text-white text-lg font-bold w-10 h-10 rounded-full flex items-center justify-center">
+                        ${candidate.final_grade}
+                      </div>
+                      <div>
+                        <div class="font-bold text-gray-800">후보자 #${index + 1}</div>
+                        <div class="text-xs text-gray-500">총점 ${candidate.total_score}점</div>
+                      </div>
+                    </div>
+                    <div class="text-right">
+                      <div class="text-sm font-bold text-purple-600">매칭 ${candidate.match_score}점</div>
+                      <div class="text-xs text-gray-500">${candidate.recommendation}</div>
+                    </div>
+                  </div>
+                  
+                  <!-- 점수 상세 -->
+                  <div class="grid grid-cols-2 gap-2 mb-2 text-xs">
+                    <div class="bg-blue-50 p-2 rounded">
+                      <div class="text-gray-600">신뢰도</div>
+                      <div class="font-bold text-blue-600">${candidate.reliability_score}/35</div>
+                    </div>
+                    <div class="bg-green-50 p-2 rounded">
+                      <div class="text-gray-600">직무적합도</div>
+                      <div class="font-bold text-green-600">${candidate.job_fit_score}/30</div>
+                    </div>
+                    <div class="bg-purple-50 p-2 rounded">
+                      <div class="text-gray-600">서비스마인드</div>
+                      <div class="font-bold text-purple-600">${candidate.service_mind_score}/25</div>
+                    </div>
+                    <div class="bg-orange-50 p-2 rounded">
+                      <div class="text-gray-600">근무조건</div>
+                      <div class="font-bold text-orange-600">${candidate.logistics_score}/10</div>
+                    </div>
+                  </div>
+                  
+                  <!-- 강점 -->
+                  ${candidate.strengths && candidate.strengths.length > 0 ? `
+                    <div class="bg-green-50 p-2 rounded-lg mb-2">
+                      <div class="text-xs font-bold text-green-700 mb-1">✅ 강점</div>
+                      <div class="text-xs text-green-600">
+                        ${candidate.strengths.slice(0, 2).map(s => `• ${s}`).join('<br>')}
+                      </div>
+                    </div>
+                  ` : ''}
+                  
+                  <!-- 한 줄 평가 -->
+                  <div class="text-xs text-gray-600 italic mt-2">
+                    "${candidate.one_liner}"
+                  </div>
+                  
+                  <!-- 액션 버튼 -->
+                  <div class="mt-3 flex space-x-2">
+                    <button 
+                      class="flex-1 bg-orange-500 text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-orange-600 transition" 
+                      onclick="sendProposal('${candidate.id}', ${candidate.match_score}, '${candidate.final_grade}', ${candidate.total_score}, '${requirement.id}')">
+                      1시간 체험 제안
+                    </button>
+                    <button 
+                      class="flex-1 bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-xs font-bold hover:bg-gray-300 transition" 
+                      onclick="viewCandidateDetail('${candidate.id}')">
+                      상세보기
+                    </button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+          
+          <div class="mt-4 text-center">
+            <button onclick="resetInterview()" class="bg-orange-500 text-white px-6 py-3 rounded-full font-bold hover:bg-orange-600 transition">
+              새로운 구인 시작하기
+            </button>
+          </div>
+        </div>
+      `;
+      
+      chatArea.appendChild(resultCard);
+      chatArea.scrollTop = chatArea.scrollHeight;
+      
+      // 입력 필드 비활성화
+      document.getElementById('messageInput').disabled = true;
+      document.getElementById('sendBtn').disabled = true;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML.replace(/\n/g, '<br>');
+    }
+
+    // ========================================
+    // 맞춤 공고 보기 - AI 추천 페이지로 이동
+    // ========================================
+    function goToRecommendedJobs() {
+      // 면접 결과를 localStorage에 저장 (추천 알고리즘에 사용)
+      if (interviewResult) {
+        localStorage.setItem('lastInterviewResult', JSON.stringify(interviewResult));
+        console.log('면접 결과 저장 완료:', interviewResult);
+      }
+      
+      // 추천 공고 페이지로 이동
+      window.location.href = '/recommended-jobs.html';
+    }
+
+    // ========================================
+    // 내 프로필 보기
+    // ========================================
+    function viewMyProfile() {
+      window.location.href = '/mypage.html';
+    }
+
+    // Enter 키 이벤트
+    document.getElementById('messageInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    // 페이지 로드 시 포커스
+    window.addEventListener('load', function() {
+      document.getElementById('messageInput').focus();
+    });
+  </script>
+  
+  <!-- Service Worker Registration -->
+  <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(reg => console.log('✅ Service Worker registered'))
+        .catch(err => console.error('❌ SW registration failed:', err));
+    });
+  }
+  </script>
+  
+  <div id="footer-container"></div>
+  <script src="/footer.js"></script>
+</body>
+</html>

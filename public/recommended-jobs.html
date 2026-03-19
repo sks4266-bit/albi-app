@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 맞춤 공고 추천 - 알비</title>
+  <meta name="description" content="AI 면접 결과 기반 맞춤 공고 추천">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+  
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .job-card {
+      transition: all 0.3s ease;
+    }
+    
+    .job-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+    
+    .match-badge {
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen">
+  <!-- 헤더 -->
+  <header class="bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-4">
+      <div class="flex items-center justify-between">
+        <!-- 로고 & 제목 -->
+        <div class="flex items-center gap-3">
+          <a href="/" class="flex items-center gap-2 hover:opacity-80 transition">
+            <i class="fas fa-robot text-2xl"></i>
+            <div class="hidden sm:block">
+              <h1 class="text-lg font-bold">Albi</h1>
+              <p class="text-xs text-purple-200">AI 취업 멘토링</p>
+            </div>
+          </a>
+        </div>
+        
+        <div class="flex items-center gap-3">
+          <h2 class="hidden sm:block text-xl font-bold">AI 맞춤 공고</h2>
+          <p class="hidden sm:block text-sm text-purple-200">면접 결과 기반 추천</p>
+        </div>
+        
+        <!-- 네비게이션 버튼 -->
+        <div class="flex items-center gap-2">
+          <a href="/mentor-chat" class="hidden md:flex items-center gap-2 bg-white bg-opacity-20 px-3 py-2 rounded-lg hover:bg-opacity-30 transition text-sm">
+            <i class="fas fa-comments"></i>
+            <span>AI 멘토</span>
+          </a>
+          <a href="/" class="bg-white bg-opacity-20 px-4 py-2 rounded-lg hover:bg-opacity-30 transition">
+            <i class="fas fa-home"></i>
+            <span class="hidden sm:inline ml-2">홈</span>
+          </a>
+          <button onclick="history.back()" class="bg-white bg-opacity-20 px-4 py-2 rounded-lg hover:bg-opacity-30 transition">
+            <i class="fas fa-arrow-left"></i>
+            <span class="hidden sm:inline ml-2">돌아가기</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 로딩 화면 -->
+  <div id="loadingScreen" class="flex items-center justify-center py-20">
+    <div class="text-center max-w-md mx-auto">
+      <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-purple-500 mx-auto mb-4"></div>
+      <p class="text-gray-800 font-bold text-lg mb-2">AI가 당신에게 맞는 공고를 찾고 있어요</p>
+      <p class="text-sm text-gray-500 mb-4">🔍 사람인, 잡코리아, 알바몬 검색 중...</p>
+      <div class="bg-white rounded-lg p-4 shadow-sm">
+        <div class="space-y-2 text-xs text-left">
+          <div class="flex items-center gap-2 text-green-600">
+            <i class="fas fa-check-circle"></i>
+            <span>적성검사 결과 분석 완료</span>
+          </div>
+          <div class="flex items-center gap-2 text-green-600">
+            <i class="fas fa-check-circle"></i>
+            <span>면접 평가 데이터 분석 완료</span>
+          </div>
+          <div class="flex items-center gap-2 text-blue-600">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span>실시간 공고 검색 중...</span>
+          </div>
+          <div class="flex items-center gap-2 text-gray-400">
+            <i class="far fa-circle"></i>
+            <span>매칭 점수 계산 대기 중</span>
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-gray-400 mt-4">⏱️ 평균 3~5초 소요</p>
+    </div>
+  </div>
+
+  <!-- 메인 컨텐츠 -->
+  <main id="mainContent" class="hidden max-w-7xl mx-auto px-4 py-6 flex-1">
+    <!-- AI 분석 결과 카드 -->
+    <div class="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-6 rounded-2xl shadow-lg mb-6 fade-in">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <div class="text-4xl">🤖</div>
+          <div>
+            <h2 class="text-2xl font-bold">AI 분석 완료!</h2>
+            <p class="text-purple-100 text-sm">당신의 프로필을 분석했어요</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="text-3xl font-bold match-badge" id="totalCount">0</div>
+          <div class="text-sm text-purple-100">추천 공고</div>
+        </div>
+      </div>
+      
+      <!-- 분석 결과 -->
+      <div id="analysisText" class="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-sm leading-relaxed whitespace-pre-line">
+        분석 중...
+      </div>
+    </div>
+
+    <!-- 추천 공고 리스트 -->
+    <div id="jobsList" class="space-y-4">
+      <!-- 공고 카드들이 여기에 동적으로 추가됩니다 -->
+    </div>
+
+    <!-- 데이터 없음 -->
+    <div id="noDataMessage" class="hidden text-center py-12">
+      <div class="text-6xl mb-4">😢</div>
+      <p class="text-gray-600 font-medium mb-2">분석할 데이터가 없어요</p>
+      <p class="text-sm text-gray-500 mb-6">적성검사 또는 AI 면접을 먼저 완료해주세요</p>
+      <div class="flex gap-3 justify-center">
+        <button onclick="location.href='/job-test.html'" class="bg-purple-500 text-white px-6 py-3 rounded-lg hover:bg-purple-600 transition">
+          <i class="fas fa-clipboard-list mr-2"></i>적성검사 하기
+        </button>
+        <button onclick="location.href='/chat'" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition">
+          <i class="fas fa-microphone mr-2"></i>AI 면접 하기
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- 푸터 -->
+  <footer class="bg-gray-900 text-gray-300 py-8 mt-auto">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="grid md:grid-cols-4 gap-8 mb-6">
+        <div>
+          <h3 class="text-white font-bold text-lg mb-3 flex items-center gap-2">
+            <i class="fas fa-robot"></i>
+            Albi
+          </h3>
+          <p class="text-sm text-gray-400">AI 기반 취업 준비 플랫폼</p>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold mb-3 text-sm">서비스</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="/job-test.html" class="hover:text-white transition">적성검사</a></li>
+            <li><a href="/chat" class="hover:text-white transition">AI 면접</a></li>
+            <li><a href="/mentor-chat" class="hover:text-white transition">AI 멘토</a></li>
+            <li><a href="/voice-mentor.html" class="hover:text-white transition">음성 멘토링</a></li>
+            <li><a href="/proofread.html" class="hover:text-white transition">AI 교정</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold mb-3 text-sm">관리</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="/portfolio.html" class="hover:text-white transition">포트폴리오</a></li>
+            <li><a href="/assignments.html" class="hover:text-white transition">과제</a></li>
+            <li><a href="/growth-dashboard.html" class="hover:text-white transition">대시보드</a></li>
+            <li><a href="/payment-history.html" class="hover:text-white transition">결제 내역</a></li>
+            <li><a href="/mypage.html" class="hover:text-white transition">마이페이지</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold mb-3 text-sm">고객 지원</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="/payment.html" class="hover:text-white transition">가격 안내</a></li>
+            <li><a href="mailto:albi260128@gmail.com" class="hover:text-white transition">문의하기</a></li>
+            <li><a href="/" class="hover:text-white transition">홈으로</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-gray-800 pt-6 text-center text-xs text-gray-500">
+        <p>&copy; 2026 Albi. All rights reserved. Powered by Cloudflare Pages & AI</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    let testResult = null;
+    let interviewResult = null;
+
+    // 페이지 로드 시 데이터 로드 및 추천 API 호출
+    window.addEventListener('load', async function() {
+      console.log('[Recommended Jobs] Page loaded, fetching data...');
+      
+      // localStorage에서 데이터 가져오기
+      try {
+        const savedTestResult = localStorage.getItem('testResult');
+        const savedInterviewResult = localStorage.getItem('lastInterviewResult');
+        
+        if (savedTestResult) {
+          testResult = JSON.parse(savedTestResult);
+          console.log('[Recommended Jobs] Test result loaded:', testResult);
+        }
+        
+        if (savedInterviewResult) {
+          interviewResult = JSON.parse(savedInterviewResult);
+          console.log('[Recommended Jobs] Interview result loaded:', interviewResult);
+          
+          // 면접 결과를 마이페이지에 저장
+          await saveInterviewResultToMyPage(interviewResult);
+        }
+
+        // 데이터가 하나도 없으면 안내 메시지 표시
+        if (!testResult && !interviewResult) {
+          document.getElementById('loadingScreen').classList.add('hidden');
+          document.getElementById('mainContent').classList.remove('hidden');
+          document.getElementById('noDataMessage').classList.remove('hidden');
+          return;
+        }
+
+        // AI 맞춤 공고 API 호출
+        await fetchJobRecommendations();
+      } catch (error) {
+        console.error('[Recommended Jobs] Error:', error);
+        showError('데이터를 불러오는 중 오류가 발생했습니다.');
+      }
+    });
+
+    /**
+     * 면접 결과를 마이페이지와 연동
+     */
+    async function saveInterviewResultToMyPage(interviewResult) {
+      try {
+        // user_id 가져오기
+        const userId = localStorage.getItem('albi_user_id');
+        if (!userId) {
+          console.log('[Save Interview] No user_id found, skipping save');
+          return;
+        }
+
+        console.log('[Save Interview] Saving to database for user:', userId);
+
+        const response = await axios.post('/api/save-interview-result', {
+          user_id: userId,
+          job_type: interviewResult.job_type || 'general',
+          final_grade: interviewResult.final_grade || 'C',
+          total_score: interviewResult.total_score || 0,
+          recommendation: interviewResult.recommendation || '',
+          strengths: interviewResult.strengths || [],
+          concerns: interviewResult.concerns || [],
+          conversation_data: interviewResult.conversation_data || {}
+        });
+
+        if (response.data.success) {
+          console.log('[Save Interview] ✅ Successfully saved to MyPage:', response.data.data);
+        } else {
+          console.error('[Save Interview] ❌ Failed to save:', response.data.error);
+        }
+      } catch (error) {
+        console.error('[Save Interview] ❌ Error saving to MyPage:', error);
+        // 저장 실패는 무시하고 계속 진행 (사용자 경험에 영향 없음)
+      }
+    }
+
+    async function fetchJobRecommendations() {
+      try {
+        console.log('[Recommended Jobs] Calling API...');
+        
+        const response = await axios.post('/api/job-recommendations', {
+          testResult: testResult,
+          interviewResult: interviewResult
+        });
+
+        console.log('[Recommended Jobs] API response:', response.data);
+
+        if (response.data.success) {
+          displayRecommendations(response.data.data);
+        } else {
+          showError(response.data.error || '추천 공고를 가져오는데 실패했습니다.');
+        }
+      } catch (error) {
+        console.error('[Recommended Jobs] API error:', error);
+        showError('서버와 통신 중 오류가 발생했습니다.');
+      }
+    }
+
+    function displayRecommendations(data) {
+      // 로딩 화면 숨기고 메인 컨텐츠 표시
+      document.getElementById('loadingScreen').classList.add('hidden');
+      document.getElementById('mainContent').classList.remove('hidden');
+
+      // 총 공고 수 표시
+      const totalCount = data.recommendations?.length || 0;
+      document.getElementById('totalCount').textContent = totalCount;
+
+      // AI 분석 텍스트 표시
+      const analysisElement = document.getElementById('analysisText');
+      if (data.analysis) {
+        // \n을 <br>로 변환하여 줄바꿈 표시
+        analysisElement.innerHTML = data.analysis
+          .replace(/\n/g, '<br>')
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // **굵은 글씨** 지원
+        console.log('[Display] Analysis text displayed:', data.analysis);
+      } else {
+        analysisElement.innerHTML = '분석 결과를 불러올 수 없습니다.';
+        console.warn('[Display] No analysis text in response');
+      }
+
+      // 추천 공고 카드 생성
+      const jobsList = document.getElementById('jobsList');
+      jobsList.innerHTML = '';
+
+      if (totalCount === 0) {
+        jobsList.innerHTML = `
+          <div class="text-center py-12 bg-white rounded-2xl shadow">
+            <div class="text-6xl mb-4">🔍</div>
+            <p class="text-gray-600 font-medium">현재 매칭되는 공고가 없어요</p>
+            <p class="text-sm text-gray-500 mt-2">조금 후에 다시 시도해주세요</p>
+          </div>
+        `;
+        return;
+      }
+
+      data.recommendations.forEach((job, index) => {
+        const jobCard = createJobCard(job, index + 1);
+        jobsList.appendChild(jobCard);
+      });
+    }
+
+    function createJobCard(job, rank) {
+      const card = document.createElement('div');
+      card.className = 'job-card bg-white p-6 rounded-2xl shadow hover:shadow-lg fade-in';
+      card.style.animationDelay = `${rank * 0.1}s`;
+
+      // 매칭 점수에 따른 배지 색상
+      let badgeColor = 'bg-green-500';
+      if (job.match_score >= 90) badgeColor = 'bg-purple-500';
+      else if (job.match_score >= 80) badgeColor = 'bg-blue-500';
+      else if (job.match_score >= 70) badgeColor = 'bg-green-500';
+      else badgeColor = 'bg-yellow-500';
+
+      // URL 인코딩 및 이스케이프 처리
+      const encodedUrl = encodeURIComponent(job.url);
+      const safeTitle = job.title.replace(/'/g, "\\'");
+      const safeUrl = job.url.replace(/'/g, "\\'");
+
+      card.innerHTML = `
+        <div class="flex items-start justify-between mb-4">
+          <div class="flex items-start gap-3 flex-1">
+            <div class="text-3xl">
+              ${rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '💼'}
+            </div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-2">
+                <h3 class="text-xl font-bold text-gray-900">${job.title}</h3>
+                <span class="${badgeColor} text-white text-xs px-2 py-1 rounded-full match-badge">
+                  ${job.match_score}% 매칭
+                </span>
+              </div>
+              <div class="flex flex-wrap gap-3 text-sm text-gray-600 mb-3">
+                <span><i class="fas fa-building mr-1"></i>${job.company}</span>
+                <span><i class="fas fa-map-marker-alt mr-1"></i>${job.location}</span>
+                <span class="text-green-600 font-semibold"><i class="fas fa-won-sign mr-1"></i>${job.salary}</span>
+              </div>
+              <a href="${job.url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-xs text-blue-600 hover:text-blue-800 hover:underline">
+                <i class="fas fa-external-link-alt mr-1"></i>${job.source}에서 보기
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 공고 설명 -->
+        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+          <p class="text-sm text-gray-700 mb-3">${job.description}</p>
+          <div class="text-xs text-gray-600">
+            <p class="font-semibold mb-1">📋 지원 자격:</p>
+            <pre class="whitespace-pre-line font-sans">${job.requirements}</pre>
+          </div>
+        </div>
+
+        <!-- 매칭 이유 -->
+        <div class="bg-purple-50 p-4 rounded-lg mb-4">
+          <p class="font-semibold text-purple-900 mb-2 flex items-center">
+            <i class="fas fa-check-circle mr-2"></i>이 공고를 추천하는 이유
+          </p>
+          <ul class="space-y-1">
+            ${job.match_reasons.map(reason => `
+              <li class="text-sm text-purple-700">• ${reason}</li>
+            `).join('')}
+          </ul>
+        </div>
+
+        <!-- 액션 버튼 -->
+        <div class="flex gap-2">
+          <a href="${job.url}" target="_blank" rel="noopener noreferrer" class="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-bold hover:from-purple-600 hover:to-pink-600 transition shadow-lg text-center">
+            <i class="fas fa-external-link-alt mr-2"></i>상세보기 및 지원
+          </a>
+          <button onclick="shareJob('${safeTitle}', '${safeUrl}')" class="bg-gray-100 text-gray-700 px-6 py-3 rounded-xl hover:bg-gray-200 transition">
+            <i class="fas fa-share-alt"></i>
+          </button>
+          <button onclick="saveJob('${safeTitle}', '${safeUrl}')" class="bg-gray-100 text-gray-700 px-6 py-3 rounded-xl hover:bg-gray-200 transition">
+            <i class="far fa-bookmark"></i>
+          </button>
+        </div>
+
+        <div class="mt-3 text-xs text-gray-400 text-center">
+          <i class="fas fa-robot mr-1"></i>AI가 분석한 추천 공고입니다 • 출처: ${job.source}
+        </div>
+      `;
+
+      return card;
+    }
+
+    function applyJob(title, url) {
+      // 실제 공고 사이트로 이동
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
+    function shareJob(title, url) {
+      if (navigator.share) {
+        navigator.share({
+          title: `알비 AI 추천 공고: ${title}`,
+          text: `AI가 나에게 맞춤 추천한 공고를 확인해보세요!`,
+          url: url
+        }).then(() => {
+          console.log('공유 성공');
+        }).catch((error) => {
+          console.log('공유 취소 또는 실패:', error);
+        });
+      } else {
+        // Web Share API를 지원하지 않는 경우 클립보드에 복사
+        navigator.clipboard.writeText(url).then(() => {
+          alert('공고 링크가 클립보드에 복사되었습니다!');
+        }).catch(() => {
+          alert('공유 기능을 지원하지 않는 브라우저입니다.');
+        });
+      }
+    }
+
+    function saveJob(title, url) {
+      // localStorage에 북마크 저장
+      let bookmarks = JSON.parse(localStorage.getItem('jobBookmarks') || '[]');
+      
+      // 중복 체크
+      if (bookmarks.some(bookmark => bookmark.url === url)) {
+        alert(`"${title}"은(는) 이미 저장되어 있습니다.`);
+        return;
+      }
+      
+      bookmarks.push({
+        title: title,
+        url: url,
+        savedAt: new Date().toISOString()
+      });
+      
+      localStorage.setItem('jobBookmarks', JSON.stringify(bookmarks));
+      alert(`"${title}" 공고를 저장했습니다.\n\n마이페이지에서 확인할 수 있습니다.`);
+    }
+
+    function showError(message) {
+      document.getElementById('loadingScreen').classList.add('hidden');
+      document.getElementById('mainContent').classList.remove('hidden');
+      document.getElementById('jobsList').innerHTML = `
+        <div class="text-center py-12 bg-white rounded-2xl shadow">
+          <div class="text-6xl mb-4">⚠️</div>
+          <p class="text-gray-600 font-medium">${message}</p>
+          <button onclick="location.reload()" class="mt-4 bg-purple-500 text-white px-6 py-2 rounded-lg hover:bg-purple-600 transition">
+            다시 시도
+          </button>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 세션 상세 조회 - Albi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .conversation-bubble {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Auth Check -->
+    <script>
+        (function() {
+            const token = localStorage.getItem('admin_token');
+            if (!token) {
+                window.location.href = '/admin-login.html?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+                return;
+            }
+        })();
+    </script>
+
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <div class="mb-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <a href="/session-stats.html" class="text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-arrow-left"></i> 뒤로
+                    </a>
+                    <h1 class="text-3xl font-bold text-gray-800">
+                        <i class="fas fa-search text-blue-600"></i>
+                        세션 상세 조회
+                    </h1>
+                </div>
+                <button onclick="logout()" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm">
+                    <i class="fas fa-sign-out-alt mr-2"></i>로그아웃
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="text-center py-12">
+            <i class="fas fa-spinner fa-spin text-4xl text-blue-600"></i>
+            <p class="mt-4 text-gray-600">세션 데이터 로딩 중...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorState" class="hidden">
+            <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+                <i class="fas fa-exclamation-circle text-4xl text-red-500 mb-4"></i>
+                <p class="text-red-700" id="errorMessage"></p>
+                <button onclick="window.location.reload()" class="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                    다시 시도
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div id="mainContent" class="hidden space-y-6">
+            <!-- Session Info Card -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-info-circle text-blue-600"></i> 세션 정보
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-500">Session ID</p>
+                        <p class="font-mono text-sm" id="sessionId">-</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">User ID</p>
+                        <p class="font-mono text-sm" id="userId">-</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">직무</p>
+                        <p id="jobType">-</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">최종 등급</p>
+                        <p id="finalGrade">-</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">총점</p>
+                        <p id="totalScore">-</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">상태</p>
+                        <p id="status">-</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">질문 수</p>
+                        <p id="questionCount">-</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">소요 시간</p>
+                        <p id="duration">-</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">시작 시각</p>
+                        <p id="startedAt">-</p>
+                    </div>
+                </div>
+                
+                <div class="mt-4 pt-4 border-t">
+                    <p class="text-sm text-gray-500 mb-2">한 줄 평가</p>
+                    <p class="text-gray-800" id="oneLiner">-</p>
+                </div>
+                
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-500 mb-2">강점</p>
+                        <div id="strengths" class="space-y-1"></div>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 mb-2">관심사항</p>
+                        <div id="concerns" class="space-y-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Card -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-chart-bar text-green-600"></i> 통계
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-blue-50 rounded p-4">
+                        <p class="text-sm text-blue-600">총 대화 수</p>
+                        <p class="text-2xl font-bold text-blue-800" id="totalConversations">-</p>
+                    </div>
+                    <div class="bg-green-50 rounded p-4">
+                        <p class="text-sm text-green-600">평균 응답 시간</p>
+                        <p class="text-2xl font-bold text-green-800" id="avgResponseTime">-</p>
+                    </div>
+                    <div class="bg-purple-50 rounded p-4">
+                        <p class="text-sm text-purple-600">평균 점수</p>
+                        <p class="text-2xl font-bold text-purple-800" id="avgScore">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conversations Card -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-comments text-purple-600"></i> 대화 내역
+                </h2>
+                <div id="conversations" class="space-y-4">
+                    <!-- Dynamic content -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const jobTypeNames = {
+            'cafe': '카페',
+            'cvs': '편의점',
+            'restaurant': '음식점',
+            'retail': '소매점',
+            'fastfood': '패스트푸드'
+        };
+
+        async function loadSessionDetail() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('session_id');
+
+            if (!sessionId) {
+                showError('Session ID가 필요합니다');
+                return;
+            }
+
+            const token = localStorage.getItem('admin_token');
+            if (!token) {
+                window.location.href = '/admin-login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/session-detail?session_id=${sessionId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.message || 'Failed to load session');
+                }
+
+                displaySession(result.data);
+
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('mainContent').classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Load error:', error);
+                showError(error.message);
+            }
+        }
+
+        function displaySession(data) {
+            const session = data.session;
+            const conversations = data.conversations;
+            const stats = data.statistics;
+
+            // Session Info
+            document.getElementById('sessionId').textContent = session.session_id;
+            document.getElementById('userId').textContent = session.user_id;
+            document.getElementById('jobType').textContent = jobTypeNames[session.job_type] || session.job_type;
+            
+            const gradeColors = {
+                'S': 'text-yellow-600',
+                'A': 'text-green-600',
+                'B': 'text-blue-600',
+                'C': 'text-purple-600',
+                'D': 'text-red-600'
+            };
+            document.getElementById('finalGrade').innerHTML = 
+                `<span class="${gradeColors[session.final_grade] || 'text-gray-600'} font-bold text-lg">${session.final_grade || '-'}</span>`;
+            
+            document.getElementById('totalScore').textContent = `${session.total_score || 0}점`;
+            
+            const statusColors = {
+                'completed': 'bg-green-100 text-green-800',
+                'rejected': 'bg-red-100 text-red-800',
+                'in_progress': 'bg-blue-100 text-blue-800'
+            };
+            const statusTexts = {
+                'completed': '완료',
+                'rejected': '거부',
+                'in_progress': '진행중'
+            };
+            document.getElementById('status').innerHTML = 
+                `<span class="px-2 py-1 rounded text-xs ${statusColors[session.status] || 'bg-gray-100 text-gray-800'}">${statusTexts[session.status] || session.status}</span>`;
+            
+            document.getElementById('questionCount').textContent = `${session.question_count || 0}개`;
+            
+            const duration = session.total_duration_seconds || 0;
+            const minutes = Math.floor(duration / 60);
+            const seconds = duration % 60;
+            document.getElementById('duration').textContent = `${minutes}분 ${seconds}초`;
+            
+            document.getElementById('startedAt').textContent = new Date(session.started_at).toLocaleString('ko-KR');
+            document.getElementById('oneLiner').textContent = session.one_liner || '-';
+
+            // Strengths
+            const strengthsDiv = document.getElementById('strengths');
+            if (session.strengths && session.strengths.length > 0) {
+                strengthsDiv.innerHTML = session.strengths.map(s => 
+                    `<div class="flex items-center text-sm"><i class="fas fa-check-circle text-green-500 mr-2"></i>${s}</div>`
+                ).join('');
+            } else {
+                strengthsDiv.innerHTML = '<p class="text-gray-400 text-sm">없음</p>';
+            }
+
+            // Concerns
+            const concernsDiv = document.getElementById('concerns');
+            if (session.concerns && session.concerns.length > 0) {
+                concernsDiv.innerHTML = session.concerns.map(c => 
+                    `<div class="flex items-center text-sm"><i class="fas fa-exclamation-circle text-orange-500 mr-2"></i>${c}</div>`
+                ).join('');
+            } else {
+                concernsDiv.innerHTML = '<p class="text-gray-400 text-sm">없음</p>';
+            }
+
+            // Statistics
+            document.getElementById('totalConversations').textContent = stats.total_questions;
+            document.getElementById('avgResponseTime').textContent = `${(stats.avg_response_time / 1000).toFixed(1)}초`;
+            document.getElementById('avgScore').textContent = stats.avg_score;
+
+            // Conversations
+            const conversationsDiv = document.getElementById('conversations');
+            conversationsDiv.innerHTML = conversations.map((conv, index) => `
+                <div class="conversation-bubble border-l-4 ${conv.score >= 5 ? 'border-green-500' : conv.score >= 3 ? 'border-blue-500' : 'border-red-500'} bg-gray-50 p-4 rounded">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="font-bold text-gray-700">Turn ${conv.turn_number}</span>
+                        <span class="text-xs text-gray-500">${new Date(conv.created_at).toLocaleString('ko-KR')}</span>
+                    </div>
+                    
+                    ${conv.question ? `
+                        <div class="mb-3">
+                            <p class="text-xs text-gray-500 mb-1"><i class="fas fa-question-circle text-blue-500"></i> 질문</p>
+                            <p class="text-sm text-gray-700">${conv.question}</p>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="mb-3">
+                        <p class="text-xs text-gray-500 mb-1"><i class="fas fa-user text-green-500"></i> 답변</p>
+                        <p class="text-sm text-gray-800">${conv.answer || '-'}</p>
+                    </div>
+                    
+                    ${conv.ai_response ? `
+                        <div class="mb-3">
+                            <p class="text-xs text-gray-500 mb-1"><i class="fas fa-robot text-purple-500"></i> AI 응답</p>
+                            <p class="text-sm text-gray-700 italic">${conv.ai_response}</p>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="flex items-center justify-between text-xs text-gray-600">
+                        <span><i class="fas fa-star text-yellow-500"></i> 점수: <strong>${conv.score || 0}</strong></span>
+                        <span><i class="fas fa-clock text-blue-500"></i> 응답시간: ${(conv.response_time_ms / 1000).toFixed(1)}초</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showError(message) {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorState').classList.remove('hidden');
+        }
+
+        function logout() {
+            if (confirm('로그아웃 하시겠습니까?')) {
+                localStorage.removeItem('admin_token');
+                window.location.href = '/admin-login.html';
+            }
+        }
+
+        // Load on page load
+        loadSessionDetail();
+    </script>
+</body>
+</html>

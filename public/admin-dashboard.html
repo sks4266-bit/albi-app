@@ -1,0 +1,3005 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>관리자 대시보드 - 알비</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100">
+  <!-- 헤더 -->
+  <nav class="bg-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <i class="fas fa-shield-alt text-purple-600 text-2xl mr-3"></i>
+          <span class="text-xl font-bold text-gray-800">알비 관리자</span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <a href="/test-account.html" target="_blank" 
+             class="text-sm text-gray-600 hover:text-blue-600 transition">
+            <i class="fas fa-vial mr-1"></i>테스트 계정
+          </a>
+          <span class="text-sm text-gray-600" id="adminName"></span>
+          <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm">
+            <i class="fas fa-sign-out-alt mr-1"></i>로그아웃
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 메인 컨테이너 -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- 메뉴 탭 -->
+    <div class="mb-8 border-b border-gray-200">
+      <nav class="flex space-x-8">
+        <button onclick="showTab('dashboard')" class="tab-button active border-b-2 border-purple-600 px-1 pb-4 text-sm font-medium text-purple-600">
+          <i class="fas fa-chart-line mr-2"></i>대시보드
+        </button>
+        <button onclick="showTab('users')" class="tab-button border-b-2 border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+          <i class="fas fa-users mr-2"></i>사용자 관리
+        </button>
+        <button onclick="showTab('points')" class="tab-button border-b-2 border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+          <i class="fas fa-coins mr-2"></i>포인트 관리
+        </button>
+        <button onclick="showTab('store')" class="tab-button border-b-2 border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+          <i class="fas fa-shopping-cart mr-2"></i>스토어 관리
+        </button>
+        <button onclick="showTab('payments')" class="tab-button border-b-2 border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+          <i class="fas fa-credit-card mr-2"></i>결제 관리
+        </button>
+        <button onclick="showTab('subscriptions')" class="tab-button border-b-2 border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+          <i class="fas fa-sync-alt mr-2"></i>구독 관리
+        </button>
+        <button onclick="showTab('taxInvoices')" class="tab-button border-b-2 border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+          <i class="fas fa-file-invoice mr-2"></i>세금계산서
+        </button>
+        <button onclick="showTab('noshowReports')" class="tab-button border-b-2 border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+          <i class="fas fa-exclamation-triangle mr-2"></i>노쇼 관리
+        </button>
+        <button onclick="showTab('sessions')" class="tab-button border-b-2 border-transparent px-1 pb-4 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+          <i class="fas fa-clipboard-check mr-2"></i>면접 세션
+        </button>
+      </nav>
+    </div>
+
+    <!-- 대시보드 탭 -->
+    <div id="dashboardTab" class="tab-content">
+      <!-- 통계 카드 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <!-- 전체 사용자 -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600">전체 사용자</p>
+              <p class="text-3xl font-bold text-gray-800" id="totalUsers">-</p>
+              <p class="text-xs text-green-600 mt-1">
+                <i class="fas fa-arrow-up mr-1"></i>
+                오늘 <span id="todayUsers">0</span>명 가입
+              </p>
+            </div>
+            <div class="bg-blue-100 p-4 rounded-full">
+              <i class="fas fa-users text-blue-600 text-2xl"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- 포인트 잔액 -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600">포인트 잔액</p>
+              <p class="text-3xl font-bold text-gray-800" id="pointsBalance">-</p>
+              <p class="text-xs text-gray-500 mt-1">
+                발행 <span id="pointsIssued">0</span>P
+              </p>
+            </div>
+            <div class="bg-yellow-100 p-4 rounded-full">
+              <i class="fas fa-coins text-yellow-600 text-2xl"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- 스토어 구매 -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600">스토어 구매</p>
+              <p class="text-3xl font-bold text-gray-800" id="totalPurchases">-</p>
+              <p class="text-xs text-green-600 mt-1">
+                <i class="fas fa-arrow-up mr-1"></i>
+                오늘 <span id="todayPurchases">0</span>건
+              </p>
+            </div>
+            <div class="bg-green-100 p-4 rounded-full">
+              <i class="fas fa-shopping-cart text-green-600 text-2xl"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- 추천인 전환율 -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600">추천인 전환율</p>
+              <p class="text-3xl font-bold text-gray-800"><span id="conversionRate">-</span>%</p>
+              <p class="text-xs text-gray-500 mt-1">
+                총 <span id="totalReferrals">0</span>명 추천
+              </p>
+            </div>
+            <div class="bg-purple-100 p-4 rounded-full">
+              <i class="fas fa-user-friends text-purple-600 text-2xl"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- 결제 매출 -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600">결제 매출</p>
+              <p class="text-3xl font-bold text-gray-800"><span id="totalRevenue">-</span></p>
+              <p class="text-xs text-green-600 mt-1">
+                <i class="fas fa-arrow-up mr-1"></i>
+                오늘 <span id="todayRevenue">0</span>원
+              </p>
+            </div>
+            <div class="bg-indigo-100 p-4 rounded-full">
+              <i class="fas fa-credit-card text-indigo-600 text-2xl"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 차트 섹션 -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <!-- 일별 사용자 증가 추이 -->
+        <div class="bg-white rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-800">
+              <i class="fas fa-chart-line text-blue-600 mr-2"></i>일별 사용자 증가 (최근 7일)
+            </h3>
+          </div>
+          <div class="p-6">
+            <canvas id="userGrowthChart" height="250"></canvas>
+          </div>
+        </div>
+
+        <!-- 포인트 발행/사용 추이 -->
+        <div class="bg-white rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-800">
+              <i class="fas fa-coins text-yellow-600 mr-2"></i>포인트 발행/사용 (최근 7일)
+            </h3>
+          </div>
+          <div class="p-6">
+            <canvas id="pointsFlowChart" height="250"></canvas>
+          </div>
+        </div>
+
+        <!-- 월별 매출 -->
+        <div class="bg-white rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-800">
+              <i class="fas fa-chart-bar text-green-600 mr-2"></i>월별 매출 (최근 6개월)
+            </h3>
+          </div>
+          <div class="p-6">
+            <canvas id="monthlyRevenueChart" height="250"></canvas>
+          </div>
+        </div>
+
+        <!-- 거래 유형별 포인트 분포 -->
+        <div class="bg-white rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-800">
+              <i class="fas fa-chart-pie text-purple-600 mr-2"></i>거래 유형별 포인트 분포
+            </h3>
+          </div>
+          <div class="p-6">
+            <canvas id="pointsByTypeChart" height="250"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- 최근 활동 -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+        <!-- 최근 가입자 -->
+        <div class="bg-white rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-800">
+              <i class="fas fa-user-plus text-blue-600 mr-2"></i>최근 가입자
+            </h3>
+          </div>
+          <div class="p-6">
+            <div id="recentUsers" class="space-y-4">
+              <div class="text-center text-gray-500 py-4">
+                <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                <p>로딩 중...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 최근 포인트 거래 -->
+        <div class="bg-white rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-800">
+              <i class="fas fa-exchange-alt text-yellow-600 mr-2"></i>최근 포인트 거래
+            </h3>
+          </div>
+          <div class="p-6">
+            <div id="recentTransactions" class="space-y-4">
+              <div class="text-center text-gray-500 py-4">
+                <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                <p>로딩 중...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 최근 스토어 구매 -->
+        <div class="bg-white rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-800">
+              <i class="fas fa-shopping-bag text-green-600 mr-2"></i>최근 스토어 구매
+            </h3>
+          </div>
+          <div class="p-6">
+            <div id="recentPurchases" class="space-y-4">
+              <div class="text-center text-gray-500 py-4">
+                <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                <p>로딩 중...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 사용자 관리 탭 -->
+    <div id="usersTab" class="tab-content hidden">
+      <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <div class="flex justify-between items-center">
+            <h3 class="text-lg font-semibold text-gray-800">
+              <i class="fas fa-users mr-2"></i>사용자 목록
+            </h3>
+            <div class="flex space-x-4">
+              <input 
+                type="text" 
+                id="userSearch" 
+                placeholder="이름, 전화번호, 이메일 검색..." 
+                class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              >
+              <select id="userTypeFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                <option value="">전체</option>
+                <option value="jobseeker">구직자</option>
+                <option value="employer">구인자</option>
+              </select>
+              <button onclick="searchUsers()" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg">
+                <i class="fas fa-search mr-2"></i>검색
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="p-6">
+          <div id="usersTable">
+            <div class="text-center text-gray-500 py-8">
+              <i class="fas fa-spinner fa-spin text-3xl mb-2"></i>
+              <p>사용자 목록을 불러오는 중...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 포인트 관리 탭 -->
+    <div id="pointsTab" class="tab-content hidden">
+      <!-- 포인트 통계 카드 -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600">총 발행</p>
+              <p class="text-2xl font-bold text-green-600" id="pointsTotalIssued">-</p>
+            </div>
+            <div class="bg-green-100 p-3 rounded-full">
+              <i class="fas fa-arrow-up text-green-600 text-xl"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600">총 사용</p>
+              <p class="text-2xl font-bold text-red-600" id="pointsTotalUsed">-</p>
+            </div>
+            <div class="bg-red-100 p-3 rounded-full">
+              <i class="fas fa-arrow-down text-red-600 text-xl"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600">거래 건수</p>
+              <p class="text-2xl font-bold text-purple-600" id="pointsTotalCount">-</p>
+            </div>
+            <div class="bg-purple-100 p-3 rounded-full">
+              <i class="fas fa-exchange-alt text-purple-600 text-xl"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 필터 및 검색 -->
+      <div class="bg-white rounded-lg shadow mb-6">
+        <div class="p-6 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-800">
+            <i class="fas fa-filter text-purple-600 mr-2"></i>필터
+          </h3>
+        </div>
+        <div class="p-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">거래 유형</label>
+              <select id="pointsTypeFilter" onchange="loadTransactions(1)" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600">
+                <option value="">전체</option>
+                <option value="signup">회원가입</option>
+                <option value="referral">추천 보상</option>
+                <option value="ai_matching">AI 매칭</option>
+                <option value="hire_success">고용 성공</option>
+                <option value="store_purchase">스토어 구매</option>
+                <option value="refund">환불</option>
+                <option value="admin_grant">관리자 지급</option>
+                <option value="admin_deduct">관리자 차감</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">사용자 ID</label>
+              <input type="text" id="pointsUserIdFilter" placeholder="사용자 ID 입력" onchange="loadTransactions(1)" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600">
+            </div>
+            
+            <div class="flex items-end">
+              <button onclick="loadTransactions(1)" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg">
+                <i class="fas fa-search mr-2"></i>검색
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 포인트 거래 내역 테이블 -->
+      <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-800">
+            <i class="fas fa-list text-purple-600 mr-2"></i>포인트 거래 내역
+          </h3>
+        </div>
+        <div class="p-6">
+          <div id="transactionsTable">
+            <div class="text-center text-gray-500 py-8">
+              <i class="fas fa-spinner fa-spin text-3xl mb-2"></i>
+              <p>거래 내역을 불러오는 중...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 스토어 관리 탭 -->
+    <div id="storeTab" class="tab-content hidden">
+      <!-- 스토어 통계 카드 -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600">전체</p>
+              <p class="text-2xl font-bold text-gray-800" id="purchasesTotalCount">-</p>
+            </div>
+            <div class="bg-gray-100 p-3 rounded-full">
+              <i class="fas fa-shopping-cart text-gray-600 text-xl"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600">완료</p>
+              <p class="text-2xl font-bold text-green-600" id="purchasesCompletedCount">-</p>
+            </div>
+            <div class="bg-green-100 p-3 rounded-full">
+              <i class="fas fa-check-circle text-green-600 text-xl"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600">대기</p>
+              <p class="text-2xl font-bold text-yellow-600" id="purchasesPendingCount">-</p>
+            </div>
+            <div class="bg-yellow-100 p-3 rounded-full">
+              <i class="fas fa-clock text-yellow-600 text-xl"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600">총 포인트</p>
+              <p class="text-2xl font-bold text-purple-600" id="purchasesTotalPoints">-</p>
+            </div>
+            <div class="bg-purple-100 p-3 rounded-full">
+              <i class="fas fa-coins text-purple-600 text-xl"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 인기 상품 통계 -->
+      <div class="bg-white rounded-lg shadow mb-6">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-800">
+            <i class="fas fa-star text-yellow-600 mr-2"></i>인기 상품 Top 10
+          </h3>
+        </div>
+        <div class="p-6">
+          <div id="productStatsTable">
+            <div class="text-center text-gray-500 py-4">
+              <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+              <p>통계를 불러오는 중...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 필터 -->
+      <div class="bg-white rounded-lg shadow mb-6">
+        <div class="p-6 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-800">
+            <i class="fas fa-filter text-purple-600 mr-2"></i>필터
+          </h3>
+        </div>
+        <div class="p-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">상태</label>
+              <select id="purchasesStatusFilter" onchange="loadPurchases(1)" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600">
+                <option value="">전체</option>
+                <option value="completed">완료</option>
+                <option value="pending">대기</option>
+                <option value="cancelled">취소</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">사용자 ID</label>
+              <input type="text" id="purchasesUserIdFilter" placeholder="사용자 ID 입력" onchange="loadPurchases(1)" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600">
+            </div>
+            
+            <div class="flex items-end">
+              <button onclick="loadPurchases(1)" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg">
+                <i class="fas fa-search mr-2"></i>검색
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 구매 내역 테이블 -->
+      <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-800">
+            <i class="fas fa-list text-purple-600 mr-2"></i>구매 내역
+          </h3>
+        </div>
+        <div class="p-6">
+          <div id="purchasesTable">
+            <div class="text-center text-gray-500 py-8">
+              <i class="fas fa-spinner fa-spin text-3xl mb-2"></i>
+              <p>구매 내역을 불러오는 중...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 결제 관리 탭 -->
+    <div id="paymentsTab" class="tab-content hidden">
+      <!-- 결제 통계 카드 -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600">총 결제</p>
+              <p class="text-2xl font-bold text-gray-800" id="paymentsTotalCount">-</p>
+            </div>
+            <div class="bg-gray-100 p-3 rounded-full">
+              <i class="fas fa-receipt text-gray-600 text-xl"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600">완료</p>
+              <p class="text-2xl font-bold text-green-600" id="paymentsCompletedCount">-</p>
+            </div>
+            <div class="bg-green-100 p-3 rounded-full">
+              <i class="fas fa-check-circle text-green-600 text-xl"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600">대기</p>
+              <p class="text-2xl font-bold text-yellow-600" id="paymentsPendingCount">-</p>
+            </div>
+            <div class="bg-yellow-100 p-3 rounded-full">
+              <i class="fas fa-clock text-yellow-600 text-xl"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600">총 매출</p>
+              <p class="text-2xl font-bold text-indigo-600" id="paymentsTotalRevenue">-</p>
+            </div>
+            <div class="bg-indigo-100 p-3 rounded-full">
+              <i class="fas fa-won-sign text-indigo-600 text-xl"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 월별 결제 추이 차트 -->
+      <div class="bg-white rounded-lg shadow mb-6">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-800">
+              <i class="fas fa-chart-line text-indigo-600 mr-2"></i>월별 결제 추이
+            </h3>
+            <div class="flex gap-2">
+              <button onclick="loadPaymentStats('amount')" id="amountBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm">
+                매출액
+              </button>
+              <button onclick="loadPaymentStats('count')" id="countBtn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm">
+                건수
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="p-6">
+          <div class="bg-white rounded-lg" style="height: 300px;">
+            <canvas id="paymentChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- 결제 수단별 통계 -->
+      <div class="bg-white rounded-lg shadow mb-6">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-800">
+            <i class="fas fa-chart-pie text-indigo-600 mr-2"></i>결제 수단별 통계
+          </h3>
+        </div>
+        <div class="p-6">
+          <div id="methodStatsTable">
+            <div class="text-center text-gray-500 py-4">
+              <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+              <p>통계를 불러오는 중...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 필터 -->
+      <div class="bg-white rounded-lg shadow mb-6">
+        <div class="p-6 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-800">
+            <i class="fas fa-filter text-indigo-600 mr-2"></i>필터
+          </h3>
+        </div>
+        <div class="p-6">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">결제 상태</label>
+              <select id="paymentsStatusFilter" onchange="loadPayments(1)" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600">
+                <option value="">전체</option>
+                <option value="completed">완료</option>
+                <option value="pending">대기</option>
+                <option value="processing">처리중</option>
+                <option value="failed">실패</option>
+                <option value="cancelled">취소</option>
+                <option value="refunded">환불</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">결제 수단</label>
+              <select id="paymentsMethodFilter" onchange="loadPayments(1)" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600">
+                <option value="">전체</option>
+                <option value="card">카드</option>
+                <option value="transfer">계좌이체</option>
+                <option value="kakaopay">카카오페이</option>
+                <option value="naverpay">네이버페이</option>
+                <option value="tosspay">토스페이</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">사용자 ID</label>
+              <input type="text" id="paymentsUserIdFilter" placeholder="사용자 ID 입력" onchange="loadPayments(1)" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600">
+            </div>
+            
+            <div class="flex items-end">
+              <button onclick="loadPayments(1)" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg">
+                <i class="fas fa-search mr-2"></i>검색
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 결제 내역 테이블 -->
+      <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-800">
+            <i class="fas fa-list text-indigo-600 mr-2"></i>결제 내역
+          </h3>
+        </div>
+        <div class="p-6">
+          <div id="paymentsTable">
+            <div class="text-center text-gray-500 py-8">
+              <i class="fas fa-spinner fa-spin text-3xl mb-2"></i>
+              <p>결제 내역을 불러오는 중...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 세금계산서 관리 탭 -->
+    <div id="taxInvoicesTab" class="tab-content hidden">
+      <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-xl font-semibold text-gray-800">
+            <i class="fas fa-file-invoice text-blue-600 mr-2"></i>세금계산서 요청 관리
+          </h2>
+        </div>
+
+        <!-- 통계 카드 -->
+        <div class="p-6 border-b border-gray-200">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-yellow-50 rounded-lg p-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-yellow-700">대기 중</p>
+                  <p class="text-2xl font-bold text-yellow-800" id="taxInvoicesPending">0</p>
+                </div>
+                <i class="fas fa-clock text-yellow-600 text-2xl"></i>
+              </div>
+            </div>
+            <div class="bg-green-50 rounded-lg p-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-green-700">발행 완료</p>
+                  <p class="text-2xl font-bold text-green-800" id="taxInvoicesIssued">0</p>
+                </div>
+                <i class="fas fa-check-circle text-green-600 text-2xl"></i>
+              </div>
+            </div>
+            <div class="bg-red-50 rounded-lg p-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-red-700">거절됨</p>
+                  <p class="text-2xl font-bold text-red-800" id="taxInvoicesRejected">0</p>
+                </div>
+                <i class="fas fa-times-circle text-red-600 text-2xl"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 월별/분기별 통계 차트 -->
+        <div class="p-6 border-b border-gray-200">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">
+              <i class="fas fa-chart-line text-blue-600 mr-2"></i>발급 추이
+            </h3>
+            <div class="flex gap-2">
+              <button onclick="loadTaxInvoiceStats('monthly')" id="monthlyBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm">
+                월별
+              </button>
+              <button onclick="loadTaxInvoiceStats('quarterly')" id="quarterlyBtn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm">
+                분기별
+              </button>
+            </div>
+          </div>
+          <div class="bg-white rounded-lg" style="height: 300px;">
+            <canvas id="taxInvoiceChart"></canvas>
+          </div>
+        </div>
+
+        <!-- 필터 및 검색 -->
+        <div class="p-6 border-b border-gray-200">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- 상태 필터 -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">상태</label>
+              <select id="taxInvoiceStatusFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option value="">전체 상태</option>
+                <option value="pending">대기 중</option>
+                <option value="issued">발행 완료</option>
+                <option value="rejected">거절됨</option>
+              </select>
+            </div>
+            
+            <!-- 회사명 검색 -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">회사명</label>
+              <input 
+                type="text" 
+                id="taxInvoiceSearchCompany" 
+                placeholder="회사명으로 검색" 
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            
+            <!-- 사업자번호 검색 -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">사업자번호</label>
+              <input 
+                type="text" 
+                id="taxInvoiceSearchBusinessNumber" 
+                placeholder="000-00-00000" 
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            
+            <!-- 검색 버튼 -->
+            <div class="flex items-end gap-2">
+              <button onclick="loadTaxInvoices(1)" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                <i class="fas fa-search mr-2"></i>검색
+              </button>
+              <button onclick="exportTaxInvoicesToExcel()" class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                <i class="fas fa-file-excel mr-2"></i>엑셀 다운로드
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 테이블 -->
+        <div class="p-6">
+          <div id="taxInvoicesTable">
+            <div class="text-center text-gray-500 py-8">
+              <i class="fas fa-spinner fa-spin text-3xl mb-2"></i>
+              <p>세금계산서 요청 목록을 불러오는 중...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 노쇼 관리 탭 -->
+    <div id="noshowReportsTab" class="tab-content hidden">
+      <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-xl font-semibold text-gray-800">
+            <i class="fas fa-exclamation-triangle text-red-600 mr-2"></i>노쇼 신고 관리
+          </h2>
+        </div>
+
+        <!-- 통계 카드 -->
+        <div class="p-6 border-b border-gray-200">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-yellow-50 rounded-lg p-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-yellow-700">검토 대기</p>
+                  <p class="text-2xl font-bold text-yellow-800" id="noshowPending">0</p>
+                </div>
+                <i class="fas fa-clock text-yellow-600 text-2xl"></i>
+              </div>
+            </div>
+            <div class="bg-green-50 rounded-lg p-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-green-700">승인됨</p>
+                  <p class="text-2xl font-bold text-green-800" id="noshowApproved">0</p>
+                </div>
+                <i class="fas fa-check-circle text-green-600 text-2xl"></i>
+              </div>
+            </div>
+            <div class="bg-red-50 rounded-lg p-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-red-700">거절됨</p>
+                  <p class="text-2xl font-bold text-red-800" id="noshowRejected">0</p>
+                </div>
+                <i class="fas fa-times-circle text-red-600 text-2xl"></i>
+              </div>
+            </div>
+            <div class="bg-blue-50 rounded-lg p-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-blue-700">전체</p>
+                  <p class="text-2xl font-bold text-blue-800" id="noshowTotal">0</p>
+                </div>
+                <i class="fas fa-list text-blue-600 text-2xl"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 필터 및 검색 -->
+        <div class="p-6 border-b border-gray-200">
+          <div class="flex flex-wrap gap-4">
+            <select id="noshowStatusFilter" onchange="loadNoshowReports()" class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+              <option value="">모든 상태</option>
+              <option value="pending">검토 대기</option>
+              <option value="approved">승인됨</option>
+              <option value="rejected">거절됨</option>
+            </select>
+            <button onclick="loadNoshowReports()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition flex items-center">
+              <i class="fas fa-sync-alt mr-2"></i>새로고침
+            </button>
+          </div>
+        </div>
+
+        <!-- 테이블 -->
+        <div class="p-6">
+          <div id="noshowReportsTable">
+            <div class="text-center text-gray-500 py-8">
+              <i class="fas fa-spinner fa-spin text-3xl mb-2"></i>
+              <p>노쇼 신고 목록을 불러오는 중...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 면접 세션 통계 탭 -->
+    <div id="sessionsTab" class="tab-content hidden">
+      <div class="bg-white rounded-lg shadow mb-6">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <div class="flex justify-between items-center">
+            <h2 class="text-xl font-semibold text-gray-800">
+              <i class="fas fa-clipboard-check text-blue-600 mr-2"></i>면접 세션 통계
+            </h2>
+            <button onclick="loadSessionStats()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition flex items-center text-sm">
+              <i class="fas fa-sync-alt mr-2"></i>새로고침
+            </button>
+          </div>
+        </div>
+
+        <!-- 실시간 세션 통계 -->
+        <div class="p-6 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">
+            <i class="fas fa-clock mr-2"></i>실시간 활성 세션
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-blue-50 rounded-lg p-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-blue-700">현재 활성 세션</p>
+                  <p class="text-3xl font-bold text-blue-800" id="activeSessions">0</p>
+                </div>
+                <i class="fas fa-users text-blue-600 text-3xl"></i>
+              </div>
+            </div>
+            <div class="bg-green-50 rounded-lg p-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-green-700">최근 1시간 생성</p>
+                  <p class="text-3xl font-bold text-green-800" id="recentSessions">0</p>
+                </div>
+                <i class="fas fa-plus-circle text-green-600 text-3xl"></i>
+              </div>
+            </div>
+            <div class="bg-purple-50 rounded-lg p-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-purple-700">24시간 완료</p>
+                  <p class="text-3xl font-bold text-purple-800" id="completedInterviews">0</p>
+                </div>
+                <i class="fas fa-check-circle text-purple-600 text-3xl"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 직무별 세션 분포 -->
+        <div class="p-6 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">
+            <i class="fas fa-briefcase mr-2"></i>직무별 세션 분포
+          </h3>
+          <div id="jobTypeDistribution" class="space-y-2">
+            <div class="text-center text-gray-500 py-4">
+              <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+              <p>데이터 로딩 중...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 등급별 분포 (24시간) -->
+        <div class="p-6 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">
+            <i class="fas fa-award mr-2"></i>등급별 분포 (최근 24시간)
+          </h3>
+          <div class="flex items-center justify-center mb-4">
+            <div class="text-center">
+              <p class="text-sm text-gray-600">평균 면접 시간</p>
+              <p class="text-2xl font-bold text-gray-800" id="avgDuration">-</p>
+            </div>
+          </div>
+          <div id="gradeDistribution" class="grid grid-cols-5 gap-4">
+            <div class="text-center text-gray-500 py-4">
+              <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+              <p>데이터 로딩 중...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 최근 활성 세션 목록 -->
+        <div class="p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">
+            <i class="fas fa-list mr-2"></i>최근 활성 세션 (상위 10개)
+          </h3>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">세션 ID</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">직무</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">진행도</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">생성 시간</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">마지막 활동</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">만료 시간</th>
+                </tr>
+              </thead>
+              <tbody id="recentSessionsTable" class="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+                    <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                    <p>데이터 로딩 중...</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 구독 관리 탭 -->
+    <div id="subscriptionsTab" class="tab-content hidden">
+      <div class="bg-white rounded-lg shadow">
+        <!-- 구독 통계 카드 -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 p-6 border-b border-gray-200">
+          <div class="text-center">
+            <p class="text-sm text-gray-600 mb-1">활성 구독</p>
+            <p class="text-3xl font-bold text-green-600" id="activeSubscriptions">-</p>
+          </div>
+          <div class="text-center">
+            <p class="text-sm text-gray-600 mb-1">취소된 구독</p>
+            <p class="text-3xl font-bold text-red-600" id="cancelledSubscriptions">-</p>
+          </div>
+          <div class="text-center">
+            <p class="text-sm text-gray-600 mb-1">월 구독 수익</p>
+            <p class="text-3xl font-bold text-blue-600" id="monthlyRevenue">-</p>
+          </div>
+          <div class="text-center">
+            <p class="text-sm text-gray-600 mb-1">환불 요청</p>
+            <p class="text-3xl font-bold text-orange-600" id="pendingRefunds">-</p>
+          </div>
+        </div>
+
+        <!-- 구독 목록 -->
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">
+              <i class="fas fa-list mr-2"></i>전체 구독 목록
+            </h3>
+            <button onclick="loadSubscriptions()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">
+              <i class="fas fa-sync mr-1"></i>새로고침
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">사용자</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">플랜</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">금액</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">상태</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">시작일</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">다음 결제일</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">액션</th>
+                </tr>
+              </thead>
+              <tbody id="subscriptionsTable" class="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td colspan="7" class="px-4 py-8 text-center text-gray-500">
+                    <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                    <p>데이터 로딩 중...</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 환불 요청 목록 -->
+        <div class="p-6 border-t border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">
+            <i class="fas fa-undo text-orange-600 mr-2"></i>환불 요청 목록
+          </h3>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">사용자</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">유형</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">환불액</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">사유</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">상태</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">요청일</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">액션</th>
+                </tr>
+              </thead>
+              <tbody id="refundsTable" class="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td colspan="7" class="px-4 py-8 text-center text-gray-500">
+                    <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                    <p>데이터 로딩 중...</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 인증 확인 (admin_token으로 통일)
+    const adminToken = localStorage.getItem('admin_token');
+    if (!adminToken) {
+      window.location.href = '/admin-login.html';
+    }
+
+    // 관리자 이름 표시
+    const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
+    document.getElementById('adminName').textContent = adminUser.username || 'Admin';
+
+    // 로그아웃
+    function logout() {
+      localStorage.removeItem('admin_token');
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminUser');
+      window.location.href = '/admin-login.html';
+    }
+
+    // 탭 전환
+    function showTab(tabName) {
+      // 모든 탭 숨기기
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.add('hidden');
+      });
+      
+      // 모든 탭 버튼 비활성화
+      document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active', 'border-purple-600', 'text-purple-600');
+        btn.classList.add('border-transparent', 'text-gray-500');
+      });
+      
+      // 선택한 탭 표시
+      document.getElementById(tabName + 'Tab').classList.remove('hidden');
+      
+      // 선택한 탭 버튼 활성화
+      event.target.closest('.tab-button').classList.add('active', 'border-purple-600', 'text-purple-600');
+      event.target.closest('.tab-button').classList.remove('border-transparent', 'text-gray-500');
+      
+      // 탭별 데이터 로드
+      if (tabName === 'users') {
+        loadUsers();
+      } else if (tabName === 'points') {
+        loadTransactions();
+      } else if (tabName === 'store') {
+        loadPurchases();
+      } else if (tabName === 'payments') {
+        loadPayments();
+        loadPaymentStats('amount');
+      } else if (tabName === 'subscriptions') {
+        loadSubscriptions();
+      } else if (tabName === 'taxInvoices') {
+        loadTaxInvoices();
+        loadTaxInvoiceStats('monthly');
+      } else if (tabName === 'noshowReports') {
+        loadNoshowReports();
+      } else if (tabName === 'sessions') {
+        loadSessionStats();
+      }
+    }
+
+    // 통계 데이터 로드
+    async function loadStats() {
+      try {
+        const response = await fetch('/api/admin/stats', {
+          headers: {
+            'Authorization': `Bearer ${adminToken}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // 통계 카드 업데이트
+          document.getElementById('totalUsers').textContent = data.stats.users.total.toLocaleString();
+          document.getElementById('todayUsers').textContent = data.stats.users.today;
+          document.getElementById('pointsBalance').textContent = data.stats.points.balance.toLocaleString() + 'P';
+          document.getElementById('pointsIssued').textContent = data.stats.points.totalIssued.toLocaleString();
+          document.getElementById('totalPurchases').textContent = data.stats.store.totalPurchases.toLocaleString();
+          document.getElementById('todayPurchases').textContent = data.stats.store.todayPurchases;
+          document.getElementById('conversionRate').textContent = data.stats.referrals.conversionRate;
+          document.getElementById('totalReferrals').textContent = data.stats.referrals.total;
+
+          // 결제 통계
+          if (data.stats.payments) {
+            document.getElementById('totalRevenue').textContent = data.stats.payments.totalRevenue.toLocaleString() + '원';
+            document.getElementById('todayRevenue').textContent = data.stats.payments.todayPayments || 0;
+          }
+
+          // 최근 가입자
+          const recentUsers = data.recentActivity.users;
+          const recentUsersHtml = recentUsers.length > 0 
+            ? recentUsers.map(user => `
+                <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                  <div>
+                    <p class="font-medium text-gray-800">${user.name}</p>
+                    <p class="text-xs text-gray-500">${user.user_type === 'jobseeker' ? '구직자' : '구인자'} · ${user.points}P</p>
+                  </div>
+                  <span class="text-xs text-gray-400">${formatDate(user.created_at)}</span>
+                </div>
+              `).join('')
+            : '<p class="text-center text-gray-500">데이터가 없습니다</p>';
+          document.getElementById('recentUsers').innerHTML = recentUsersHtml;
+
+          // 최근 포인트 거래
+          const recentTransactions = data.stats.recentTransactions;
+          const recentTransactionsHtml = recentTransactions.length > 0
+            ? recentTransactions.map(tx => `
+                <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                  <div>
+                    <p class="font-medium text-gray-800">${tx.user_name || 'Unknown'}</p>
+                    <p class="text-xs text-gray-500">${tx.description || tx.type}</p>
+                  </div>
+                  <span class="text-sm font-semibold ${tx.amount > 0 ? 'text-green-600' : 'text-red-600'}">
+                    ${tx.amount > 0 ? '+' : ''}${tx.amount}P
+                  </span>
+                </div>
+              `).join('')
+            : '<p class="text-center text-gray-500">데이터가 없습니다</p>';
+          document.getElementById('recentTransactions').innerHTML = recentTransactionsHtml;
+
+          // 최근 스토어 구매
+          const recentPurchases = data.stats.recentPurchases;
+          const recentPurchasesHtml = recentPurchases.length > 0
+            ? recentPurchases.map(purchase => `
+                <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                  <div>
+                    <p class="font-medium text-gray-800">${purchase.user_name || 'Unknown'}</p>
+                    <p class="text-xs text-gray-500">${purchase.product_name}</p>
+                  </div>
+                  <span class="text-sm font-semibold text-purple-600">${purchase.product_price}P</span>
+                </div>
+              `).join('')
+            : '<p class="text-center text-gray-500">데이터가 없습니다</p>';
+          document.getElementById('recentPurchases').innerHTML = recentPurchasesHtml;
+        }
+      } catch (error) {
+        console.error('통계 로드 오류:', error);
+      }
+    }
+
+    // 사용자 목록 로드
+    async function loadUsers(page = 1) {
+      const search = document.getElementById('userSearch')?.value || '';
+      const userType = document.getElementById('userTypeFilter')?.value || '';
+
+      try {
+        const response = await fetch(`/api/admin/users?page=${page}&limit=20&search=${search}&userType=${userType}`, {
+          headers: {
+            'Authorization': `Bearer ${adminToken}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          const users = data.users;
+          const usersHtml = users.length > 0
+            ? `
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">이름</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">전화번호</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">유형</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">포인트</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">가입일</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">관리</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  ${users.map(user => `
+                    <tr>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${user.name}</td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${user.phone}</td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${user.user_type === 'jobseeker' ? '구직자' : '구인자'}</td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">${user.points}P</td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatDate(user.created_at)}</td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <button onclick="viewUser('${user.id}')" class="text-purple-600 hover:text-purple-900 mr-3">
+                          <i class="fas fa-eye"></i> 상세
+                        </button>
+                        <button onclick="adjustPoints('${user.id}', '${user.name}')" class="text-green-600 hover:text-green-900">
+                          <i class="fas fa-coins"></i> 포인트
+                        </button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+              <div class="mt-4 flex justify-between items-center">
+                <p class="text-sm text-gray-600">
+                  총 ${data.pagination.total}명 (${data.pagination.page}/${data.pagination.totalPages} 페이지)
+                </p>
+                <div class="space-x-2">
+                  ${data.pagination.page > 1 ? `<button onclick="loadUsers(${data.pagination.page - 1})" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">이전</button>` : ''}
+                  ${data.pagination.page < data.pagination.totalPages ? `<button onclick="loadUsers(${data.pagination.page + 1})" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">다음</button>` : ''}
+                </div>
+              </div>
+            `
+            : '<p class="text-center text-gray-500 py-8">사용자가 없습니다</p>';
+
+          document.getElementById('usersTable').innerHTML = usersHtml;
+        }
+      } catch (error) {
+        console.error('사용자 목록 로드 오류:', error);
+      }
+    }
+
+    // 사용자 검색
+    function searchUsers() {
+      loadUsers(1);
+    }
+
+    // 사용자 상세 보기
+    function viewUser(userId) {
+      window.location.href = `/admin-user-detail.html?id=${userId}`;
+    }
+
+    // 포인트 조정
+    function adjustPoints(userId, userName) {
+      const amount = prompt(`${userName}에게 지급할 포인트를 입력하세요 (차감은 음수로 입력):`);
+      if (amount === null) return;
+
+      const points = parseInt(amount);
+      if (isNaN(points) || points === 0) {
+        alert('올바른 포인트 금액을 입력해주세요.');
+        return;
+      }
+
+      const reason = prompt('지급/차감 사유를 입력하세요:');
+      if (!reason) {
+        alert('사유를 입력해주세요.');
+        return;
+      }
+
+      fetch(`/api/admin/users/${userId}/points`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`
+        },
+        body: JSON.stringify({ amount: points, reason })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert(`포인트가 ${points > 0 ? '지급' : '차감'}되었습니다.\n새 잔액: ${data.user.newPoints}P`);
+          loadUsers();
+        } else {
+          alert('오류: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('포인트 조정 오류:', error);
+        alert('포인트 조정 중 오류가 발생했습니다.');
+      });
+    }
+
+    // 날짜 포맷
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diff = now - date;
+      const seconds = Math.floor(diff / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const hours = Math.floor(minutes / 60);
+      const days = Math.floor(hours / 24);
+
+      if (days > 0) return `${days}일 전`;
+      if (hours > 0) return `${hours}시간 전`;
+      if (minutes > 0) return `${minutes}분 전`;
+      return '방금 전';
+    }
+
+    // 포인트 거래내역 로드
+    async function loadTransactions(page = 1) {
+      const type = document.getElementById('pointsTypeFilter')?.value || '';
+      const userId = document.getElementById('pointsUserIdFilter')?.value || '';
+
+      try {
+        const response = await fetch(`/api/admin/transactions?page=${page}&limit=20&type=${type}&userId=${userId}`, {
+          headers: {
+            'Authorization': `Bearer ${adminToken}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // 통계 업데이트
+          document.getElementById('pointsTotalIssued').textContent = data.stats.totalIssued.toLocaleString() + 'P';
+          document.getElementById('pointsTotalUsed').textContent = data.stats.totalUsed.toLocaleString() + 'P';
+          document.getElementById('pointsTotalCount').textContent = data.stats.totalCount.toLocaleString() + '건';
+
+          const transactions = data.transactions;
+          const transactionsHtml = transactions.length > 0
+            ? `
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">사용자</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">금액</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">유형</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">설명</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">시간</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  ${transactions.map(tx => `
+                    <tr>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${tx.user_name || 'Unknown'}</div>
+                        <div class="text-sm text-gray-500">${tx.user_email || ''}</div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="text-sm font-bold ${tx.amount > 0 ? 'text-green-600' : 'text-red-600'}">
+                          ${tx.amount > 0 ? '+' : ''}${tx.amount}P
+                        </span>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getTypeColor(tx.type)}">
+                          ${getTypeLabel(tx.type)}
+                        </span>
+                      </td>
+                      <td class="px-6 py-4 text-sm text-gray-500">${tx.description || '-'}</td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatDate(tx.created_at)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+              <div class="mt-4 flex justify-between items-center">
+                <p class="text-sm text-gray-600">
+                  총 ${data.pagination.total}건 (${data.pagination.page}/${data.pagination.totalPages} 페이지)
+                </p>
+                <div class="space-x-2">
+                  ${data.pagination.page > 1 ? `<button onclick="loadTransactions(${data.pagination.page - 1})" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">이전</button>` : ''}
+                  ${data.pagination.page < data.pagination.totalPages ? `<button onclick="loadTransactions(${data.pagination.page + 1})" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">다음</button>` : ''}
+                </div>
+              </div>
+            `
+            : '<p class="text-center text-gray-500 py-8">거래 내역이 없습니다</p>';
+
+          document.getElementById('transactionsTable').innerHTML = transactionsHtml;
+        }
+      } catch (error) {
+        console.error('거래내역 로드 오류:', error);
+      }
+    }
+
+    // 스토어 구매내역 로드
+    async function loadPurchases(page = 1) {
+      const status = document.getElementById('purchasesStatusFilter')?.value || '';
+      const userId = document.getElementById('purchasesUserIdFilter')?.value || '';
+
+      try {
+        const response = await fetch(`/api/admin/purchases?page=${page}&limit=20&status=${status}&userId=${userId}`, {
+          headers: {
+            'Authorization': `Bearer ${adminToken}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // 통계 업데이트
+          document.getElementById('purchasesTotalCount').textContent = data.stats.totalCount.toLocaleString();
+          document.getElementById('purchasesCompletedCount').textContent = data.stats.completedCount.toLocaleString();
+          document.getElementById('purchasesPendingCount').textContent = data.stats.pendingCount.toLocaleString();
+          document.getElementById('purchasesTotalPoints').textContent = data.stats.totalPoints.toLocaleString() + 'P';
+
+          // 인기 상품 통계
+          if (data.productStats && data.productStats.length > 0) {
+            const productStatsHtml = `
+              <div class="overflow-x-auto">
+                <table class="min-w-full">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">순위</th>
+                      <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">상품명</th>
+                      <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">판매량</th>
+                      <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">매출</th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-200">
+                    ${data.productStats.map((product, index) => `
+                      <tr>
+                        <td class="px-4 py-2 whitespace-nowrap">
+                          <span class="inline-flex items-center justify-center w-6 h-6 rounded-full ${index < 3 ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600'} text-xs font-bold">
+                            ${index + 1}
+                          </span>
+                        </td>
+                        <td class="px-4 py-2 text-sm font-medium text-gray-900">${product.product_name}</td>
+                        <td class="px-4 py-2 text-sm text-right text-gray-900">${product.count}개</td>
+                        <td class="px-4 py-2 text-sm text-right font-semibold text-purple-600">${product.total_points.toLocaleString()}P</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            `;
+            document.getElementById('productStatsTable').innerHTML = productStatsHtml;
+          }
+
+          const purchases = data.purchases;
+          const purchasesHtml = purchases.length > 0
+            ? `
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">사용자</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">상품</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">포인트</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">상태</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">기프트코드</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">시간</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  ${purchases.map(purchase => `
+                    <tr>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${purchase.user_name || 'Unknown'}</div>
+                        <div class="text-sm text-gray-500">${purchase.user_phone || ''}</div>
+                      </td>
+                      <td class="px-6 py-4 text-sm text-gray-900">${purchase.product_name}</td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-purple-600">${purchase.product_price}P</td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getPurchaseStatusColor(purchase.status)}">
+                          ${getPurchaseStatusLabel(purchase.status)}
+                        </span>
+                      </td>
+                      <td class="px-6 py-4 text-sm text-gray-500 font-mono">${purchase.gift_code || '-'}</td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatDate(purchase.created_at)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+              <div class="mt-4 flex justify-between items-center">
+                <p class="text-sm text-gray-600">
+                  총 ${data.pagination.total}건 (${data.pagination.page}/${data.pagination.totalPages} 페이지)
+                </p>
+                <div class="space-x-2">
+                  ${data.pagination.page > 1 ? `<button onclick="loadPurchases(${data.pagination.page - 1})" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">이전</button>` : ''}
+                  ${data.pagination.page < data.pagination.totalPages ? `<button onclick="loadPurchases(${data.pagination.page + 1})" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">다음</button>` : ''}
+                </div>
+              </div>
+            `
+            : '<p class="text-center text-gray-500 py-8">구매 내역이 없습니다</p>';
+
+          document.getElementById('purchasesTable').innerHTML = purchasesHtml;
+        }
+      } catch (error) {
+        console.error('구매내역 로드 오류:', error);
+      }
+    }
+
+    // 거래 유형별 라벨
+    function getTypeLabel(type) {
+      const labels = {
+        'signup': '회원가입',
+        'referral': '추천보상',
+        'ai_matching': 'AI매칭',
+        'hire_success': '고용성공',
+        'store_purchase': '스토어구매',
+        'refund': '환불',
+        'admin_grant': '관리자지급',
+        'admin_deduct': '관리자차감'
+      };
+      return labels[type] || type;
+    }
+
+    // 거래 유형별 색상
+    function getTypeColor(type) {
+      const colors = {
+        'signup': 'bg-blue-100 text-blue-800',
+        'referral': 'bg-green-100 text-green-800',
+        'ai_matching': 'bg-purple-100 text-purple-800',
+        'hire_success': 'bg-yellow-100 text-yellow-800',
+        'store_purchase': 'bg-red-100 text-red-800',
+        'refund': 'bg-gray-100 text-gray-800',
+        'admin_grant': 'bg-indigo-100 text-indigo-800',
+        'admin_deduct': 'bg-pink-100 text-pink-800'
+      };
+      return colors[type] || 'bg-gray-100 text-gray-800';
+    }
+
+    // 구매 상태별 라벨
+    function getPurchaseStatusLabel(status) {
+      const labels = {
+        'completed': '완료',
+        'pending': '대기',
+        'cancelled': '취소'
+      };
+      return labels[status] || status;
+    }
+
+    // 구매 상태별 색상
+    function getPurchaseStatusColor(status) {
+      const colors = {
+        'completed': 'bg-green-100 text-green-800',
+        'pending': 'bg-yellow-100 text-yellow-800',
+        'cancelled': 'bg-red-100 text-red-800'
+      };
+      return colors[status] || 'bg-gray-100 text-gray-800';
+    }
+
+    // 초기 로드
+    loadStats();
+    loadCharts();
+
+    // 차트 로드
+    async function loadCharts() {
+      try {
+        const response = await fetch('/api/admin/charts', {
+          headers: {
+            'Authorization': `Bearer ${adminToken}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          const charts = data.charts;
+
+          // 1. 일별 사용자 증가 추이
+          const userGrowthCtx = document.getElementById('userGrowthChart').getContext('2d');
+          if (charts.userGrowth && charts.userGrowth.length > 0) {
+            new Chart(userGrowthCtx, {
+              type: 'line',
+              data: {
+                labels: charts.userGrowth.map(d => d.date),
+                datasets: [{
+                  label: '신규 가입자',
+                  data: charts.userGrowth.map(d => d.count),
+                  borderColor: 'rgb(59, 130, 246)',
+                  backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                  tension: 0.4,
+                  fill: true
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    display: true,
+                    position: 'bottom'
+                  }
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    ticks: {
+                      stepSize: 1
+                    }
+                  }
+                }
+              }
+            });
+          } else {
+            // 데이터가 없을 때 빈 차트 표시
+            new Chart(userGrowthCtx, {
+              type: 'line',
+              data: {
+                labels: [],
+                datasets: [{
+                  label: '신규 가입자',
+                  data: [],
+                  borderColor: 'rgb(59, 130, 246)',
+                  backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                  tension: 0.4,
+                  fill: true
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { display: true, position: 'bottom' }
+                },
+                scales: {
+                  y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                }
+              }
+            });
+          }
+
+          // 2. 포인트 발행/사용 추이
+          const pointsFlowCtx = document.getElementById('pointsFlowChart').getContext('2d');
+          if (charts.pointsFlow && charts.pointsFlow.length > 0) {
+            new Chart(pointsFlowCtx, {
+              type: 'line',
+              data: {
+                labels: charts.pointsFlow.map(d => d.date),
+                datasets: [
+                  {
+                    label: '발행',
+                    data: charts.pointsFlow.map(d => d.issued),
+                    borderColor: 'rgb(34, 197, 94)',
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                  },
+                  {
+                    label: '사용',
+                    data: charts.pointsFlow.map(d => d.used),
+                    borderColor: 'rgb(239, 68, 68)',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                  }
+                ]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    display: true,
+                    position: 'bottom'
+                  }
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true
+                  }
+                }
+              }
+            });
+          } else {
+            // 데이터가 없을 때 빈 차트 표시
+            new Chart(pointsFlowCtx, {
+              type: 'line',
+              data: {
+                labels: [],
+                datasets: [
+                  {
+                    label: '발행',
+                    data: [],
+                    borderColor: 'rgb(34, 197, 94)',
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                  },
+                  {
+                    label: '사용',
+                    data: [],
+                    borderColor: 'rgb(239, 68, 68)',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                  }
+                ]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: true, position: 'bottom' } },
+                scales: { y: { beginAtZero: true } }
+              }
+            });
+          }
+
+          // 3. 월별 매출
+          const monthlyRevenueCtx = document.getElementById('monthlyRevenueChart').getContext('2d');
+          if (charts.monthlyRevenue && charts.monthlyRevenue.length > 0) {
+            new Chart(monthlyRevenueCtx, {
+              type: 'bar',
+              data: {
+                labels: charts.monthlyRevenue.map(d => d.month),
+                datasets: [{
+                  label: '매출 (포인트)',
+                  data: charts.monthlyRevenue.map(d => d.revenue),
+                  backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                  borderColor: 'rgb(34, 197, 94)',
+                  borderWidth: 1
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    display: true,
+                    position: 'bottom'
+                  }
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true
+                  }
+                }
+              }
+            });
+          } else {
+            // 데이터가 없을 때 빈 차트 표시
+            new Chart(monthlyRevenueCtx, {
+              type: 'bar',
+              data: {
+                labels: [],
+                datasets: [{
+                  label: '매출 (포인트)',
+                  data: [],
+                  backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                  borderColor: 'rgb(34, 197, 94)',
+                  borderWidth: 1
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: true, position: 'bottom' } },
+                scales: { y: { beginAtZero: true } }
+              }
+            });
+          }
+
+          // 4. 거래 유형별 포인트 분포
+          const pointsByTypeCtx = document.getElementById('pointsByTypeChart').getContext('2d');
+          if (charts.pointsByType && charts.pointsByType.length > 0) {
+            new Chart(pointsByTypeCtx, {
+              type: 'doughnut',
+              data: {
+                labels: charts.pointsByType.map(d => getTypeLabel(d.type)),
+                datasets: [{
+                  data: charts.pointsByType.map(d => d.total),
+                  backgroundColor: [
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(168, 85, 247, 0.8)',
+                    'rgba(251, 191, 36, 0.8)',
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(156, 163, 175, 0.8)',
+                    'rgba(99, 102, 241, 0.8)',
+                    'rgba(236, 72, 153, 0.8)'
+                  ],
+                  borderWidth: 2
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    display: true,
+                    position: 'right'
+                  }
+                }
+              }
+            });
+          } else {
+            // 데이터가 없을 때 빈 차트 표시
+            new Chart(pointsByTypeCtx, {
+              type: 'doughnut',
+              data: {
+                labels: [],
+                datasets: [{
+                  data: [],
+                  backgroundColor: [],
+                  borderWidth: 2
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: true, position: 'right' } }
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.error('차트 로드 오류:', error);
+      }
+    }
+
+    // 결제 내역 로드
+    async function loadPayments(page = 1) {
+      const status = document.getElementById('paymentsStatusFilter')?.value || '';
+      const method = document.getElementById('paymentsMethodFilter')?.value || '';
+      const userId = document.getElementById('paymentsUserIdFilter')?.value || '';
+
+      try {
+        const response = await fetch(`/api/admin/payments?page=${page}&limit=20&status=${status}&method=${method}&userId=${userId}`, {
+          headers: {
+            'Authorization': `Bearer ${adminToken}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // 통계 업데이트
+          document.getElementById('paymentsTotalCount').textContent = data.stats.totalCount.toLocaleString();
+          document.getElementById('paymentsCompletedCount').textContent = data.stats.completedCount.toLocaleString();
+          document.getElementById('paymentsPendingCount').textContent = data.stats.pendingCount.toLocaleString();
+          document.getElementById('paymentsTotalRevenue').textContent = data.stats.totalRevenue.toLocaleString() + '원';
+
+          // 결제 수단별 통계
+          if (data.methodStats && data.methodStats.length > 0) {
+            const methodStatsHtml = `
+              <div class="overflow-x-auto">
+                <table class="min-w-full">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">결제 수단</th>
+                      <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">건수</th>
+                      <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">금액</th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-200">
+                    ${data.methodStats.map(stat => `
+                      <tr>
+                        <td class="px-4 py-2 text-sm font-medium text-gray-900">${getPaymentMethodLabel(stat.payment_method)}</td>
+                        <td class="px-4 py-2 text-sm text-right text-gray-900">${stat.count}건</td>
+                        <td class="px-4 py-2 text-sm text-right font-semibold text-indigo-600">${stat.total_amount.toLocaleString()}원</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            `;
+            document.getElementById('methodStatsTable').innerHTML = methodStatsHtml;
+          }
+
+          const payments = data.payments;
+          const paymentsHtml = payments.length > 0
+            ? `
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">사용자</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">금액</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">결제수단</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">상태</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">설명</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">시간</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">관리</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  ${payments.map(payment => `
+                    <tr>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${payment.user_name || 'Unknown'}</div>
+                        <div class="text-sm text-gray-500">${payment.user_phone || ''}</div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">${payment.amount.toLocaleString()}원</td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${getPaymentMethodLabel(payment.payment_method)}</td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getPaymentStatusColor(payment.payment_status)}">
+                          ${getPaymentStatusLabel(payment.payment_status)}
+                        </span>
+                      </td>
+                      <td class="px-6 py-4 text-sm text-gray-500">${payment.description || '-'}</td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatDate(payment.created_at)}</td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        ${payment.payment_status === 'completed' ? `
+                          <button onclick="refundPayment('${payment.id}', '${payment.user_name}')" class="text-red-600 hover:text-red-900">
+                            <i class="fas fa-undo"></i> 환불
+                          </button>
+                        ` : '-'}
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+              <div class="mt-4 flex justify-between items-center">
+                <p class="text-sm text-gray-600">
+                  총 ${data.pagination.total}건 (${data.pagination.page}/${data.pagination.totalPages} 페이지)
+                </p>
+                <div class="space-x-2">
+                  ${data.pagination.page > 1 ? `<button onclick="loadPayments(${data.pagination.page - 1})" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">이전</button>` : ''}
+                  ${data.pagination.page < data.pagination.totalPages ? `<button onclick="loadPayments(${data.pagination.page + 1})" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">다음</button>` : ''}
+                </div>
+              </div>
+            `
+            : '<p class="text-center text-gray-500 py-8">결제 내역이 없습니다</p>';
+
+          document.getElementById('paymentsTable').innerHTML = paymentsHtml;
+        }
+      } catch (error) {
+        console.error('결제내역 로드 오류:', error);
+      }
+    }
+
+    // 결제 환불
+    function refundPayment(paymentId, userName) {
+      const reason = prompt(`${userName}의 결제를 환불하시겠습니까?\n환불 사유를 입력하세요:`);
+      if (!reason) return;
+
+      fetch(`/api/admin/payments/${paymentId}/refund`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`
+        },
+        body: JSON.stringify({ reason })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert('환불이 완료되었습니다.');
+          loadPayments();
+        } else {
+          alert('오류: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('환불 오류:', error);
+        alert('환불 처리 중 오류가 발생했습니다.');
+      });
+    }
+
+    // 결제 수단 라벨
+    function getPaymentMethodLabel(method) {
+      const labels = {
+        'card': '카드',
+        'transfer': '계좌이체',
+        'virtual_account': '가상계좌',
+        'phone': '휴대폰',
+        'kakaopay': '카카오페이',
+        'naverpay': '네이버페이',
+        'tosspay': '토스페이'
+      };
+      return labels[method] || method;
+    }
+
+    // 결제 상태 라벨
+    function getPaymentStatusLabel(status) {
+      const labels = {
+        'pending': '대기',
+        'processing': '처리중',
+        'completed': '완료',
+        'failed': '실패',
+        'cancelled': '취소',
+        'refunded': '환불',
+        'partial_refund': '부분환불'
+      };
+      return labels[status] || status;
+    }
+
+    // 결제 상태 색상
+    function getPaymentStatusColor(status) {
+      const colors = {
+        'pending': 'bg-yellow-100 text-yellow-800',
+        'processing': 'bg-blue-100 text-blue-800',
+        'completed': 'bg-green-100 text-green-800',
+        'failed': 'bg-red-100 text-red-800',
+        'cancelled': 'bg-gray-100 text-gray-800',
+        'refunded': 'bg-purple-100 text-purple-800',
+        'partial_refund': 'bg-orange-100 text-orange-800'
+      };
+      return colors[status] || 'bg-gray-100 text-gray-800';
+    }
+
+    // 세금계산서 목록 로드
+    async function loadTaxInvoices(page = 1) {
+      try {
+        const status = document.getElementById('taxInvoiceStatusFilter').value;
+        const searchCompany = document.getElementById('taxInvoiceSearchCompany').value.trim();
+        const searchBusinessNumber = document.getElementById('taxInvoiceSearchBusinessNumber').value.trim();
+        
+        const params = new URLSearchParams({
+          page: page.toString(),
+          limit: '20'
+        });
+
+        if (status) {
+          params.append('status', status);
+        }
+        if (searchCompany) {
+          params.append('search_company', searchCompany);
+        }
+        if (searchBusinessNumber) {
+          params.append('search_business_number', searchBusinessNumber);
+        }
+
+        const response = await fetch(`/api/admin/tax-invoices?${params}`, {
+          headers: {
+            'Authorization': `Bearer ${adminToken}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // 통계 업데이트
+          document.getElementById('taxInvoicesPending').textContent = data.stats.pending;
+          document.getElementById('taxInvoicesIssued').textContent = data.stats.issued;
+          document.getElementById('taxInvoicesRejected').textContent = data.stats.rejected;
+
+          // 테이블 렌더링
+          renderTaxInvoicesTable(data.invoices, data.pagination);
+        } else {
+          document.getElementById('taxInvoicesTable').innerHTML = `
+            <div class="text-center text-red-500 py-8">
+              <i class="fas fa-exclamation-circle text-3xl mb-2"></i>
+              <p>${data.message || '세금계산서 목록을 불러올 수 없습니다.'}</p>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Tax invoices load error:', error);
+        document.getElementById('taxInvoicesTable').innerHTML = `
+          <div class="text-center text-red-500 py-8">
+            <i class="fas fa-exclamation-circle text-3xl mb-2"></i>
+            <p>오류가 발생했습니다.</p>
+          </div>
+        `;
+      }
+    }
+
+    // 세금계산서 테이블 렌더링
+    function renderTaxInvoicesTable(invoices, pagination) {
+      if (invoices.length === 0) {
+        document.getElementById('taxInvoicesTable').innerHTML = `
+          <div class="text-center text-gray-500 py-8">
+            <i class="fas fa-inbox text-3xl mb-2"></i>
+            <p>세금계산서 요청이 없습니다.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const tableHtml = `
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">요청일</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">사업자 정보</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">결제 정보</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">상태</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">액션</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              ${invoices.map(invoice => `
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    ${formatDate(invoice.created_at)}
+                  </td>
+                  <td class="px-6 py-4 text-sm">
+                    <div class="font-medium text-gray-900">${invoice.business_name}</div>
+                    <div class="text-gray-500">${invoice.business_number}</div>
+                    <div class="text-gray-500">대표: ${invoice.ceo_name}</div>
+                    <div class="text-gray-500">${invoice.email}</div>
+                  </td>
+                  <td class="px-6 py-4 text-sm">
+                    <div class="font-medium text-gray-900">${invoice.company_name || '-'}</div>
+                    <div class="text-gray-500">${invoice.job_title || '-'}</div>
+                    <div class="font-bold text-blue-600">${(invoice.payment_amount || 0).toLocaleString()}원</div>
+                    <div class="text-gray-500">${invoice.payment_method || '-'}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getTaxInvoiceStatusColor(invoice.status)}">
+                      ${getTaxInvoiceStatusLabel(invoice.status)}
+                    </span>
+                    ${invoice.status === 'issued' && invoice.issued_at ? `<div class="text-xs text-gray-500 mt-1">${formatDate(invoice.issued_at)}</div>` : ''}
+                    ${invoice.status === 'rejected' && invoice.rejected_reason ? `<div class="text-xs text-red-500 mt-1">${invoice.rejected_reason}</div>` : ''}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    ${invoice.status === 'pending' ? `
+                      <button onclick="approveTaxInvoice('${invoice.id}')" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition mr-2">
+                        <i class="fas fa-check mr-1"></i>승인
+                      </button>
+                      <button onclick="rejectTaxInvoice('${invoice.id}')" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition">
+                        <i class="fas fa-times mr-1"></i>거절
+                      </button>
+                    ` : '-'}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 페이지네이션 -->
+        <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+          <div class="text-sm text-gray-700">
+            총 ${pagination.total}건 (${pagination.page}/${pagination.totalPages} 페이지)
+          </div>
+          <div class="flex gap-2">
+            ${pagination.page > 1 ? `
+              <button onclick="loadTaxInvoices(${pagination.page - 1})" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                이전
+              </button>
+            ` : ''}
+            ${pagination.page < pagination.totalPages ? `
+              <button onclick="loadTaxInvoices(${pagination.page + 1})" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                다음
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `;
+
+      document.getElementById('taxInvoicesTable').innerHTML = tableHtml;
+    }
+
+    // 세금계산서 승인
+    async function approveTaxInvoice(invoiceId) {
+      if (!confirm('세금계산서를 승인하고 발행하시겠습니까?')) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/admin/tax-invoices/${invoiceId}/approve`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${adminToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert(data.message || '세금계산서가 승인되었습니다.');
+          loadTaxInvoices();
+        } else {
+          alert('승인 실패: ' + data.message);
+        }
+      } catch (error) {
+        console.error('Approve tax invoice error:', error);
+        alert('승인 중 오류가 발생했습니다.');
+      }
+    }
+
+    // 세금계산서 거절
+    async function rejectTaxInvoice(invoiceId) {
+      const reason = prompt('거절 사유를 입력해주세요:');
+      if (!reason || reason.trim() === '') {
+        alert('거절 사유를 입력해야 합니다.');
+        return;
+      }
+
+      if (!confirm('세금계산서 요청을 거절하시겠습니까?')) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/admin/tax-invoices/${invoiceId}/reject`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${adminToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ reason: reason.trim() })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert(data.message || '세금계산서 요청이 거절되었습니다.');
+          loadTaxInvoices();
+        } else {
+          alert('거절 실패: ' + data.message);
+        }
+      } catch (error) {
+        console.error('Reject tax invoice error:', error);
+        alert('거절 중 오류가 발생했습니다.');
+      }
+    }
+
+    // 세금계산서 상태 라벨
+    function getTaxInvoiceStatusLabel(status) {
+      const labels = {
+        'pending': '대기 중',
+        'issued': '발행 완료',
+        'rejected': '거절됨'
+      };
+      return labels[status] || status;
+    }
+
+    // 세금계산서 상태 색상
+    function getTaxInvoiceStatusColor(status) {
+      const colors = {
+        'pending': 'bg-yellow-100 text-yellow-800',
+        'issued': 'bg-green-100 text-green-800',
+        'rejected': 'bg-red-100 text-red-800'
+      };
+      return colors[status] || 'bg-gray-100 text-gray-800';
+    }
+    
+    // 세금계산서 검색 필드 엔터 키 이벤트
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchFields = ['taxInvoiceSearchCompany', 'taxInvoiceSearchBusinessNumber'];
+      searchFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+          field.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+              loadTaxInvoices(1);
+            }
+          });
+        }
+      });
+    });
+    
+    // 결제 통계 차트
+    let paymentChart = null;
+    let currentPaymentMode = 'amount';
+    
+    async function loadPaymentStats(mode = 'amount') {
+      try {
+        currentPaymentMode = mode;
+        
+        // 버튼 상태 업데이트
+        document.getElementById('amountBtn').className = mode === 'amount'
+          ? 'px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm'
+          : 'px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm';
+        document.getElementById('countBtn').className = mode === 'count'
+          ? 'px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm'
+          : 'px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm';
+        
+        const response = await fetch(`/api/admin/payments/stats?mode=${mode}`, {
+          headers: {
+            'Authorization': `Bearer ${adminToken}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          renderPaymentChart(data.stats, mode);
+        } else {
+          console.error('Failed to load payment stats:', data.message);
+        }
+      } catch (error) {
+        console.error('Payment stats error:', error);
+      }
+    }
+    
+    function renderPaymentChart(stats, mode) {
+      const ctx = document.getElementById('paymentChart').getContext('2d');
+      
+      // 기존 차트 파괴
+      if (paymentChart) {
+        paymentChart.destroy();
+      }
+      
+      const labels = stats.map(s => s.period);
+      const completedData = stats.map(s => mode === 'amount' ? (s.completed_amount || 0) : (s.completed_count || 0));
+      const pendingData = stats.map(s => mode === 'amount' ? (s.pending_amount || 0) : (s.pending_count || 0));
+      const refundedData = stats.map(s => mode === 'amount' ? (s.refunded_amount || 0) : (s.refunded_count || 0));
+      
+      paymentChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: '완료',
+              data: completedData,
+              backgroundColor: 'rgba(79, 70, 229, 0.1)',
+              borderColor: 'rgba(79, 70, 229, 1)',
+              borderWidth: 2,
+              fill: true,
+              tension: 0.4
+            },
+            {
+              label: '대기',
+              data: pendingData,
+              backgroundColor: 'rgba(234, 179, 8, 0.1)',
+              borderColor: 'rgba(234, 179, 8, 1)',
+              borderWidth: 2,
+              fill: true,
+              tension: 0.4
+            },
+            {
+              label: '환불',
+              data: refundedData,
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              borderColor: 'rgba(239, 68, 68, 1)',
+              borderWidth: 2,
+              fill: true,
+              tension: 0.4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return mode === 'amount' ? value.toLocaleString() + '원' : value + '건';
+                }
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+            title: {
+              display: true,
+              text: mode === 'amount' ? '월별 결제 금액 추이' : '월별 결제 건수 추이'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  let label = context.dataset.label || '';
+                  if (label) {
+                    label += ': ';
+                  }
+                  label += mode === 'amount' 
+                    ? context.parsed.y.toLocaleString() + '원'
+                    : context.parsed.y + '건';
+                  return label;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    // 세금계산서 통계 차트
+    let taxInvoiceChart = null;
+    let currentStatsMode = 'monthly';
+    
+    async function loadTaxInvoiceStats(mode = 'monthly') {
+      try {
+        currentStatsMode = mode;
+        
+        // 버튼 상태 업데이트
+        document.getElementById('monthlyBtn').className = mode === 'monthly' 
+          ? 'px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm'
+          : 'px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm';
+        document.getElementById('quarterlyBtn').className = mode === 'quarterly'
+          ? 'px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm'
+          : 'px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm';
+        
+        const response = await fetch(`/api/admin/tax-invoices/stats?mode=${mode}`, {
+          headers: {
+            'Authorization': `Bearer ${adminToken}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          renderTaxInvoiceChart(data.stats, mode);
+        } else {
+          console.error('Failed to load stats:', data.message);
+        }
+      } catch (error) {
+        console.error('Tax invoice stats error:', error);
+      }
+    }
+    
+    function renderTaxInvoiceChart(stats, mode) {
+      const ctx = document.getElementById('taxInvoiceChart').getContext('2d');
+      
+      // 기존 차트 파괴
+      if (taxInvoiceChart) {
+        taxInvoiceChart.destroy();
+      }
+      
+      const labels = stats.map(s => s.period);
+      const issuedData = stats.map(s => s.issued || 0);
+      const rejectedData = stats.map(s => s.rejected || 0);
+      const pendingData = stats.map(s => s.pending || 0);
+      
+      taxInvoiceChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: '발행 완료',
+              data: issuedData,
+              backgroundColor: 'rgba(34, 197, 94, 0.8)',
+              borderColor: 'rgba(34, 197, 94, 1)',
+              borderWidth: 1
+            },
+            {
+              label: '대기 중',
+              data: pendingData,
+              backgroundColor: 'rgba(234, 179, 8, 0.8)',
+              borderColor: 'rgba(234, 179, 8, 1)',
+              borderWidth: 1
+            },
+            {
+              label: '거절됨',
+              data: rejectedData,
+              backgroundColor: 'rgba(239, 68, 68, 0.8)',
+              borderColor: 'rgba(239, 68, 68, 1)',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+            title: {
+              display: true,
+              text: mode === 'monthly' ? '월별 세금계산서 발급 현황' : '분기별 세금계산서 발급 현황'
+            }
+          }
+        }
+      });
+    }
+    
+    // 세금계산서 엑셀 다운로드
+    async function exportTaxInvoicesToExcel() {
+      try {
+        const status = document.getElementById('taxInvoiceStatusFilter').value;
+        const searchCompany = document.getElementById('taxInvoiceSearchCompany').value.trim();
+        const searchBusinessNumber = document.getElementById('taxInvoiceSearchBusinessNumber').value.trim();
+        
+        const params = new URLSearchParams({
+          page: '1',
+          limit: '1000' // 최대 1000건
+        });
+
+        if (status) params.append('status', status);
+        if (searchCompany) params.append('search_company', searchCompany);
+        if (searchBusinessNumber) params.append('search_business_number', searchBusinessNumber);
+
+        const response = await fetch(`/api/admin/tax-invoices?${params}`, {
+          headers: {
+            'Authorization': `Bearer ${adminToken}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (!data.success || !data.invoices || data.invoices.length === 0) {
+          alert('다운로드할 세금계산서가 없습니다.');
+          return;
+        }
+
+        // CSV 데이터 생성
+        const csv = [];
+        // 헤더
+        csv.push([
+          '요청일',
+          '상태',
+          '회사명',
+          '사업자번호',
+          '대표자명',
+          '주소',
+          '이메일',
+          '공고명',
+          '금액',
+          '발급일',
+          '거절사유'
+        ].join(','));
+
+        // 데이터
+        data.invoices.forEach(inv => {
+          csv.push([
+            formatDateKorean(inv.created_at),
+            getTaxInvoiceStatusLabel(inv.status),
+            `"${inv.business_name || ''}"`,
+            `"${inv.business_number || ''}"`,
+            `"${inv.ceo_name || ''}"`,
+            `"${inv.business_address || ''}"`,
+            `"${inv.email || ''}"`,
+            `"${inv.job_title || ''}"`,
+            (inv.payment_amount || 0).toLocaleString() + '원',
+            formatDateKorean(inv.issued_at || ''),
+            `"${inv.rejected_reason || ''}"`
+          ].join(','));
+        });
+
+        // BOM 추가 (엑셀에서 한글 깨짐 방지)
+        const csvContent = '\uFEFF' + csv.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        const now = new Date();
+        const filename = `세금계산서_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}.csv`;
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        alert(`${data.invoices.length}건의 세금계산서가 다운로드되었습니다.`);
+      } catch (error) {
+        console.error('Excel export error:', error);
+        alert('엑셀 다운로드 중 오류가 발생했습니다.');
+      }
+    }
+    
+    // ============================================
+    // 노쇼 신고 관리
+    // ============================================
+    
+    async function loadNoshowReports() {
+      try {
+        const status = document.getElementById('noshowStatusFilter').value;
+        const params = new URLSearchParams();
+        if (status) params.append('status', status);
+        
+        const response = await fetch(`/api/admin/noshow-reports?${params}`, {
+          headers: {
+            'Authorization': `Bearer ${adminToken}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // 통계 업데이트
+          const stats = {
+            pending: 0,
+            approved: 0,
+            rejected: 0,
+            total: data.reports.length
+          };
+          
+          data.reports.forEach(report => {
+            if (report.status === 'pending') stats.pending++;
+            else if (report.status === 'approved') stats.approved++;
+            else if (report.status === 'rejected') stats.rejected++;
+          });
+          
+          document.getElementById('noshowPending').textContent = stats.pending;
+          document.getElementById('noshowApproved').textContent = stats.approved;
+          document.getElementById('noshowRejected').textContent = stats.rejected;
+          document.getElementById('noshowTotal').textContent = stats.total;
+          
+          // 테이블 표시
+          displayNoshowReportsTable(data.reports);
+        } else {
+          alert('노쇼 신고 목록을 불러오는데 실패했습니다: ' + data.error);
+        }
+      } catch (error) {
+        console.error('노쇼 신고 목록 로드 오류:', error);
+        alert('노쇼 신고 목록을 불러오는 중 오류가 발생했습니다.');
+      }
+    }
+    
+    function displayNoshowReportsTable(reports) {
+      const table = document.getElementById('noshowReportsTable');
+      
+      if (reports.length === 0) {
+        table.innerHTML = `
+          <div class="text-center text-gray-500 py-8">
+            <i class="fas fa-inbox text-4xl mb-2"></i>
+            <p>노쇼 신고가 없습니다</p>
+          </div>
+        `;
+        return;
+      }
+      
+      table.innerHTML = `
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">신고 ID</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">신고자</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">신고 대상</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">공고</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">사유</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">신고일</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상태</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">관리</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              ${reports.map(report => `
+                <tr class="hover:bg-gray-50">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${report.id.substring(0, 8)}...</td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900">${report.reporter_name || '-'}</div>
+                    <div class="text-sm text-gray-500">${report.reporter_phone || '-'}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900">${report.reported_user_name || '-'}</div>
+                    <div class="text-sm text-gray-500">${report.reported_user_phone || '-'}</div>
+                    ${report.reported_user_trust_score !== null ? `<div class="text-xs text-blue-600">신뢰도: ${report.reported_user_trust_score}점</div>` : ''}
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="text-sm text-gray-900">${report.job_title || '-'}</div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="text-sm text-gray-600 max-w-xs truncate" title="${report.reason}">${report.reason || '-'}</div>
+                    ${report.evidence ? `<div class="text-xs text-gray-500 mt-1"><i class="fas fa-paperclip"></i> 증거 있음</div>` : ''}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(report.created_at).toLocaleDateString('ko-KR')}</td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    ${getNoshowStatusBadge(report.status, report.trust_score_deducted)}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    ${report.status === 'pending' ? `
+                      <button onclick="reviewNoshowReport('${report.id}', 'approve')" class="text-green-600 hover:text-green-900 mr-2">
+                        <i class="fas fa-check-circle"></i> 승인
+                      </button>
+                      <button onclick="reviewNoshowReport('${report.id}', 'reject')" class="text-red-600 hover:text-red-900">
+                        <i class="fas fa-times-circle"></i> 거절
+                      </button>
+                    ` : `
+                      <button onclick="viewNoshowReportDetails('${report.id}')" class="text-blue-600 hover:text-blue-900">
+                        <i class="fas fa-eye"></i> 상세
+                      </button>
+                    `}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+    
+    function getNoshowStatusBadge(status, scoreDeducted) {
+      const badges = {
+        'pending': '<span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800"><i class="fas fa-clock mr-1"></i>검토 대기</span>',
+        'approved': `<span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"><i class="fas fa-check-circle mr-1"></i>승인 ${scoreDeducted ? `(-${scoreDeducted}점)` : ''}</span>`,
+        'rejected': '<span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800"><i class="fas fa-times-circle mr-1"></i>거절됨</span>'
+      };
+      return badges[status] || status;
+    }
+    
+    async function reviewNoshowReport(reportId, action) {
+      const confirmed = confirm(`이 노쇼 신고를 ${action === 'approve' ? '승인' : '거절'}하시겠습니까?${action === 'approve' ? '\n\n구직자의 신뢰도 점수가 차감됩니다.' : ''}`);
+      if (!confirmed) return;
+      
+      const penalty = action === 'approve' ? prompt('차감할 신뢰도 점수를 입력하세요 (기본값: 10)', '10') : null;
+      const adminNotes = prompt('관리자 검토 의견을 입력하세요 (선택):', '');
+      
+      if (action === 'approve' && !penalty) return;
+      
+      try {
+        const response = await fetch(`/api/noshow/review/${reportId}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${adminToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            action: action,
+            trust_score_penalty: action === 'approve' ? parseInt(penalty) : 0,
+            admin_notes: adminNotes || null
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          alert('✅ ' + data.message);
+          loadNoshowReports();
+        } else {
+          alert('❌ ' + (data.error || '처리에 실패했습니다.'));
+        }
+      } catch (error) {
+        console.error('노쇼 신고 검토 오류:', error);
+        alert('처리 중 오류가 발생했습니다.');
+      }
+    }
+    
+    function viewNoshowReportDetails(reportId) {
+      alert('노쇼 신고 상세 보기 기능은 추후 구현 예정입니다.\n\n신고 ID: ' + reportId);
+    }
+    
+    // ========================================
+    // 면접 세션 통계
+    // ========================================
+    async function loadSessionStats() {
+      try {
+        const response = await fetch('/api/session-stats');
+        const result = await response.json();
+        
+        if (result.success) {
+          const stats = result.data;
+          
+          // 실시간 세션 통계
+          document.getElementById('activeSessions').textContent = stats.active_sessions.total || 0;
+          document.getElementById('recentSessions').textContent = stats.active_sessions.recent_1h || 0;
+          document.getElementById('completedInterviews').textContent = stats.completed_interviews_24h || 0;
+          
+          // 평균 면접 시간
+          const avgMinutes = Math.floor(stats.avg_interview_duration_seconds / 60);
+          const avgSeconds = stats.avg_interview_duration_seconds % 60;
+          document.getElementById('avgDuration').textContent = avgMinutes > 0 
+            ? `${avgMinutes}분 ${avgSeconds}초`
+            : `${avgSeconds}초`;
+          
+          // 직무별 세션 분포
+          displayJobTypeDistribution(stats.job_type_distribution);
+          
+          // 등급별 분포
+          displayGradeDistribution(stats.grade_distribution_24h);
+          
+          // 최근 활성 세션 목록
+          displayRecentSessions(stats.recent_active_sessions);
+        } else {
+          console.error('Failed to load session stats:', result.error);
+        }
+      } catch (error) {
+        console.error('Session stats error:', error);
+      }
+    }
+    
+    function displayJobTypeDistribution(distribution) {
+      const container = document.getElementById('jobTypeDistribution');
+      
+      if (!distribution || distribution.length === 0) {
+        container.innerHTML = '<div class="text-center text-gray-500 py-4">데이터가 없습니다</div>';
+        return;
+      }
+      
+      // 직무명 매핑
+      const jobTypeNames = {
+        'cafe': '카페',
+        'restaurant': '레스토랑',
+        'retail': '리테일',
+        'cvs': '편의점',
+        'fastfood': '패스트푸드'
+      };
+      
+      const total = distribution.reduce((sum, item) => sum + (item.count || 0), 0);
+      
+      container.innerHTML = distribution.map(item => {
+        const percentage = total > 0 ? ((item.count / total) * 100).toFixed(1) : 0;
+        const jobName = jobTypeNames[item.job_type] || item.job_type || '기타';
+        
+        return `
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div class="flex items-center flex-1">
+              <span class="text-sm font-medium text-gray-700 w-24">${jobName}</span>
+              <div class="flex-1 mx-4">
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                  <div class="bg-blue-600 h-2 rounded-full" style="width: ${percentage}%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="text-sm font-bold text-gray-800">${item.count}</span>
+              <span class="text-xs text-gray-500 ml-1">(${percentage}%)</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    function displayGradeDistribution(distribution) {
+      const container = document.getElementById('gradeDistribution');
+      
+      if (!distribution || distribution.length === 0) {
+        container.innerHTML = '<div class="col-span-5 text-center text-gray-500 py-4">데이터가 없습니다</div>';
+        return;
+      }
+      
+      const gradeColors = {
+        'S': 'bg-purple-100 text-purple-800 border-purple-300',
+        'A': 'bg-blue-100 text-blue-800 border-blue-300',
+        'B': 'bg-green-100 text-green-800 border-green-300',
+        'C': 'bg-yellow-100 text-yellow-800 border-yellow-300',
+        'D': 'bg-red-100 text-red-800 border-red-300'
+      };
+      
+      const grades = ['S', 'A', 'B', 'C', 'D'];
+      const gradeMap = {};
+      distribution.forEach(item => {
+        gradeMap[item.final_grade] = item.count || 0;
+      });
+      
+      container.innerHTML = grades.map(grade => {
+        const count = gradeMap[grade] || 0;
+        const colorClass = gradeColors[grade] || 'bg-gray-100 text-gray-800 border-gray-300';
+        
+        return `
+          <div class="border-2 ${colorClass} rounded-lg p-4 text-center">
+            <div class="text-3xl font-bold mb-1">${grade}</div>
+            <div class="text-2xl font-semibold">${count}</div>
+            <div class="text-xs mt-1">건</div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    function displayRecentSessions(sessions) {
+      const tbody = document.getElementById('recentSessionsTable');
+      
+      if (!sessions || sessions.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+              <i class="fas fa-inbox text-3xl mb-2"></i>
+              <p>활성 세션이 없습니다</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      // 직무명 매핑
+      const jobTypeNames = {
+        'cafe': '카페',
+        'restaurant': '레스토랑',
+        'retail': '리테일',
+        'cvs': '편의점',
+        'fastfood': '패스트푸드'
+      };
+      
+      tbody.innerHTML = sessions.map(session => {
+        const jobName = jobTypeNames[session.job_type] || session.job_type || '-';
+        const createdAt = session.created_at ? new Date(session.created_at).toLocaleString('ko-KR') : '-';
+        const lastActivity = session.last_activity ? new Date(session.last_activity).toLocaleString('ko-KR') : '-';
+        const expiresAt = session.expires_at ? new Date(session.expires_at).toLocaleString('ko-KR') : '-';
+        
+        return `
+          <tr class="hover:bg-gray-50">
+            <td class="px-4 py-3 text-sm text-gray-900 font-mono">${session.session_id ? session.session_id.substring(0, 12) + '...' : '-'}</td>
+            <td class="px-4 py-3 text-sm text-gray-700">${jobName}</td>
+            <td class="px-4 py-3 text-sm text-gray-700">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                ${session.question_count || 0}질문
+              </span>
+            </td>
+            <td class="px-4 py-3 text-sm text-gray-500">${createdAt}</td>
+            <td class="px-4 py-3 text-sm text-gray-500">${lastActivity}</td>
+            <td class="px-4 py-3 text-sm text-gray-500">${expiresAt}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // ============================================
+    // 구독 관리 함수들
+    // ============================================
+    
+    async function loadSubscriptions() {
+      try {
+        // TODO: 실제 API 엔드포인트 구현 필요 (/api/admin/subscriptions)
+        // 현재는 더미 데이터 표시
+        
+        const subscriptionsTable = document.getElementById('subscriptionsTable');
+        
+        // 더미 데이터
+        const dummySubscriptions = [
+          {
+            user_id: 'test_user_abc123_1234567890',
+            user_email: 'test_abc123@albi-test.com',
+            plan: 'standard',
+            price: 4900,
+            status: 'active',
+            started_at: '2026-03-05T00:00:00Z',
+            next_payment_date: '2026-04-05T00:00:00Z'
+          }
+        ];
+
+        // 통계 업데이트
+        document.getElementById('activeSubscriptions').textContent = '0';
+        document.getElementById('cancelledSubscriptions').textContent = '0';
+        document.getElementById('monthlyRevenue').textContent = '₩0';
+        document.getElementById('pendingRefunds').textContent = '0';
+
+        // 테이블 업데이트
+        if (dummySubscriptions.length === 0) {
+          subscriptionsTable.innerHTML = `
+            <tr>
+              <td colspan="7" class="px-4 py-8 text-center text-gray-500">
+                <i class="fas fa-inbox text-4xl mb-2"></i>
+                <p>구독 데이터가 없습니다</p>
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        subscriptionsTable.innerHTML = dummySubscriptions.map(sub => {
+          const planNames = { basic: 'Basic', standard: 'Standard', premium: 'Premium', unlimited: 'Unlimited' };
+          const statusBadge = sub.status === 'active' 
+            ? '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">활성</span>'
+            : '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">취소</span>';
+
+          return `
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-3">
+                <div class="text-sm font-medium text-gray-900">${sub.user_id.substring(0, 15)}...</div>
+                <div class="text-xs text-gray-500">${sub.user_email || '-'}</div>
+              </td>
+              <td class="px-4 py-3 text-sm font-semibold text-blue-600">${planNames[sub.plan] || sub.plan}</td>
+              <td class="px-4 py-3 text-sm font-bold text-gray-800">₩${sub.price.toLocaleString()}</td>
+              <td class="px-4 py-3">${statusBadge}</td>
+              <td class="px-4 py-3 text-sm text-gray-500">${new Date(sub.started_at).toLocaleDateString('ko-KR')}</td>
+              <td class="px-4 py-3 text-sm text-gray-500">${new Date(sub.next_payment_date).toLocaleDateString('ko-KR')}</td>
+              <td class="px-4 py-3 text-sm">
+                <button class="text-blue-600 hover:text-blue-800 mr-2" title="상세보기">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button class="text-red-600 hover:text-red-800" title="강제해지">
+                  <i class="fas fa-ban"></i>
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+      } catch (error) {
+        console.error('❌ Load subscriptions error:', error);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>지원자 관리 - 알비</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+  <!-- 헤더 -->
+  <nav class="bg-white shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-4">
+      <div class="flex items-center justify-between">
+        <a href="/" class="text-2xl font-bold text-orange-600">
+          <i class="fas fa-briefcase mr-2"></i>ALBI
+        </a>
+        <div class="flex items-center space-x-4">
+          <a href="/mypage.html" class="text-gray-600 hover:text-orange-600">
+            <i class="fas fa-user-circle mr-1"></i>마이페이지
+          </a>
+          <button onclick="logout()" class="text-gray-600 hover:text-red-600">
+            <i class="fas fa-sign-out-alt mr-1"></i>로그아웃
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">
+      <i class="fas fa-users mr-2"></i>지원자 관리
+    </h1>
+
+    <!-- 필터 -->
+    <div class="bg-white rounded-lg shadow p-4 mb-6">
+      <div class="flex flex-wrap gap-4">
+        <select id="statusFilter" onchange="loadApplications()" 
+                class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+          <option value="">전체 상태</option>
+          <option value="pending">대기중</option>
+          <option value="experience_requested">체험 신청</option>
+          <option value="experience_completed">체험 완료</option>
+          <option value="hired">정식 채용</option>
+          <option value="rejected">불합격</option>
+        </select>
+        
+        <select id="jobFilter" onchange="loadApplications()" 
+                class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+          <option value="">전체 공고</option>
+        </select>
+
+        <input type="text" id="searchInput" placeholder="지원자 검색..." 
+               onkeyup="loadApplications()"
+               class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+        
+        <button onclick="loadApplications()" class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
+          <i class="fas fa-search mr-1"></i>검색
+        </button>
+      </div>
+    </div>
+
+    <!-- 로딩 상태 -->
+    <div id="loadingState" class="bg-white rounded-lg shadow p-8 text-center">
+      <i class="fas fa-spinner fa-spin text-4xl text-orange-600 mb-4"></i>
+      <p class="text-gray-600">지원자 목록을 불러오는 중...</p>
+    </div>
+
+    <!-- 지원자 목록 -->
+    <div id="applicationsList" class="hidden space-y-4">
+      <!-- 동적으로 생성 -->
+    </div>
+
+    <!-- 빈 상태 -->
+    <div id="emptyState" class="hidden bg-white rounded-lg shadow p-12 text-center">
+      <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
+      <p class="text-gray-600 text-lg">아직 지원자가 없습니다</p>
+      <p class="text-gray-500 mt-2">공고를 등록하고 첫 지원자를 받아보세요!</p>
+      <a href="/jobs/create.html" class="inline-block mt-4 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
+        <i class="fas fa-plus mr-1"></i>공고 등록하기
+      </a>
+    </div>
+  </div>
+
+  <!-- 결제 확인 모달 -->
+  <div id="paymentModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
+      <h3 class="text-2xl font-bold text-gray-800 mb-4">
+        <i class="fas fa-handshake text-orange-600 mr-2"></i>정식 채용 확정
+      </h3>
+      
+      <div class="mb-6">
+        <p class="text-gray-700 mb-4">
+          <strong id="modalApplicantName"></strong>님을 정식 채용하시겠습니까?
+        </p>
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <p class="text-sm text-amber-800">
+            <i class="fas fa-info-circle mr-1"></i>
+            정식 채용 확정 시 <strong>50,000원</strong>의 채용 성공 수수료가 부과됩니다.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex space-x-3">
+        <button onclick="closePaymentModal()" 
+                class="flex-1 px-4 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 font-semibold">
+          취소
+        </button>
+        <button onclick="proceedToPayment()" 
+                class="flex-1 px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-semibold">
+          <i class="fas fa-credit-card mr-1"></i>결제하기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentApplicationId = null;
+    let currentJobId = null;
+
+    // 페이지 로드
+    window.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('albi_session_token');
+      if (!token) {
+        alert('로그인이 필요합니다.');
+        window.location.href = '/login.html';
+        return;
+      }
+
+      await loadJobs();
+      await loadApplications();
+    });
+
+    // 공고 목록 로드 (필터용)
+    async function loadJobs() {
+      try {
+        const token = localStorage.getItem('albi_session_token');
+        const response = await fetch('/api/mypage/my-jobs', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          const select = document.getElementById('jobFilter');
+          data.jobs.forEach(job => {
+            const option = document.createElement('option');
+            option.value = job.id;
+            option.textContent = job.title;
+            select.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error('공고 목록 로드 오류:', error);
+      }
+    }
+
+    // 지원자 목록 로드
+    async function loadApplications() {
+      try {
+        document.getElementById('loadingState').classList.remove('hidden');
+        document.getElementById('applicationsList').classList.add('hidden');
+        document.getElementById('emptyState').classList.add('hidden');
+
+        const token = localStorage.getItem('albi_session_token');
+        const status = document.getElementById('statusFilter').value;
+        const jobId = document.getElementById('jobFilter').value;
+        const search = document.getElementById('searchInput').value;
+
+        let url = '/api/employer/applications?';
+        if (status) url += `status=${status}&`;
+        if (jobId) url += `jobId=${jobId}&`;
+        if (search) url += `search=${search}&`;
+
+        const response = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.applications.length > 0) {
+          displayApplications(data.applications);
+          document.getElementById('loadingState').classList.add('hidden');
+          document.getElementById('applicationsList').classList.remove('hidden');
+        } else {
+          document.getElementById('loadingState').classList.add('hidden');
+          document.getElementById('emptyState').classList.remove('hidden');
+        }
+      } catch (error) {
+        console.error('지원자 목록 로드 오류:', error);
+        alert('지원자 목록을 불러오는데 실패했습니다.');
+      }
+    }
+
+    // 지원자 목록 표시
+    function displayApplications(applications) {
+      const container = document.getElementById('applicationsList');
+      container.innerHTML = '';
+
+      applications.forEach(app => {
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-lg shadow p-6 hover:shadow-lg transition';
+        card.innerHTML = `
+          <div class="flex items-start justify-between mb-4">
+            <div class="flex items-start flex-1">
+              <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-user text-2xl text-orange-600"></i>
+              </div>
+              <div class="flex-1">
+                <h3 class="text-xl font-bold text-gray-800">${app.applicant_name}</h3>
+                <p class="text-sm text-gray-600 mb-2">${app.applicant_email || app.applicant_phone}</p>
+                <div class="flex flex-wrap gap-2">
+                  <span class="px-3 py-1 ${getStatusBadgeClass(app.status)} text-xs font-semibold rounded-full">
+                    ${getStatusLabel(app.status)}
+                  </span>
+                  ${app.payment_required ? '<span class="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full"><i class="fas fa-check mr-1"></i>결제 완료</span>' : ''}
+                </div>
+              </div>
+            </div>
+            <div class="text-right text-sm text-gray-500">
+              <p>${new Date(app.created_at).toLocaleDateString('ko-KR')}</p>
+            </div>
+          </div>
+
+          <div class="border-t pt-4 mb-4">
+            <h4 class="font-semibold text-gray-800 mb-2">${app.job_title}</h4>
+            <div class="flex items-center text-sm text-gray-600 space-x-4">
+              <span><i class="fas fa-map-marker-alt mr-1"></i>${app.job_location}</span>
+              <span><i class="fas fa-won-sign mr-1"></i>${parseInt(app.job_wage).toLocaleString()}원</span>
+            </div>
+          </div>
+
+          ${app.ai_score ? `
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-blue-800"><i class="fas fa-robot mr-1"></i>AI 면접 점수</span>
+                <span class="text-lg font-bold text-blue-600">${app.ai_score}점</span>
+              </div>
+            </div>
+          ` : ''}
+
+          <div class="flex flex-wrap gap-2">
+            ${getActionButtons(app)}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // 상태 배지 클래스
+    function getStatusBadgeClass(status) {
+      const classes = {
+        'pending': 'bg-yellow-100 text-yellow-800',
+        'experience_requested': 'bg-blue-100 text-blue-800',
+        'experience_completed': 'bg-purple-100 text-purple-800',
+        'hired': 'bg-green-100 text-green-800',
+        'rejected': 'bg-red-100 text-red-800',
+      };
+      return classes[status] || 'bg-gray-100 text-gray-800';
+    }
+
+    // 상태 레이블
+    function getStatusLabel(status) {
+      const labels = {
+        'pending': '대기중',
+        'experience_requested': '체험 신청',
+        'experience_completed': '체험 완료',
+        'hired': '정식 채용',
+        'rejected': '불합격',
+      };
+      return labels[status] || status;
+    }
+
+    // 액션 버튼
+    function getActionButtons(app) {
+      if (app.payment_required) {
+        return `
+          <button onclick="viewPaymentReceipt('${app.payment_id}')" 
+                  class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+            <i class="fas fa-receipt mr-1"></i>영수증 보기
+          </button>
+        `;
+      }
+
+      if (app.status === 'experience_completed') {
+        return `
+          <button onclick="showPaymentModal('${app.id}', '${app.job_id}', '${app.applicant_name}')" 
+                  class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
+            <i class="fas fa-credit-card mr-1"></i>정식 채용 확정 (결제)
+          </button>
+          <button onclick="rejectApplication('${app.id}')" 
+                  class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+            <i class="fas fa-times mr-1"></i>불합격
+          </button>
+        `;
+      }
+
+      if (app.status === 'pending') {
+        return `
+          <button onclick="requestExperience('${app.id}')" 
+                  class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            <i class="fas fa-clock mr-1"></i>1시간 체험 신청
+          </button>
+          <button onclick="rejectApplication('${app.id}')" 
+                  class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+            <i class="fas fa-times mr-1"></i>불합격
+          </button>
+        `;
+      }
+
+      return '';
+    }
+
+    // 결제 모달 표시
+    function showPaymentModal(applicationId, jobId, applicantName) {
+      currentApplicationId = applicationId;
+      currentJobId = jobId;
+      document.getElementById('modalApplicantName').textContent = applicantName;
+      document.getElementById('paymentModal').classList.remove('hidden');
+    }
+
+    // 결제 모달 닫기
+    function closePaymentModal() {
+      document.getElementById('paymentModal').classList.add('hidden');
+      currentApplicationId = null;
+      currentJobId = null;
+    }
+
+    // 결제 페이지로 이동
+    function proceedToPayment() {
+      if (!currentApplicationId || !currentJobId) {
+        alert('오류가 발생했습니다.');
+        return;
+      }
+      
+      window.location.href = `/payment.html?applicationId=${currentApplicationId}&jobId=${currentJobId}`;
+    }
+
+    // 1시간 체험 신청
+    async function requestExperience(applicationId) {
+      if (!confirm('이 지원자에게 1시간 체험을 신청하시겠습니까?')) return;
+
+      try {
+        const token = localStorage.getItem('albi_session_token');
+        const response = await fetch(`/api/employer/applications/${applicationId}/request-experience`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          alert('1시간 체험 신청이 완료되었습니다!');
+          await loadApplications();
+        } else {
+          alert(data.message || '체험 신청에 실패했습니다.');
+        }
+      } catch (error) {
+        console.error('체험 신청 오류:', error);
+        alert('체험 신청 중 오류가 발생했습니다.');
+      }
+    }
+
+    // 불합격 처리
+    async function rejectApplication(applicationId) {
+      if (!confirm('정말로 이 지원자를 불합격 처리하시겠습니까?')) return;
+
+      try {
+        const token = localStorage.getItem('albi_session_token');
+        const response = await fetch(`/api/employer/applications/${applicationId}/reject`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          alert('불합격 처리되었습니다.');
+          await loadApplications();
+        } else {
+          alert(data.message || '불합격 처리에 실패했습니다.');
+        }
+      } catch (error) {
+        console.error('불합격 처리 오류:', error);
+        alert('불합격 처리 중 오류가 발생했습니다.');
+      }
+    }
+
+    // 영수증 보기
+    function viewPaymentReceipt(paymentId) {
+      window.location.href = `/employer/payment-receipt.html?paymentId=${paymentId}`;
+    }
+
+    // 로그아웃
+    function logout() {
+      localStorage.removeItem('albi_session_token');
+      localStorage.removeItem('albi_user_info');
+      window.location.href = '/login.html';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>패널 면접 - 3명의 면접관 | Albi AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Phase 8.1: System Optimization -->
+    <link rel="stylesheet" href="/static/mobile-optimized.css">
+    <script src="/static/error-handler.js"></script>
+    <script src="/static/loading-manager.js"></script>
+    <script src="/static/performance-monitor.js"></script>
+    <script src="/static/interviewers.js"></script>
+    
+    <!-- Interviewer Animation -->
+    <script src="/static/interviewer-animator.js"></script>
+    
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .interviewer-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .interviewer-card.active {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid #a78bfa;
+            box-shadow: 0 10px 40px rgba(167, 139, 250, 0.5);
+            transform: scale(1.05);
+        }
+        
+        .interviewer-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            object-fit: cover;
+        }
+        
+        .interviewer-card.active .interviewer-avatar {
+            border-color: #a78bfa;
+            box-shadow: 0 0 20px rgba(167, 139, 250, 0.8);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen text-white">
+    <div class="container mx-auto px-4 py-8">
+        <!-- 헤더 -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold mb-2">
+                <i class="fas fa-users mr-3"></i>패널 면접
+            </h1>
+            <p class="text-gray-300">3명의 전문가가 함께 면접을 진행합니다</p>
+        </div>
+
+        <!-- 면접관 패널 -->
+        <div id="panelContainer" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- 면접관 카드가 여기에 동적으로 추가됩니다 -->
+        </div>
+
+        <!-- 질문 영역 -->
+        <div class="bg-gray-900/50 backdrop-blur-lg rounded-2xl p-8 mb-6">
+            <div class="flex items-start space-x-4 mb-6">
+                <div id="currentInterviewerAvatar" class="interviewer-avatar w-24 h-24 rounded-full overflow-hidden border-3 border-purple-500 shadow-lg">
+                    <img id="currentInterviewerImg" src="/static/interviewer.jpg" alt="면접관" class="w-full h-full object-cover">
+                </div>
+                <div class="flex-1">
+                    <h3 id="currentInterviewerName" class="text-2xl font-bold mb-2">면접관</h3>
+                    <p id="currentInterviewerRole" class="text-gray-400 mb-4">직책</p>
+                    <div class="bg-purple-900/30 rounded-xl p-6">
+                        <p id="questionText" class="text-xl leading-relaxed">
+                            패널 면접을 시작하려면 아래 버튼을 클릭하세요.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 컨트롤 버튼 -->
+        <div class="flex justify-center space-x-4">
+            <button id="startButton" class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all">
+                <i class="fas fa-play mr-2"></i>면접 시작
+            </button>
+            
+            <button id="recordButton" class="hidden bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all">
+                <i class="fas fa-microphone mr-2"></i>답변하기
+            </button>
+            
+            <button id="nextButton" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all">
+                <i class="fas fa-forward mr-2"></i>다음 질문
+            </button>
+            
+            <button id="endButton" class="hidden bg-gray-600 hover:bg-gray-700 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all">
+                <i class="fas fa-stop mr-2"></i>면접 종료
+            </button>
+        </div>
+
+        <!-- 진행 상황 -->
+        <div id="progressContainer" class="mt-8 hidden">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm text-gray-300">진행 상황</span>
+                <span id="progressText" class="text-sm font-bold">0/0</span>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-2">
+                <div id="progressBar" class="bg-purple-500 h-2 rounded-full transition-all" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/interviewers.js"></script>
+    <script>
+        // 면접관 데이터
+        const INTERVIEWERS = [
+          {
+            id: 'interviewer_001',
+            name: '김서연',
+            role: 'HR 매니저',
+            specialty: 'HR',
+            imageUrl: '/static/interviewer-hr.jpg'
+          },
+          {
+            id: 'interviewer_002',
+            name: '박준혁',
+            role: '기술 리드',
+            specialty: 'TECH',
+            imageUrl: '/static/interviewer-tech.jpg'
+          },
+          {
+            id: 'interviewer_003',
+            name: '이민지',
+            role: '프로젝트 매니저',
+            specialty: 'PM',
+            imageUrl: '/static/interviewer-pm.jpg'
+          }
+        ];
+        
+        let currentPanel = INTERVIEWERS;
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let currentInterviewer = null;
+        
+        // 패널 카드 렌더링
+        function renderPanel() {
+            const container = document.getElementById('panelContainer');
+            container.innerHTML = '';
+            
+            currentPanel.forEach((interviewer, index) => {
+                const card = document.createElement('div');
+                card.className = 'interviewer-card rounded-xl p-6 text-center';
+                card.id = `interviewer_card_${interviewer.id}`;
+                
+                const avatarSrc = interviewer.imageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(interviewer.name)}&size=100&background=667eea&color=fff`;
+                
+                card.innerHTML = `
+                    <img src="${avatarSrc}" alt="${interviewer.name}" class="interviewer-avatar mx-auto mb-4">
+                    <h3 class="text-xl font-bold mb-2">${interviewer.name}</h3>
+                    <p class="text-gray-400 text-sm mb-2">${interviewer.role}</p>
+                    <span class="inline-block bg-purple-600 text-xs px-3 py-1 rounded-full">${interviewer.specialty}</span>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+        
+        // 면접 시작
+        async function startInterview() {
+            try {
+                // 질문 생성
+                const response = await fetch('/api/panel-interview-questions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: 'user_demo_001',
+                        company: {
+                            name: '삼성전자',
+                            position: '소프트웨어 엔지니어'
+                        },
+                        panelIds: currentPanel.map(i => i.id)
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!data.success || !data.data.questions) {
+                    throw new Error('Failed to generate questions');
+                }
+                
+                currentQuestions = data.data.questions;
+                currentQuestionIndex = 0;
+                
+                // UI 업데이트
+                document.getElementById('startButton').classList.add('hidden');
+                document.getElementById('recordButton').classList.remove('hidden');
+                document.getElementById('nextButton').classList.remove('hidden');
+                document.getElementById('endButton').classList.remove('hidden');
+                document.getElementById('progressContainer').classList.remove('hidden');
+                
+                // 첫 질문 표시
+                showQuestion(0);
+                
+            } catch (error) {
+                console.error('Failed to start interview:', error);
+                alert('면접 시작에 실패했습니다: ' + error.message);
+            }
+        }
+        
+        // 질문 표시
+        function showQuestion(index) {
+            if (index >= currentQuestions.length) {
+                endInterview();
+                return;
+            }
+            
+            const question = currentQuestions[index];
+            const interviewer = currentPanel.find(i => i.id === question.interviewerId) || currentPanel[0];
+            
+            currentInterviewer = interviewer;
+            currentQuestionIndex = index;
+            
+            // 현재 면접관 카드 활성화
+            document.querySelectorAll('.interviewer-card').forEach(card => card.classList.remove('active'));
+            const activeCard = document.getElementById(`interviewer_card_${interviewer.id}`);
+            if (activeCard) {
+                activeCard.classList.add('active');
+            }
+            
+            // 질문 표시
+            const avatarSrc = interviewer.imageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(interviewer.name)}&size=100&background=667eea&color=fff`;
+            document.getElementById('currentInterviewerAvatar').innerHTML = `<img src="${avatarSrc}" alt="${interviewer.name}" class="w-full h-full rounded-full object-cover">`;
+            document.getElementById('currentInterviewerName').textContent = interviewer.name;
+            document.getElementById('currentInterviewerRole').textContent = interviewer.role;
+            document.getElementById('questionText').textContent = question.question;
+            
+            // 진행 상황 업데이트
+            updateProgress();
+        }
+        
+        // 진행 상황 업데이트
+        function updateProgress() {
+            const progress = ((currentQuestionIndex + 1) / currentQuestions.length) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = `${currentQuestionIndex + 1}/${currentQuestions.length}`;
+        }
+        
+        // 다음 질문
+        function nextQuestion() {
+            showQuestion(currentQuestionIndex + 1);
+        }
+        
+        // 면접 종료
+        function endInterview() {
+            alert('면접이 완료되었습니다! 평가 결과는 곧 제공됩니다.');
+            location.reload();
+        }
+        
+        // 이벤트 리스너
+        document.getElementById('startButton').addEventListener('click', startInterview);
+        document.getElementById('nextButton').addEventListener('click', nextQuestion);
+        document.getElementById('endButton').addEventListener('click', endInterview);
+        document.getElementById('recordButton').addEventListener('click', () => {
+            alert('음성 답변 기능은 곧 제공됩니다!');
+        });
+        
+        // 초기 패널 렌더링
+        renderPanel();
+    </script>
+</body>
+</html>

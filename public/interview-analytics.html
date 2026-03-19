@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📈 Albi 면접 분석 대시보드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-chart-bar text-purple-600"></i>
+                면접 데이터 분석
+            </h1>
+            <p class="text-gray-600">완료율, 점수 추이, 이탈률, 성과 분석</p>
+            <div class="mt-2 text-sm text-gray-500 flex items-center gap-4">
+                <span>마지막 업데이트: <span id="lastUpdate">-</span></span>
+                <button onclick="loadAnalytics()" class="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600">
+                    <i class="fas fa-sync-alt"></i> 새로고침
+                </button>
+                <a href="/session-stats.html" class="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600">
+                    <i class="fas fa-users"></i> 세션 모니터링
+                </a>
+            </div>
+        </div>
+
+        <!-- 주요 지표 -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-500 text-sm">시작된 면접</p>
+                <p class="text-3xl font-bold text-blue-600" id="totalStarted">-</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-500 text-sm">완료</p>
+                <p class="text-3xl font-bold text-green-600" id="completed">-</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-500 text-sm">완료율</p>
+                <p class="text-3xl font-bold text-purple-600" id="completionRate">-%</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-500 text-sm">탈락</p>
+                <p class="text-3xl font-bold text-red-600" id="rejected">-</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-500 text-sm">평균 응답시간</p>
+                <p class="text-3xl font-bold text-orange-600" id="avgResponseTime">-s</p>
+            </div>
+        </div>
+
+        <!-- 차트 그리드 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <!-- 점수 추이 -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-chart-line text-blue-600"></i>
+                    평균 점수 추이 (7일)
+                </h2>
+                <canvas id="scoresTrendChart" height="200"></canvas>
+            </div>
+            
+            <!-- 등급 분포 상세 -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-medal text-yellow-600"></i>
+                    등급별 통계 (24h)
+                </h2>
+                <div id="gradeStatsTable" class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left">등급</th>
+                                <th class="px-4 py-2 text-right">개수</th>
+                                <th class="px-4 py-2 text-right">평균점수</th>
+                                <th class="px-4 py-2 text-right">평균시간</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gradeStatsBody">
+                            <tr><td colspan="4" class="text-center py-4 text-gray-500">로딩 중...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 이탈률 & 시간대별 활동 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <!-- 이탈률 분석 -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-exclamation-triangle text-red-600"></i>
+                    이탈률 분석 (질문 단계별)
+                </h2>
+                <canvas id="dropoffChart" height="200"></canvas>
+            </div>
+            
+            <!-- 시간대별 활동 -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-clock text-purple-600"></i>
+                    시간대별 면접 활동 (24h)
+                </h2>
+                <canvas id="hourlyChart" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- 직무별 성과 -->
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-briefcase text-green-600"></i>
+                직무별 성과 비교 (24h)
+            </h2>
+            <canvas id="jobPerformanceChart" height="100"></canvas>
+        </div>
+
+        <!-- Top/Worst 면접 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- 최고 점수 -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-trophy text-yellow-500"></i>
+                    최고 점수 면접 Top 5
+                </h2>
+                <div id="topInterviews" class="space-y-2">
+                    <p class="text-gray-500 text-sm">로딩 중...</p>
+                </div>
+            </div>
+            
+            <!-- 최저 점수 -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-chart-line text-red-500"></i>
+                    개선 필요 면접 Top 5
+                </h2>
+                <div id="worstInterviews" class="space-y-2">
+                    <p class="text-gray-500 text-sm">로딩 중...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let scoresTrendChart, dropoffChart, hourlyChart, jobPerformanceChart;
+        
+        const jobTypeNames = {
+            cafe: '☕ 카페',
+            cvs: '🏪 편의점',
+            restaurant: '🍜 음식점',
+            retail: '🛒 매장',
+            fastfood: '🍔 패스트푸드'
+        };
+        
+        function formatDateTime(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleString('ko-KR', { 
+                month: 'short', 
+                day: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+        }
+        
+        function formatDuration(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            return `${minutes}분`;
+        }
+        
+        async function loadAnalytics() {
+            try {
+                console.log('📈 Loading analytics...');
+                const response = await fetch('/api/interview-analytics');
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.error || 'Failed to load analytics');
+                }
+                
+                const data = result.data;
+                console.log('✅ Analytics loaded:', data);
+                
+                // 주요 지표
+                document.getElementById('totalStarted').textContent = data.completion.total_started;
+                document.getElementById('completed').textContent = data.completion.completed;
+                document.getElementById('completionRate').textContent = data.completion.completion_rate + '%';
+                document.getElementById('rejected').textContent = data.completion.rejected;
+                document.getElementById('avgResponseTime').textContent = data.avg_response_time_seconds + 's';
+                document.getElementById('lastUpdate').textContent = formatDateTime(data.timestamp);
+                
+                // 점수 추이 차트
+                const dates = data.scores_trend.daily.map(d => d.date);
+                const scores = data.scores_trend.daily.map(d => Math.round(d.avg_score));
+                
+                if (scoresTrendChart) scoresTrendChart.destroy();
+                const ctx1 = document.getElementById('scoresTrendChart').getContext('2d');
+                scoresTrendChart = new Chart(ctx1, {
+                    type: 'line',
+                    data: {
+                        labels: dates,
+                        datasets: [{
+                            label: '평균 점수',
+                            data: scores,
+                            borderColor: '#3B82F6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: { beginAtZero: true, max: 100 }
+                        }
+                    }
+                });
+                
+                // 등급별 통계 테이블
+                const gradeBody = document.getElementById('gradeStatsBody');
+                if (data.grade_stats.length === 0) {
+                    gradeBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray-500">데이터 없음</td></tr>';
+                } else {
+                    gradeBody.innerHTML = data.grade_stats.map(stat => `
+                        <tr class="border-t">
+                            <td class="px-4 py-2 font-bold text-lg">${stat.final_grade}</td>
+                            <td class="px-4 py-2 text-right">${stat.count}명</td>
+                            <td class="px-4 py-2 text-right">${Math.round(stat.avg_score)}점</td>
+                            <td class="px-4 py-2 text-right">${formatDuration(stat.avg_duration)}</td>
+                        </tr>
+                    `).join('');
+                }
+                
+                // 이탈률 차트
+                const dropoffSteps = data.dropoff_analysis.map(d => `${d.question_count}/15`);
+                const dropoffCounts = data.dropoff_analysis.map(d => d.session_count);
+                
+                if (dropoffChart) dropoffChart.destroy();
+                const ctx2 = document.getElementById('dropoffChart').getContext('2d');
+                dropoffChart = new Chart(ctx2, {
+                    type: 'bar',
+                    data: {
+                        labels: dropoffSteps,
+                        datasets: [{
+                            label: '이탈 세션 수',
+                            data: dropoffCounts,
+                            backgroundColor: '#EF4444'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                        }
+                    }
+                });
+                
+                // 시간대별 활동 차트
+                const hours = data.hourly_activity.map(d => d.hour + '시');
+                const hourlyInterviews = data.hourly_activity.map(d => d.interviews);
+                
+                if (hourlyChart) hourlyChart.destroy();
+                const ctx3 = document.getElementById('hourlyChart').getContext('2d');
+                hourlyChart = new Chart(ctx3, {
+                    type: 'bar',
+                    data: {
+                        labels: hours,
+                        datasets: [{
+                            label: '면접 수',
+                            data: hourlyInterviews,
+                            backgroundColor: '#8B5CF6'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                        }
+                    }
+                });
+                
+                // 직무별 성과 차트
+                const jobTypes = data.job_performance.map(d => jobTypeNames[d.job_type] || d.job_type);
+                const jobScores = data.job_performance.map(d => Math.round(d.avg_score || 0));
+                
+                if (jobPerformanceChart) jobPerformanceChart.destroy();
+                const ctx4 = document.getElementById('jobPerformanceChart').getContext('2d');
+                jobPerformanceChart = new Chart(ctx4, {
+                    type: 'bar',
+                    data: {
+                        labels: jobTypes,
+                        datasets: [{
+                            label: '평균 점수',
+                            data: jobScores,
+                            backgroundColor: '#10B981'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        indexAxis: 'y',
+                        scales: {
+                            x: { beginAtZero: true, max: 100 }
+                        }
+                    }
+                });
+                
+                // Top/Worst 면접
+                const topDiv = document.getElementById('topInterviews');
+                if (data.top_interviews.length === 0) {
+                    topDiv.innerHTML = '<p class="text-gray-500 text-sm">데이터 없음</p>';
+                } else {
+                    topDiv.innerHTML = data.top_interviews.map((interview, i) => `
+                        <div class="flex items-center justify-between p-3 bg-yellow-50 rounded">
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl">${['🥇','🥈','🥉','4️⃣','5️⃣'][i]}</span>
+                                <div>
+                                    <p class="font-bold">${jobTypeNames[interview.job_type]} - ${interview.final_grade}등급</p>
+                                    <p class="text-xs text-gray-500">${formatDateTime(interview.started_at)}</p>
+                                </div>
+                            </div>
+                            <span class="text-xl font-bold text-yellow-600">${interview.total_score}점</span>
+                        </div>
+                    `).join('');
+                }
+                
+                const worstDiv = document.getElementById('worstInterviews');
+                if (data.worst_interviews.length === 0) {
+                    worstDiv.innerHTML = '<p class="text-gray-500 text-sm">데이터 없음</p>';
+                } else {
+                    worstDiv.innerHTML = data.worst_interviews.map(interview => `
+                        <div class="flex items-center justify-between p-3 bg-red-50 rounded">
+                            <div>
+                                <p class="font-bold">${jobTypeNames[interview.job_type]} - ${interview.final_grade}등급</p>
+                                <p class="text-xs text-gray-500">${formatDateTime(interview.started_at)}</p>
+                            </div>
+                            <span class="text-xl font-bold text-red-600">${interview.total_score}점</span>
+                        </div>
+                    `).join('');
+                }
+                
+            } catch (error) {
+                console.error('❌ Failed to load analytics:', error);
+                alert('분석 데이터 로드 실패: ' + error.message);
+            }
+        }
+        
+        // 페이지 로드 시 분석 로드
+        loadAnalytics();
+        
+        // 1분마다 자동 새로고침
+        setInterval(loadAnalytics, 60000);
+    </script>
+</body>
+</html>

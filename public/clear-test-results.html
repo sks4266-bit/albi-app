@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>테스트 결과 초기화 - 알비</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+        <div class="text-6xl mb-4">🗑️</div>
+        <h1 class="text-2xl font-bold text-gray-800 mb-4">테스트 결과 초기화</h1>
+        <p class="text-gray-600 mb-6">저장된 모든 테스트 결과를 삭제합니다.</p>
+        
+        <div id="status" class="mb-6 p-4 rounded-lg bg-gray-50">
+            <p class="text-sm text-gray-700">
+                저장된 결과: <span id="count" class="font-bold">확인 중...</span>
+            </p>
+        </div>
+        
+        <button onclick="clearResults()" class="w-full bg-red-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-600 transition mb-3">
+            모든 결과 삭제
+        </button>
+        
+        <a href="/mypage.html" class="block w-full bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">
+            마이페이지로 돌아가기
+        </a>
+    </div>
+    
+    <script>
+        // 페이지 로드 시 저장된 결과 개수 표시
+        window.addEventListener('DOMContentLoaded', () => {
+            updateCount();
+        });
+        
+        function updateCount() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('myTestResults') || '[]');
+                document.getElementById('count').textContent = saved.length + '개';
+            } catch (error) {
+                document.getElementById('count').textContent = '오류';
+            }
+        }
+        
+        function clearResults() {
+            if (!confirm('정말로 모든 테스트 결과를 삭제하시겠습니까?')) {
+                return;
+            }
+            
+            try {
+                localStorage.removeItem('myTestResults');
+                document.getElementById('status').innerHTML = `
+                    <p class="text-green-600 font-semibold">
+                        ✅ 모든 결과가 삭제되었습니다!
+                    </p>
+                `;
+                updateCount();
+                
+                setTimeout(() => {
+                    window.location.href = '/mypage.html';
+                }, 1500);
+            } catch (error) {
+                document.getElementById('status').innerHTML = `
+                    <p class="text-red-600 font-semibold">
+                        ❌ 삭제 실패: ${error.message}
+                    </p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

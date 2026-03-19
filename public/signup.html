@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>회원가입 - 알비</title>
+  <!-- Google Vision API OCR v2.0 -->
+  <link href="/styles.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+  
+
+  
+  <!-- 전역 스크립트: 모든 버튼 함수들을 미리 정의 -->
+  <script>
+    console.log('🟢 전역 스크립트 로드됨');
+    
+    // 전역 변수
+    var verificationData = null;
+    var selectedUserType = 'jobseeker'; // 모든 사용자는 구직자로 가입
+    var businessRegistrationFile = null;
+    var phoneVerificationToken = null;
+    var phoneVerified = false;
+    var verificationTimer = null;
+    var verificationTimeLeft = 180; // 3분
+    
+    // 소셜 로그인
+    function socialSignup(provider) {
+      console.log('✅ socialSignup 호출:', provider);
+      if (provider === 'kakao') {
+        window.location.href = '/api/auth/kakao';
+      } else if (provider === 'naver') {
+        window.location.href = '/api/auth/naver';
+      } else if (provider === 'google') {
+        window.location.href = '/api/auth/google';
+      }
+    }
+    
+    // 사용자 타입 선택
+    function selectUserType(type) {
+      console.log('✅ selectUserType 호출:', type);
+      selectedUserType = type;
+      
+      document.querySelectorAll('.type-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      const clickedBtn = document.querySelector(`.type-btn[data-type="${type}"]`);
+      if (clickedBtn) clickedBtn.classList.add('active');
+      
+      const businessRegistration = document.getElementById('businessRegistration');
+      if (businessRegistration) {
+        businessRegistration.style.display = type === 'employer' ? 'block' : 'none';
+      }
+    }
+    
+    // 파일 제거
+    function removeFile() {
+      console.log('✅ removeFile 호출');
+      businessRegistrationFile = null;
+      const fileInput = document.getElementById('businessRegistrationFile');
+      if (fileInput) fileInput.value = '';
+      
+      // 업로드 버튼을 초기 상태로 되돌리기
+      const uploadBtn = document.querySelector('.file-upload-btn');
+      if (uploadBtn) {
+        uploadBtn.style.borderColor = '';
+        uploadBtn.style.backgroundColor = '';
+        uploadBtn.innerHTML = `
+          <i class="fas fa-upload"></i>
+          <div style="margin-top: 12px; font-weight: 600; color: #333;">사업자등록증 파일 업로드</div>
+          <div style="margin-top: 4px; font-size: 12px; color: #999;">이미지 또는 PDF 파일 (최대 5MB)</div>
+        `;
+      }
+      
+      const preview = document.querySelector('.file-preview');
+      if (preview) preview.style.display = 'none';
+    }
+    
+    // 휴대폰 인증 전송
+    async function sendPhoneVerification() {
+      const nameInput = document.getElementById('name');
+      const phoneInput = document.getElementById('phone');
+      
+      if (!nameInput || !phoneInput) return;
+      
+      const name = nameInput.value.trim();
+      const phone = phoneInput.value.trim();
+      
+      if (!name) {
+        alert('이름을 입력해주세요.');
+        nameInput.focus();
+        return;
+      }
+      
+      if (!phone) {
+        alert('휴대폰 번호를 입력해주세요.');
+        phoneInput.focus();
+        return;
+      }
+      
+      const sendBtn = document.getElementById('sendVerificationBtn');
+      const verifySection = document.getElementById('verifySection');
+      const statusBox = document.getElementById('phoneVerificationStatus');
+      
+      if (sendBtn) sendBtn.disabled = true;
+      if (statusBox) {
+        statusBox.textContent = '인증번호 전송 중...';
+        statusBox.className = 'phone-verification-status';
+        statusBox.style.display = 'block';
+      }
+      
+      try {
+        const response = await fetch('/api/auth/send-signup-verification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, phone })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || '인증번호 전송에 실패했습니다.');
+        }
+        
+        phoneVerificationToken = data.token;
+        
+        if (statusBox) {
+          statusBox.textContent = '인증번호가 전송되었습니다. (3분 유효)';
+          statusBox.className = 'phone-verification-status success';
+        }
+        
+        if (verifySection) verifySection.style.display = 'block';
+        
+        // 타이머 시작
+        startVerificationTimer();
+        
+        // 개발 모드에서 콘솔에 코드 출력
+        if (data.debug_code) {
+          console.log('📱 인증번호:', data.debug_code);
+        }
+        
+      } catch (error) {
+        console.error('인증번호 전송 실패:', error);
+        if (statusBox) {
+          statusBox.textContent = error.message;
+          statusBox.className = 'phone-verification-status error';
+        }
+        if (sendBtn) sendBtn.disabled = false;
+      }
+    }
+    
+    // 인증번호 확인
+    async function verifyPhoneCode() {
+      const codeInput = document.getElementById('verificationCode');
+      if (!codeInput) return;
+      
+      const code = codeInput.value.trim();
+      
+      if (!code) {
+        alert('인증번호를 입력해주세요.');
+        return;
+      }
+      
+      if (!phoneVerificationToken) {
+        alert('인증번호를 먼저 요청해주세요.');
+        return;
+      }
+      
+      const verifyBtn = document.getElementById('verifyCodeBtn');
+      const statusBox = document.getElementById('phoneVerificationStatus');
+      
+      if (verifyBtn) verifyBtn.disabled = true;
+      if (statusBox) {
+        statusBox.textContent = '인증 확인 중...';
+        statusBox.className = 'phone-verification-status';
+      }
+      
+      try {
+        const response = await fetch('/api/auth/verify-signup-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: phoneVerificationToken, code })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || '인증번호가 일치하지 않습니다.');
+        }
+        
+        phoneVerified = true;
+        
+        // 타이머 정지
+        if (verificationTimer) {
+          clearInterval(verificationTimer);
+          verificationTimer = null;
+        }
+        
+        if (statusBox) {
+          statusBox.textContent = '✓ 휴대폰 인증이 완료되었습니다.';
+          statusBox.className = 'phone-verification-status success';
+        }
+        
+        // 입력 필드 비활성화
+        const nameInput = document.getElementById('name');
+        const phoneInput = document.getElementById('phone');
+        if (nameInput) nameInput.disabled = true;
+        if (phoneInput) phoneInput.disabled = true;
+        if (codeInput) codeInput.disabled = true;
+        if (verifyBtn) verifyBtn.style.display = 'none';
+        
+        const sendBtn = document.getElementById('sendVerificationBtn');
+        if (sendBtn) sendBtn.style.display = 'none';
+        
+      } catch (error) {
+        console.error('인증 확인 실패:', error);
+        if (statusBox) {
+          statusBox.textContent = error.message;
+          statusBox.className = 'phone-verification-status error';
+        }
+        if (verifyBtn) verifyBtn.disabled = false;
+      }
+    }
+    
+    // 타이머 시작
+    function startVerificationTimer() {
+      verificationTimeLeft = 180; // 3분
+      
+      if (verificationTimer) {
+        clearInterval(verificationTimer);
+      }
+      
+      const timerDisplay = document.getElementById('verificationTimer');
+      if (timerDisplay) timerDisplay.style.display = 'inline';
+      
+      verificationTimer = setInterval(() => {
+        verificationTimeLeft--;
+        
+        if (timerDisplay) {
+          const minutes = Math.floor(verificationTimeLeft / 60);
+          const seconds = verificationTimeLeft % 60;
+          timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        if (verificationTimeLeft <= 0) {
+          clearInterval(verificationTimer);
+          verificationTimer = null;
+          
+          const statusBox = document.getElementById('phoneVerificationStatus');
+          if (statusBox && !phoneVerified) {
+            statusBox.textContent = '인증 시간이 만료되었습니다. 다시 시도해주세요.';
+            statusBox.className = 'phone-verification-status error';
+          }
+        }
+      }, 1000);
+    }
+    
+    // 전체 동의 토글
+    window.toggleAllTerms = function() {
+      var agreeAll = document.getElementById('agreeAll').checked;
+      var checkboxes = document.querySelectorAll('.term-checkbox');
+      for (var i = 0; i < checkboxes.length; i++) {
+        checkboxes[i].checked = agreeAll;
+      }
+    }
+    
+    // 개별 체크박스 클릭 시 전체 동의 상태 업데이트
+    window.updateAgreeAll = function() {
+      var checkboxes = document.querySelectorAll('.term-checkbox');
+      var allChecked = true;
+      for (var i = 0; i < checkboxes.length; i++) {
+        if (!checkboxes[i].checked) {
+          allChecked = false;
+          break;
+        }
+      }
+      document.getElementById('agreeAll').checked = allChecked;
+    }
+  </script>
+  
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+      background: #f8f9fa;
+      padding: 40px 20px;
+    }
+    
+    .signup-container {
+      max-width: 480px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      padding: 48px 40px;
+    }
+    
+    .signup-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    
+    .signup-logo {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+    }
+    
+    .signup-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #222;
+      margin-bottom: 8px;
+    }
+    
+    .signup-subtitle {
+      font-size: 14px;
+      color: #666;
+    }
+    
+    /* 간편 회원가입 */
+    .social-signup {
+      margin-bottom: 32px;
+    }
+    
+    .social-signup-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 16px;
+    }
+    
+    .btn-social {
+      width: 100%;
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 10px;
+      border: none;
+    }
+    
+    .btn-kakao {
+      background: #FEE500;
+      color: #000;
+    }
+    
+    .btn-kakao:hover {
+      background: #FDDC3F;
+    }
+    
+    .btn-naver {
+      background: #03C75A;
+      color: white;
+    }
+    
+    .btn-naver:hover {
+      background: #02B350;
+    }
+    
+    .btn-google {
+      background: white;
+      border: 1px solid #ddd;
+      color: #333;
+    }
+    
+    .btn-google:hover {
+      background: #f8f9fa;
+    }
+    
+    .divider {
+      text-align: center;
+      margin: 32px 0;
+      position: relative;
+    }
+    
+    .divider::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 1px;
+      background: #e5e5e5;
+    }
+    
+    .divider span {
+      position: relative;
+      background: white;
+      padding: 0 16px;
+      font-size: 13px;
+      color: #999;
+    }
+    
+    /* 휴대폰 인증 회원가입 */
+    .phone-signup-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 16px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .form-label .required {
+      color: #FF6B35;
+      margin-left: 2px;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 15px;
+      transition: all 0.2s;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: #FF6B35;
+      box-shadow: 0 0 0 3px rgba(255,107,53,0.1);
+    }
+    
+    .input-group {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .input-group .form-input {
+      flex: 1;
+    }
+    
+    .btn-verify {
+      padding: 14px 20px;
+      background: #FF6B35;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    
+    .btn-verify:hover {
+      background: #E55A2B;
+    }
+    
+    .btn-verify:disabled {
+      background: #ddd;
+      cursor: not-allowed;
+    }
+    
+    .verification-timer {
+      font-size: 13px;
+      color: #FF6B35;
+      margin-top: 6px;
+    }
+    
+    .phone-verification-status {
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      text-align: center;
+      background: #F3F4F6;
+      color: #666;
+    }
+    
+    .phone-verification-status.success {
+      background: #D1FAE5;
+      color: #065F46;
+    }
+    
+    .phone-verification-status.error {
+      background: #FEE2E2;
+      color: #991B1B;
+    }
+    
+    .form-checkbox {
+      display: flex;
+      align-items: start;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    
+    .form-checkbox input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      cursor: pointer;
+    }
+    
+    .form-checkbox label {
+      font-size: 14px;
+      color: #555;
+      cursor: pointer;
+      line-height: 1.5;
+    }
+    
+    .form-checkbox label a {
+      color: #FF6B35;
+      text-decoration: underline;
+    }
+    
+    .terms-all {
+      padding: 16px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+    
+    .btn-signup {
+      width: 100%;
+      padding: 18px;
+      background: #FF6B35;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 8px;
+    }
+    
+    .btn-signup:hover {
+      background: #E55A2B;
+    }
+    
+    .btn-signup:disabled {
+      background: #ddd;
+      cursor: not-allowed;
+    }
+    
+    .login-link {
+      text-align: center;
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid #e5e5e5;
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .login-link a {
+      color: #FF6B35;
+      text-decoration: none;
+      font-weight: 600;
+      margin-left: 6px;
+    }
+    
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+    
+    /* 사용자 타입 선택 */
+    .user-type-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    
+    .type-btn {
+      padding: 20px 16px;
+      background: white;
+      border: 2px solid #e5e5e5;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .type-btn i {
+      font-size: 32px;
+      color: #999;
+    }
+    
+    .type-btn span {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .type-btn small {
+      font-size: 12px;
+      color: #999;
+    }
+    
+    .type-btn:hover {
+      border-color: #FF6B35;
+      background: #FFF5F2;
+    }
+    
+    .type-btn.active {
+      border-color: #FF6B35;
+      background: #FFF5F2;
+    }
+    
+    .type-btn.active i {
+      color: #FF6B35;
+    }
+    
+    /* 사업자등록증 인증 */
+    .business-registration {
+      margin-top: 20px;
+      padding: 20px;
+      background: #F8F9FA;
+      border-radius: 8px;
+      border: 1px dashed #ddd;
+    }
+    
+    .business-registration h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 16px;
+    }
+    
+    .file-upload-wrapper {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+    
+    .file-upload-input {
+      display: none;
+    }
+    
+    .file-upload-btn {
+      width: 100%;
+      padding: 24px 16px;
+      background: white;
+      border: 2px dashed #ddd;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .file-upload-btn:hover {
+      border-color: #FF6B35;
+      color: #FF6B35;
+    }
+    
+    .file-upload-btn i {
+      font-size: 48px;
+      display: block;
+      margin-bottom: 8px;
+      color: #FF6B35;
+    }
+    
+    .file-preview {
+      margin-top: 12px;
+      padding: 12px;
+      background: white;
+      border: 1px solid #e5e5e5;
+      border-radius: 6px;
+      display: none;
+    }
+    
+    .file-preview.active {
+      display: block;
+    }
+    
+    .file-preview-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .file-preview-name {
+      font-size: 14px;
+      color: #333;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 200px;
+    }
+    
+    .file-preview-remove {
+      color: #FF6B35;
+      cursor: pointer;
+      font-size: 18px;
+    }
+    
+    .business-info-input {
+      margin-top: 12px;
+    }
+    
+    .business-info-input input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    
+    .verification-status {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      display: none;
+    }
+    
+    .verification-status.success {
+      display: block;
+      background: #E8F5E9;
+      color: #2E7D32;
+      border: 1px solid #81C784;
+    }
+    
+    .verification-status.error {
+      display: block;
+      background: #FFEBEE;
+      color: #C62828;
+      border: 1px solid #EF9A9A;
+    }
+    
+    .verification-status i {
+      margin-right: 8px;
+    }
+
+    @media (max-width: 480px) {
+      .signup-container {
+        padding: 32px 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="signup-container">
+    <div class="signup-header">
+      <img src="/albi-mascot.svg" alt="알비" class="signup-logo">
+      <h1 class="signup-title">알비 회원가입</h1>
+      <p class="signup-subtitle">3초만에 간편하게 시작하세요!</p>
+    </div>
+    
+    <!-- 간편 회원가입 -->
+    <div class="social-signup">
+      <h3 class="social-signup-title">간편 시작하기</h3>
+      <p style="color: #666; font-size: 13px; text-align: center; margin: -8px 0 16px 0;">
+        계정이 없으면 자동으로 가입되고, 있으면 바로 로그인됩니다
+      </p>
+      <button class="btn-social btn-kakao" onclick="socialSignup('kakao')">
+        <i class="fas fa-comment" style="font-size: 18px;"></i>
+        <span>카카오로 3초만에 시작</span>
+      </button>
+      <button class="btn-social btn-naver" onclick="socialSignup('naver')">
+        <span style="font-weight: 700; font-size: 18px;">N</span>
+        <span>네이버로 3초만에 시작</span>
+      </button>
+      <button class="btn-social btn-google" onclick="socialSignup('google')">
+        <i class="fab fa-google" style="font-size: 16px;"></i>
+        <span>Google로 3초만에 시작</span>
+      </button>
+    </div>
+    
+    <div class="divider">
+      <span>또는 휴대폰 인증으로 가입</span>
+    </div>
+    
+    <!-- 휴대폰 인증 회원가입 -->
+    <form id="signupForm">
+      <h3 class="phone-signup-title">휴대폰 인증 회원가입</h3>
+      
+      <!-- 본인인증 섹션 -->
+      <div class="verification-section" style="display: none;">
+        <h4><i class="fas fa-file-alt"></i> 사업자등록증 인증 (필수)</h4>
+        
+        <div class="file-upload-wrapper">
+          <input type="file" id="businessRegistrationFile" class="file-upload-input" accept="image/jpeg,image/jpg,image/png" onchange="handleFileUpload(event)">
+          <label for="businessRegistrationFile" class="file-upload-btn">
+            <i class="fas fa-upload"></i>
+            <div style="margin-top: 12px; font-weight: 600; color: #333;">사업자등록증 파일 업로드</div>
+            <div style="margin-top: 4px; font-size: 12px; color: #999;">JPG 또는 PNG 이미지 파일 (최대 5MB)</div>
+          </label>
+        </div>
+        
+        <div class="file-preview" id="filePreview">
+          <div class="file-preview-info">
+            <span class="file-preview-name" id="fileName"></span>
+            <i class="fas fa-times file-preview-remove" onclick="removeFile()"></i>
+          </div>
+        </div>
+        
+        <div class="business-info-input">
+          <input type="text" id="businessNumber" placeholder="사업자등록번호 (예: 123-45-67890)" maxlength="12">
+        </div>
+        
+        <div class="business-info-input">
+          <input type="text" id="businessName" placeholder="상호명">
+        </div>
+        
+        <div class="verification-status" id="verificationStatus"></div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">
+          이름 <span class="required">*</span>
+        </label>
+        <input type="text" class="form-input" id="name" placeholder="홍길동" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">
+          휴대폰 번호 <span class="required">*</span>
+        </label>
+        <div style="display: flex; gap: 8px;">
+          <input type="tel" class="form-input" id="phone" placeholder="010-1234-5678" required style="flex: 1;">
+          <button type="button" class="btn-verify" id="sendVerificationBtn" onclick="sendPhoneVerification()" 
+                  style="width: 120px; padding: 12px 16px; background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+            인증번호 전송
+          </button>
+        </div>
+        <div id="phoneVerificationStatus" class="phone-verification-status" style="display: none; margin-top: 12px; padding: 12px; border-radius: 8px; font-size: 13px; text-align: center;"></div>
+      </div>
+      
+      <div class="form-group" id="verifySection" style="display: none;">
+        <label class="form-label">
+          인증번호 입력 <span id="verificationTimer" style="color: #FF6B35; font-weight: 600; margin-left: 8px;"></span>
+        </label>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" class="form-input" id="verificationCode" placeholder="6자리 인증번호" maxlength="6" required style="flex: 1;">
+          <button type="button" class="btn-verify" id="verifyCodeBtn" onclick="verifyPhoneCode()" 
+                  style="width: 100px; padding: 12px 16px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+            확인
+          </button>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">
+          이메일 (선택)
+        </label>
+        <input type="email" class="form-input" id="email" placeholder="example@email.com">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">
+          비밀번호 <span class="required">*</span>
+        </label>
+        <input type="password" class="form-input" id="password" placeholder="8자 이상 (영문, 숫자, 특수문자 조합)" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">
+          비밀번호 확인 <span class="required">*</span>
+        </label>
+        <input type="password" class="form-input" id="passwordConfirm" placeholder="비밀번호를 다시 입력하세요" required>
+      </div>
+      
+      <!-- 추천인 코드 (선택) -->
+      <div class="form-group">
+        <label for="referralCode">
+          <i class="fas fa-gift"></i>
+          추천인 코드 (선택)
+        </label>
+        <input type="text" class="form-input" id="referralCode" placeholder="추천인 코드를 입력하면 20P 지급!">
+        <div class="hint-text" style="margin-top: 8px; font-size: 13px; color: #666;">
+          <i class="fas fa-info-circle" style="color: #FF6B35;"></i>
+          친구의 추천 코드를 입력하면 <strong style="color: #FF6B35;">가입 시 20P</strong>를 받고, 추천인에게는 <strong style="color: #FF6B35;">30P</strong>가 지급돼요!
+        </div>
+      </div>
+      
+      <!-- 약관 동의 -->
+      <div class="terms-all">
+        <div class="form-checkbox">
+          <input type="checkbox" id="agreeAll" onclick="window.toggleAllTerms()">
+          <label for="agreeAll">
+            <strong>전체 동의</strong>
+          </label>
+        </div>
+      </div>
+      
+      <div class="form-checkbox">
+        <input type="checkbox" id="agreeTerms" class="term-checkbox" onclick="window.updateAgreeAll()" required>
+        <label for="agreeTerms">
+          [필수] <a href="/terms.html" target="_blank">이용약관</a> 동의
+        </label>
+      </div>
+      
+      <div class="form-checkbox">
+        <input type="checkbox" id="agreePrivacy" class="term-checkbox" onclick="window.updateAgreeAll()" required>
+        <label for="agreePrivacy">
+          [필수] <a href="/privacy.html" target="_blank">개인정보처리방침</a> 동의
+        </label>
+      </div>
+      
+      <div class="form-checkbox">
+        <input type="checkbox" id="agreeMarketing" class="term-checkbox" onclick="window.updateAgreeAll()">
+        <label for="agreeMarketing">
+          [선택] 마케팅 정보 수신 동의 (알바 추천, 이벤트 혜택)
+        </label>
+      </div>
+      
+      <button type="submit" class="btn-signup" id="submitBtn" disabled>
+        회원가입
+      </button>
+    </form>
+    
+    <div class="login-link">
+      이미 계정이 있으신가요?
+      <a href="/login.html">로그인</a>
+    </div>
+  </div>
+  
+  <script>
+    // ========================================
+    // 📱 휴대폰 본인인증 - 인라인 스크립트로 이동됨 (중복 제거)
+    // ========================================
+    // 기존 변수들
+    // ========================================
+    // 기존 변수들 (전역으로 이동한 것 제외)
+    // ========================================
+    let verificationSent = false;
+    let phoneVerified = false;
+    let verificationTimer = null;
+    let timeLeft = 180;
+    // selectedUserType, businessRegistrationFile은 head에서 전역 선언됨
+    
+    // selectUserType 함수는 head에서 전역 함수로 선언됨
+    
+    // 파일 업로드 처리 (Google Cloud Vision API로 서버사이드 OCR)
+    async function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      // 파일 크기 체크 (10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('파일 크기는 10MB 이하만 가능합니다.');
+        event.target.value = '';
+        return;
+      }
+      
+      // 파일 타입 체크 (이미지 + PDF)
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+      if (!allowedTypes.includes(file.type)) {
+        alert('JPG, PNG 이미지 또는 PDF 파일만 업로드 가능합니다.');
+        event.target.value = '';
+        return;
+      }
+      
+      businessRegistrationFile = file;
+      
+      // 업로드 버튼 스타일 변경 (로딩 표시)
+      const uploadBtn = document.querySelector('.file-upload-btn');
+      uploadBtn.style.borderColor = '#FF6B35';
+      uploadBtn.style.backgroundColor = '#FFF5F2';
+      uploadBtn.innerHTML = `
+        <i class="fas fa-spinner fa-spin" style="color: #FF6B35;"></i>
+        <div style="margin-top: 12px; font-weight: 600; color: #FF6B35;">사업자등록증 인식 중...</div>
+        <div style="margin-top: 4px; font-size: 12px; color: #E55A2B;">Google Vision API 처리 중...</div>
+      `;
+      
+      try {
+        console.log('🔍 Google Vision OCR 시작:', file.name);
+        
+        // FormData로 파일 전송
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        // API 호출
+        const response = await fetch('/api/ocr/business-registration', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        console.log('📄 OCR API 응답:', result);
+        
+        if (result.success) {
+          const { businessNumber, businessName, confidence } = result;
+          
+          // 자동 입력
+          if (businessNumber) {
+            document.getElementById('businessNumber').value = businessNumber;
+          }
+          if (businessName) {
+            document.getElementById('businessName').value = businessName;
+          }
+          
+          // 성공 표시
+          uploadBtn.style.borderColor = '#10B981';
+          uploadBtn.style.backgroundColor = '#F0FDF4';
+          uploadBtn.innerHTML = `
+            <i class="fas fa-check-circle" style="color: #10B981;"></i>
+            <div style="margin-top: 12px; font-weight: 600; color: #10B981;">✅ 사업자정보 인식 완료!</div>
+            <div style="margin-top: 4px; font-size: 12px; color: #059669;">${file.name} (${(file.size / 1024).toFixed(1)}KB)</div>
+            ${businessNumber || businessName ? `<div style="margin-top: 8px; font-size: 12px; color: #059669;">📋 ${businessName || '상호명 미인식'} ${businessNumber ? '(' + businessNumber + ')' : ''}</div>` : ''}
+            <div style="margin-top: 8px; font-size: 11px; color: #666;">신뢰도: ${Math.round(confidence * 100)}% | Google Vision API</div>
+          `;
+          
+          console.log('✅ OCR 성공:', { businessNumber, businessName, confidence });
+        } else {
+          throw new Error(result.error || '사업자등록번호와 상호명을 인식하지 못했습니다.');
+        }
+        
+        // 파일 미리보기 표시
+        document.getElementById('fileName').textContent = file.name;
+        document.getElementById('filePreview').style.display = 'block';
+        
+      } catch (error) {
+        console.error('❌ OCR 오류:', error);
+        
+        // 오류 표시 (하지만 파일은 유지)
+        uploadBtn.style.borderColor = '#F59E0B';
+        uploadBtn.style.backgroundColor = '#FEF3C7';
+        uploadBtn.innerHTML = `
+          <i class="fas fa-exclamation-triangle" style="color: #F59E0B;"></i>
+          <div style="margin-top: 12px; font-weight: 600; color: #D97706;">⚠️ 자동 인식 실패</div>
+          <div style="margin-top: 4px; font-size: 12px; color: #92400E;">${file.name} (${(file.size / 1024).toFixed(1)}KB)</div>
+          <div style="margin-top: 8px; font-size: 12px; color: #92400E;">사업자등록번호와 상호명을 직접 입력해주세요</div>
+          <div style="margin-top: 8px; font-size: 11px; color: #666;">다른 파일로 변경하려면 다시 클릭하세요</div>
+        `;
+        
+        alert('사업자등록증 자동 인식에 실패했습니다.\n사업자등록번호와 상호명을 직접 입력해주세요.');
+      }
+      
+      // 폼 유효성 검사 재실행
+      checkFormValidity();
+    }
+    
+    function checkFormValidity() {
+      const phone = document.getElementById('phone').value;
+      const password = document.getElementById('password').value;
+      const passwordConfirm = document.getElementById('passwordConfirm').value;
+      const agreeTerms = document.getElementById('agreeTerms').checked;
+      const agreePrivacy = document.getElementById('agreePrivacy').checked;
+      
+      // Check if phone is verified (required for signup)
+      // 이름은 본인인증에서 자동으로 받음
+      let isValid = phone && phoneVerified && password && passwordConfirm && 
+                      password === passwordConfirm && 
+                      agreeTerms && agreePrivacy;
+      
+      // 구인자인 경우 사업자등록증 필수
+      if (selectedUserType === 'employer') {
+        const businessNumber = document.getElementById('businessNumber').value;
+        const businessName = document.getElementById('businessName').value;
+        isValid = isValid && businessRegistrationFile && businessNumber && businessName;
+      }
+      
+      document.getElementById('submitBtn').disabled = !isValid;
+    }
+    
+    // ========================================
+    // 페이지 로드 시 초기화
+    // ========================================
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('✅ 페이지 로드 완료');
+      
+      // 입력 필드 변경 감지
+      const phoneInput = document.getElementById('phone');
+      const passwordInput = document.getElementById('password');
+      const passwordConfirmInput = document.getElementById('passwordConfirm');
+      const businessNumberInput = document.getElementById('businessNumber');
+      const businessNameInput = document.getElementById('businessName');
+      
+      if (phoneInput) phoneInput.addEventListener('input', checkFormValidity);
+      if (passwordInput) passwordInput.addEventListener('input', checkFormValidity);
+      if (passwordConfirmInput) passwordConfirmInput.addEventListener('input', checkFormValidity);
+      if (businessNumberInput) businessNumberInput.addEventListener('input', checkFormValidity);
+      if (businessNameInput) businessNameInput.addEventListener('input', checkFormValidity);
+      
+      // 약관 체크박스 변경 감지
+      document.querySelectorAll('.term-checkbox').forEach(function(checkbox) {
+        checkbox.addEventListener('change', checkFormValidity);
+      });
+      document.getElementById('agreeAll').addEventListener('change', checkFormValidity);
+      
+      // 회원가입 폼 제출
+      document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // 휴대폰 인증 확인
+      if (!phoneVerified) {
+        alert('휴대폰 인증을 먼저 완료해주세요.');
+        document.getElementById('sendVerificationBtn').focus();
+        return;
+      }
+      
+      const name = document.getElementById('name').value;
+      const phone = document.getElementById('phone').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const passwordConfirm = document.getElementById('passwordConfirm').value;
+      
+      if (password !== passwordConfirm) {
+        alert('비밀번호가 일치하지 않습니다.');
+        return;
+      }
+      
+      if (password.length < 8) {
+        alert('비밀번호는 8자 이상이어야 합니다.');
+        return;
+      }
+      
+      try {
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = '가입 처리 중...';
+        
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('phone', phone);
+        formData.append('email', email);
+        formData.append('password', password);
+        formData.append('user_type', 'jobseeker'); // 모든 사용자는 구직자
+        formData.append('agreed_terms', document.getElementById('agreeTerms').checked);
+        formData.append('agreed_privacy', document.getElementById('agreePrivacy').checked);
+        formData.append('agreed_marketing', document.getElementById('agreeMarketing').checked);
+        
+        // 추천인 코드 추가
+        const referralCodeInput = document.getElementById('referralCode');
+        if (referralCodeInput && referralCodeInput.value.trim()) {
+          formData.append('referral_code', referralCodeInput.value.trim().toUpperCase());
+        }
+        
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.message || '회원가입 실패');
+        }
+        
+        // 성공 메시지 표시 (포인트 정보 포함)
+        const pointMessage = data.hasReferrer 
+          ? `🎉 추천 코드로 가입하여 20P가 지급되었습니다!\n(추천인에게도 30P가 지급되었습니다)\n\n나의 추천 코드: ${data.referralCode}` 
+          : `🎉 회원가입이 완료되었습니다!\n\n친구를 초대하고 포인트를 받아보세요!\n나의 추천 코드: ${data.referralCode}`;
+        
+        alert(`회원가입이 완료되었습니다!\n\n${pointMessage}`);
+        
+        // 로그인 페이지로 이동
+        window.location.href = '/login.html';
+      } catch (error) {
+        alert('회원가입 중 오류가 발생했습니다: ' + error.message);
+        document.getElementById('submitBtn').disabled = false;
+        document.getElementById('submitBtn').textContent = '회원가입';
+      }
+      });
+    }); // DOMContentLoaded 종료
+  </script>
+</body>
+</html>

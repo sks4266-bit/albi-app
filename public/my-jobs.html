@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>내 공고 관리 - 알비</title>
+  <link href="/styles.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+      background: #f8f9fa;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .header {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 24px;
+    }
+    
+    .job-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 16px;
+      transition: all 0.2s;
+    }
+    
+    .job-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .job-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 16px;
+    }
+    
+    .job-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .job-meta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .job-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .job-status {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    .status-active {
+      background: #D4EDDA;
+      color: #155724;
+    }
+    
+    .status-closed {
+      background: #F8D7DA;
+      color: #721C24;
+    }
+    
+    .job-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #e5e5e5;
+    }
+    
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background: #FF6B35;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #E55A2B;
+    }
+    
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #666;
+    }
+    
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+    
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #c82333;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .empty-state i {
+      font-size: 64px;
+      color: #ddd;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 헤더 -->
+    <div class="header">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <button onclick="window.location.href='/'" style="background: none; border: none; color: #666; cursor: pointer;">
+            <i class="fas fa-arrow-left" style="font-size: 20px;"></i>
+          </button>
+          <h1 style="font-size: 24px; font-weight: 700; color: #333;">
+            <i class="fas fa-clipboard-list" style="color: #FF6B35;"></i>
+            내 공고 관리
+          </h1>
+        </div>
+        <button onclick="window.location.href='/job-post.html'" class="btn btn-primary">
+          <i class="fas fa-plus"></i> 새 공고 등록
+        </button>
+      </div>
+      <p style="font-size: 14px; color: #666;">등록한 공고를 관리하고 지원자를 확인하세요</p>
+    </div>
+
+    <!-- 필터 -->
+    <div style="background: white; padding: 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px;">
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <button class="filter-btn active" data-status="all" onclick="filterJobs('all')">
+          전체 (<span id="countAll">0</span>)
+        </button>
+        <button class="filter-btn" data-status="active" onclick="filterJobs('active')">
+          진행중 (<span id="countActive">0</span>)
+        </button>
+        <button class="filter-btn" data-status="closed" onclick="filterJobs('closed')">
+          마감 (<span id="countClosed">0</span>)
+        </button>
+      </div>
+    </div>
+
+    <!-- 공고 목록 -->
+    <div id="jobsList">
+      <div style="text-align: center; padding: 60px 20px;">
+        <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #FF6B35;"></i>
+        <p style="margin-top: 16px; color: #666;">로딩 중...</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+  <script>
+    let allJobs = [];
+    let currentFilter = 'all';
+    
+    const categoryNames = {
+      cafe: '☕ 카페',
+      convenience: '🏪 편의점',
+      restaurant: '🍽️ 음식점',
+      retail: '👕 소매/판매',
+      delivery: '🛵 배달',
+      etc: '💼 기타'
+    };
+    
+    // ============================================
+    // 초기화
+    // ============================================
+    window.addEventListener('DOMContentLoaded', async () => {
+      console.log('📋 내 공고 관리 페이지 로드');
+      
+      // 로그인 확인
+      const sessionToken = localStorage.getItem('albi_session_token');
+      const userType = localStorage.getItem('albi_user_type');
+      
+      if (!sessionToken) {
+        alert('로그인이 필요합니다.');
+        window.location.href = '/login.html';
+        return;
+      }
+      
+      if (userType !== 'employer') {
+        alert('구인자만 접근할 수 있습니다.');
+        window.location.href = '/';
+        return;
+      }
+      
+      // 공고 목록 로드
+      await loadMyJobs();
+    });
+    
+    // ============================================
+    // 내 공고 목록 로드
+    // ============================================
+    async function loadMyJobs() {
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        const response = await axios.get('/api/jobs/my/list', {
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        });
+        
+        console.log('✅ 공고 목록:', response.data);
+        
+        if (response.data.success) {
+          allJobs = response.data.jobs || [];
+          updateCounts();
+          renderJobs();
+        } else {
+          throw new Error(response.data.error);
+        }
+      } catch (error) {
+        console.error('❌ 공고 로드 실패:', error);
+        document.getElementById('jobsList').innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-exclamation-circle" style="color: #FF6B35;"></i>
+            <p style="font-size: 16px; margin-top: 16px; color: #333;">공고를 불러올 수 없습니다</p>
+            <p style="font-size: 14px; margin-top: 8px; color: #666;">잠시 후 다시 시도해주세요</p>
+          </div>
+        `;
+      }
+    }
+    
+    // ============================================
+    // 카운트 업데이트
+    // ============================================
+    function updateCounts() {
+      const activeCount = allJobs.filter(j => j.status === 'active').length;
+      const closedCount = allJobs.filter(j => j.status === 'closed').length;
+      
+      document.getElementById('countAll').textContent = allJobs.length;
+      document.getElementById('countActive').textContent = activeCount;
+      document.getElementById('countClosed').textContent = closedCount;
+    }
+    
+    // ============================================
+    // 필터링
+    // ============================================
+    function filterJobs(status) {
+      currentFilter = status;
+      
+      // 필터 버튼 활성화
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.status === status) {
+          btn.classList.add('active');
+        }
+      });
+      
+      renderJobs();
+    }
+    
+    // ============================================
+    // 공고 렌더링
+    // ============================================
+    function renderJobs() {
+      const filteredJobs = currentFilter === 'all' 
+        ? allJobs 
+        : allJobs.filter(j => j.status === currentFilter);
+      
+      if (filteredJobs.length === 0) {
+        document.getElementById('jobsList').innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-clipboard-list"></i>
+            <p style="font-size: 16px; margin-top: 16px; color: #333;">등록된 공고가 없습니다</p>
+            <p style="font-size: 14px; margin-top: 8px; color: #666;">새 공고를 등록하여 인재를 찾아보세요</p>
+            <button onclick="window.location.href='/job-post.html'" class="btn btn-primary" style="margin-top: 20px;">
+              <i class="fas fa-plus"></i> 새 공고 등록
+            </button>
+          </div>
+        `;
+        return;
+      }
+      
+      const html = filteredJobs.map(job => {
+        const date = new Date(job.created_at).toLocaleDateString('ko-KR');
+        const statusClass = job.status === 'active' ? 'status-active' : 'status-closed';
+        const statusText = job.status === 'active' ? '진행중' : '마감';
+        
+        return `
+          <div class="job-card">
+            <div class="job-header">
+              <div style="flex: 1;">
+                <div class="job-title">${job.title}</div>
+                <div class="job-meta">
+                  <div class="job-meta-item">
+                    <i class="fas fa-building"></i>
+                    <span>${job.company_name || '-'}</span>
+                  </div>
+                  <div class="job-meta-item">
+                    <i class="fas fa-tag"></i>
+                    <span>${categoryNames[job.category] || job.category}</span>
+                  </div>
+                  <div class="job-meta-item">
+                    <i class="fas fa-won-sign"></i>
+                    <span>${(job.hourly_wage || 0).toLocaleString()}원</span>
+                  </div>
+                  <div class="job-meta-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>${job.location || '-'}</span>
+                  </div>
+                </div>
+                <div style="margin-top: 12px; font-size: 13px; color: #999;">
+                  <i class="fas fa-eye"></i> ${job.views || 0}회 조회
+                  <span style="margin-left: 16px;">
+                    <i class="fas fa-calendar"></i> ${date}
+                  </span>
+                </div>
+              </div>
+              <div>
+                <span class="job-status ${statusClass}">${statusText}</span>
+              </div>
+            </div>
+            <div class="job-actions">
+              <button class="btn btn-secondary" onclick="viewJobDetail('${job.id}')">
+                <i class="fas fa-eye"></i> 상세보기
+              </button>
+              ${job.status === 'active' ? `
+                <button class="btn btn-secondary" onclick="editJob('${job.id}')">
+                  <i class="fas fa-edit"></i> 수정
+                </button>
+                <button class="btn btn-danger" onclick="closeJob('${job.id}')">
+                  <i class="fas fa-times-circle"></i> 마감
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      document.getElementById('jobsList').innerHTML = html;
+    }
+    
+    // ============================================
+    // 공고 상세보기
+    // ============================================
+    function viewJobDetail(jobId) {
+      window.location.href = `/job-detail.html?id=${jobId}`;
+    }
+    
+    // ============================================
+    // 공고 수정
+    // ============================================
+    function editJob(jobId) {
+      // TODO: 공고 수정 페이지 구현
+      alert('공고 수정 기능은 준비 중입니다.');
+    }
+    
+    // ============================================
+    // 공고 마감
+    // ============================================
+    async function closeJob(jobId) {
+      if (!confirm('공고를 마감하시겠습니까?\n마감 후에는 다시 활성화할 수 없습니다.')) {
+        return;
+      }
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        const response = await axios.delete(`/api/jobs/${jobId}`, {
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        });
+        
+        console.log('✅ 공고 마감:', response.data);
+        
+        if (response.data.success) {
+          alert('공고가 마감되었습니다.');
+          await loadMyJobs();
+        } else {
+          throw new Error(response.data.error);
+        }
+      } catch (error) {
+        console.error('❌ 공고 마감 실패:', error);
+        alert(error.response?.data?.error || '공고 마감 중 오류가 발생했습니다.');
+      }
+    }
+  </script>
+  
+  <style>
+    .filter-btn {
+      padding: 8px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      background: white;
+      font-size: 14px;
+      font-weight: 600;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .filter-btn:hover {
+      border-color: #FF6B35;
+    }
+    
+    .filter-btn.active {
+      border-color: #FF6B35;
+      background: #FFF5F2;
+      color: #FF6B35;
+    }
+  </style>
+</body>
+</html>

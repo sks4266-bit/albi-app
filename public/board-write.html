@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>글쓰기 - 자유게시판</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/styles.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <!-- 네비게이션 바 -->
+    <nav class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <a href="/" class="text-xl font-bold text-purple-600">
+                    <i class="fas fa-briefcase mr-2"></i>알비
+                </a>
+                <span class="text-gray-400">|</span>
+                <h1 class="text-lg font-semibold text-gray-800">글쓰기 ✍️</h1>
+            </div>
+            <button onclick="window.location.href='/board.html'" class="text-gray-600 hover:text-gray-800">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="max-w-4xl mx-auto px-4 py-6">
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <!-- 제목 입력 -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    제목 <span class="text-red-500">*</span>
+                </label>
+                <input 
+                    type="text" 
+                    id="titleInput" 
+                    placeholder="제목을 입력하세요 (최대 100자)"
+                    maxlength="100"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                >
+                <div class="text-right text-sm text-gray-500 mt-1">
+                    <span id="titleLength">0</span> / 100
+                </div>
+            </div>
+
+            <!-- 내용 입력 -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    내용 <span class="text-red-500">*</span>
+                </label>
+                <textarea 
+                    id="contentInput" 
+                    placeholder="내용을 입력하세요 (최대 5000자)"
+                    maxlength="5000"
+                    rows="15"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+                ></textarea>
+                <div class="text-right text-sm text-gray-500 mt-1">
+                    <span id="contentLength">0</span> / 5000
+                </div>
+            </div>
+
+            <!-- 익명 옵션 -->
+            <div class="mb-6">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="anonymousCheck" class="w-4 h-4 text-purple-600 rounded">
+                    <span class="text-sm text-gray-700">익명으로 작성</span>
+                </label>
+            </div>
+
+            <!-- 작성 가이드 -->
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+                <h3 class="font-semibold text-gray-800 mb-2 flex items-center">
+                    <i class="fas fa-info-circle text-purple-600 mr-2"></i>
+                    게시판 이용 안내
+                </h3>
+                <ul class="text-sm text-gray-600 space-y-1">
+                    <li>• 타인을 비방하거나 욕설이 포함된 게시글은 삭제될 수 있습니다.</li>
+                    <li>• 스팸성 게시글이나 광고는 관리자에 의해 삭제됩니다.</li>
+                    <li>• 불법적인 내용이나 저작권을 침해하는 게시글은 법적 책임을 질 수 있습니다.</li>
+                    <li>• 익명으로 작성 시 수정 및 삭제가 제한될 수 있습니다.</li>
+                </ul>
+            </div>
+
+            <!-- 버튼 -->
+            <div class="flex gap-3">
+                <button 
+                    onclick="submitPost()"
+                    id="submitBtn"
+                    class="flex-1 bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition font-semibold"
+                >
+                    <i class="fas fa-check mr-2"></i>완료
+                </button>
+                <button 
+                    onclick="window.location.href='/board.html'"
+                    class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                >
+                    취소
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 페이지 로드 시 로그인 체크
+        window.addEventListener('DOMContentLoaded', () => {
+            const userInfo = JSON.parse(localStorage.getItem('albi_user_info') || '{}');
+            const userId = userInfo.userId || localStorage.getItem('albi_user_id');
+            
+            if (!userId) {
+                alert('로그인이 필요합니다.');
+                // 현재 페이지 URL을 저장
+                localStorage.setItem('redirect_after_login', window.location.href);
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            // 로그인된 사용자 이름 표시 (선택사항)
+            const userName = userInfo.userName || localStorage.getItem('albi_user_name') || '알비사용자';
+            console.log('로그인된 사용자:', userName);
+        });
+        
+        // 글자 수 카운터
+        document.getElementById('titleInput').addEventListener('input', (e) => {
+            document.getElementById('titleLength').textContent = e.target.value.length;
+        });
+
+        document.getElementById('contentInput').addEventListener('input', (e) => {
+            document.getElementById('contentLength').textContent = e.target.value.length;
+        });
+
+        // 게시글 작성
+        async function submitPost() {
+            const title = document.getElementById('titleInput').value.trim();
+            const content = document.getElementById('contentInput').value.trim();
+            const isAnonymous = document.getElementById('anonymousCheck').checked;
+
+            // 유효성 검사
+            if (!title) {
+                alert('제목을 입력해주세요.');
+                return;
+            }
+
+            if (!content) {
+                alert('내용을 입력해주세요.');
+                return;
+            }
+
+            // 사용자 정보 가져오기
+            const userInfo = JSON.parse(localStorage.getItem('albi_user_info') || '{}');
+            const userId = userInfo.userId || localStorage.getItem('albi_user_id');
+            const userName = userInfo.userName || localStorage.getItem('albi_user_name') || '알비사용자';
+
+            // 로그인 체크 (이중 체크)
+            if (!userId) {
+                alert('로그인이 필요합니다.');
+                window.location.href = '/login.html';
+                return;
+            }
+
+            // 버튼 비활성화
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>작성 중...';
+
+            try {
+                const response = await fetch('/api/board/posts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId,
+                        authorName: userName,
+                        title,
+                        content,
+                        isAnonymous
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(data.data.message || '게시글이 작성되었습니다! 📝');
+                    window.location.href = `/board-post.html?id=${data.data.postId}`;
+                } else {
+                    alert(data.error || '게시글 작성에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('Submit error:', error);
+                alert('게시글 작성 중 오류가 발생했습니다.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-check mr-2"></i>완료';
+            }
+        }
+    </script>
+</body>
+</html>

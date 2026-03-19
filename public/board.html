@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>자유게시판 - 알비</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/styles.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <!-- 네비게이션 바 -->
+    <nav class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <a href="/" class="text-xl font-bold text-purple-600">
+                    <i class="fas fa-briefcase mr-2"></i>알비
+                </a>
+                <span class="text-gray-400">|</span>
+                <h1 class="text-lg font-semibold text-gray-800">자유게시판 📋</h1>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="handleWriteClick()" id="writeBtn" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
+                    <i class="fas fa-pen mr-1"></i>글쓰기
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="max-w-7xl mx-auto px-4 py-6">
+        <!-- 검색 바 -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+            <div class="flex gap-2">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="제목 또는 내용으로 검색..." 
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    onkeypress="if(event.key === 'Enter') searchPosts()"
+                >
+                <button onclick="searchPosts()" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition">
+                    <i class="fas fa-search"></i> 검색
+                </button>
+            </div>
+        </div>
+
+        <!-- 게시글 목록 -->
+        <div class="bg-white rounded-lg shadow-sm">
+            <div id="loadingSpinner" class="text-center py-12">
+                <i class="fas fa-spinner fa-spin text-4xl text-purple-600"></i>
+                <p class="mt-2 text-gray-600">게시글을 불러오는 중...</p>
+            </div>
+            
+            <div id="postsContainer" class="hidden">
+                <!-- 게시글 목록이 여기에 렌더링됩니다 -->
+            </div>
+
+            <div id="emptyState" class="hidden text-center py-12">
+                <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
+                <p class="text-gray-600 text-lg">게시글이 없습니다.</p>
+                <button onclick="window.location.href='/board-write.html'" class="mt-4 bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition">
+                    첫 게시글 작성하기
+                </button>
+            </div>
+        </div>
+
+        <!-- 페이지네이션 -->
+        <div id="pagination" class="hidden mt-6 flex justify-center gap-2">
+            <!-- 페이지 버튼이 여기에 렌더링됩니다 -->
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        let currentSearch = '';
+
+        // 페이지 로드 시 게시글 목록 불러오기
+        async function loadPosts() {
+            try {
+                const url = `/api/board/posts?page=${currentPage}&limit=20${currentSearch ? `&search=${encodeURIComponent(currentSearch)}` : ''}`;
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+
+                if (data.success) {
+                    renderPosts(data.data.posts);
+                    renderPagination(data.data.pagination);
+                } else {
+                    console.error('Failed to load posts:', data.error);
+                    alert('게시글을 불러오는데 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('Error loading posts:', error);
+                alert('게시글을 불러오는 중 오류가 발생했습니다.');
+            } finally {
+                document.getElementById('loadingSpinner').classList.add('hidden');
+            }
+        }
+
+        // 게시글 목록 렌더링
+        function renderPosts(posts) {
+            const container = document.getElementById('postsContainer');
+            const emptyState = document.getElementById('emptyState');
+
+            if (!posts || posts.length === 0) {
+                container.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+
+            container.innerHTML = posts.map(post => `
+                <div class="border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition">
+                    <a href="/board-post.html?id=${post.id}" class="block p-4">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-gray-800 hover:text-purple-600 mb-1">
+                                    ${escapeHtml(post.title)}
+                                    ${post.comments_count > 0 ? `<span class="text-purple-600 text-sm ml-1">[${post.comments_count}]</span>` : ''}
+                                </h3>
+                                <div class="flex items-center gap-3 text-sm text-gray-500">
+                                    <span><i class="fas fa-user mr-1"></i>${escapeHtml(post.author_name)}</span>
+                                    <span><i class="fas fa-eye mr-1"></i>${post.views}</span>
+                                    <span><i class="fas fa-heart mr-1"></i>${post.likes}</span>
+                                    <span><i class="fas fa-clock mr-1"></i>${getTimeAgo(post.created_at)}</span>
+                                </div>
+                            </div>
+                            ${post.is_popular ? '<span class="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full ml-2">인기</span>' : ''}
+                        </div>
+                    </a>
+                </div>
+            `).join('');
+        }
+
+        // 페이지네이션 렌더링
+        function renderPagination(pagination) {
+            const container = document.getElementById('pagination');
+
+            if (pagination.totalPages <= 1) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+
+            let html = '';
+
+            // 이전 페이지 버튼
+            if (pagination.page > 1) {
+                html += `<button onclick="goToPage(${pagination.page - 1})" class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">이전</button>`;
+            }
+
+            // 페이지 번호 버튼 (최대 5개)
+            const startPage = Math.max(1, pagination.page - 2);
+            const endPage = Math.min(pagination.totalPages, startPage + 4);
+
+            for (let i = startPage; i <= endPage; i++) {
+                const isActive = i === pagination.page;
+                html += `
+                    <button 
+                        onclick="goToPage(${i})" 
+                        class="px-4 py-2 rounded-lg transition ${isActive ? 'bg-purple-600 text-white' : 'bg-white border border-gray-300 hover:bg-gray-50'}"
+                    >
+                        ${i}
+                    </button>
+                `;
+            }
+
+            // 다음 페이지 버튼
+            if (pagination.page < pagination.totalPages) {
+                html += `<button onclick="goToPage(${pagination.page + 1})" class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">다음</button>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // 페이지 이동
+        function goToPage(page) {
+            currentPage = page;
+            document.getElementById('loadingSpinner').classList.remove('hidden');
+            document.getElementById('postsContainer').classList.add('hidden');
+            window.scrollTo(0, 0);
+            loadPosts();
+        }
+
+        // 검색
+        function searchPosts() {
+            currentSearch = document.getElementById('searchInput').value.trim();
+            currentPage = 1;
+            document.getElementById('loadingSpinner').classList.remove('hidden');
+            document.getElementById('postsContainer').classList.add('hidden');
+            loadPosts();
+        }
+
+        // 상대 시간 표시
+        function getTimeAgo(dateString) {
+            try {
+                const isoDateString = dateString.replace(' ', 'T') + 'Z';
+                const postDate = new Date(isoDateString);
+                
+                if (isNaN(postDate.getTime())) {
+                    return dateString;
+                }
+                
+                const now = new Date();
+                const diffMs = now - postDate;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                const diffDays = Math.floor(diffMs / 86400000);
+
+                if (diffMins < 1) return '방금 전';
+                if (diffMins < 60) return `${diffMins}분 전`;
+                if (diffHours < 24) return `${diffHours}시간 전`;
+                if (diffDays < 7) return `${diffDays}일 전`;
+                
+                return postDate.toLocaleDateString('ko-KR');
+            } catch (error) {
+                console.error('Date parsing error:', error);
+                return dateString;
+            }
+        }
+
+        // HTML 이스케이프
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // 로그인 체크 및 글쓰기 버튼 클릭
+        function handleWriteClick() {
+            const userInfo = JSON.parse(localStorage.getItem('albi_user_info') || '{}');
+            const userId = userInfo.userId || localStorage.getItem('albi_user_id');
+            
+            if (!userId) {
+                if (confirm('로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?')) {
+                    // 현재 페이지 URL을 저장하여 로그인 후 돌아올 수 있도록
+                    localStorage.setItem('redirect_after_login', window.location.href);
+                    window.location.href = '/login.html';
+                }
+                return;
+            }
+            
+            // 로그인되어 있으면 글쓰기 페이지로 이동
+            window.location.href = '/board-write.html';
+        }
+
+        // 초기 로드
+        loadPosts();
+    </script>
+</body>
+</html>

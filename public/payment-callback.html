@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결제 처리 중 - 알비</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+            <!-- 로딩 스피너 -->
+            <div id="loading" class="mb-6">
+                <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600"></div>
+                <h2 class="text-2xl font-bold text-gray-800 mt-6 mb-2">결제 처리 중...</h2>
+                <p class="text-gray-600">잠시만 기다려주세요</p>
+            </div>
+
+            <!-- 성공 메시지 -->
+            <div id="success" class="hidden">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-check text-3xl text-green-600"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">결제가 완료되었습니다!</h2>
+                <p class="text-gray-600 mb-6">구독이 활성화되었습니다.</p>
+                <div id="subscription-info" class="bg-gray-50 rounded-lg p-4 mb-6 text-left">
+                    <!-- 구독 정보 표시 -->
+                </div>
+                <button onclick="goToMyPage()" class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
+                    <i class="fas fa-user mr-2"></i>
+                    마이페이지로 이동
+                </button>
+            </div>
+
+            <!-- 실패 메시지 -->
+            <div id="error" class="hidden">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-times text-3xl text-red-600"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">결제 처리 실패</h2>
+                <p id="error-message" class="text-gray-600 mb-6"></p>
+                <button onclick="goBackToPayment()" class="w-full bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    결제 페이지로 돌아가기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // URL 파라미터 파싱
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentId = urlParams.get('paymentId');
+        const code = urlParams.get('code');
+        const message = urlParams.get('message');
+
+        console.log('Payment callback:', { paymentId, code, message });
+
+        // 결제 결과 처리
+        async function processPayment() {
+            // 에러 코드가 있으면 실패 처리
+            if (code) {
+                showError(message || '결제가 취소되었거나 실패했습니다.');
+                return;
+            }
+
+            // paymentId가 없으면 에러
+            if (!paymentId) {
+                showError('결제 정보를 찾을 수 없습니다.');
+                return;
+            }
+
+            try {
+                // PortOne API로 결제 정보 조회
+                const paymentResponse = await fetch(`/api/subscription/payment-info?payment_id=${paymentId}`);
+                
+                if (!paymentResponse.ok) {
+                    throw new Error('결제 정보 조회 실패');
+                }
+
+                const paymentData = await paymentResponse.json();
+
+                if (!paymentData.success) {
+                    throw new Error(paymentData.message || '결제 정보를 가져올 수 없습니다.');
+                }
+
+                const payment = paymentData.data;
+
+                // 결제 상태 확인
+                if (payment.status !== 'PAID') {
+                    showError(`결제 상태: ${payment.status}`);
+                    return;
+                }
+
+                // 서버에 결제 확인 요청
+                const confirmResponse = await fetch('/api/subscription/confirm', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        payment_id: paymentId,
+                        transaction_id: payment.transactionId,
+                        billing_key: payment.billingKey,
+                        paid_amount: payment.amount?.total || 0
+                    })
+                });
+
+                const confirmResult = await confirmResponse.json();
+
+                if (confirmResult.success) {
+                    showSuccess(confirmResult.data);
+                } else {
+                    showError(confirmResult.message || '구독 활성화 실패');
+                }
+
+            } catch (error) {
+                console.error('❌ Payment processing error:', error);
+                showError(error.message || '결제 처리 중 오류가 발생했습니다.');
+            }
+        }
+
+        function showSuccess(data) {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('success').classList.remove('hidden');
+
+            const infoDiv = document.getElementById('subscription-info');
+            infoDiv.innerHTML = `
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">플랜</span>
+                        <span class="font-semibold">${data.plan_name || 'Standard'}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">금액</span>
+                        <span class="font-semibold">₩${(data.amount || 0).toLocaleString()}/월</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">다음 결제일</span>
+                        <span class="font-semibold">${formatDate(data.next_billing_date)}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">상태</span>
+                        <span class="px-2 py-1 bg-green-100 text-green-800 text-sm rounded">활성</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showError(errorMessage) {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('error').classList.remove('hidden');
+            document.getElementById('error-message').textContent = errorMessage;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ko-KR', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+
+        function goToMyPage() {
+            window.location.href = '/mypage.html?subscription=success';
+        }
+
+        function goBackToPayment() {
+            window.location.href = '/payment.html';
+        }
+
+        // 페이지 로드 시 자동 실행
+        processPayment();
+    </script>
+</body>
+</html>

@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>공고 상세 - 알비</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+  <script src="/js/safety-modal.js"></script>
+  <link href="/footer.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 pb-24">
+  <div class="max-w-2xl mx-auto min-h-screen bg-white shadow-xl">
+    <div id="loading" class="flex items-center justify-center min-h-screen">
+      <div class="text-center">
+        <div class="text-6xl mb-4 animate-bounce">🐜</div>
+        <p class="text-gray-600">공고 정보를 불러오는 중...</p>
+      </div>
+    </div>
+
+    <div id="jobDetail" class="hidden">
+      <div class="sticky top-0 bg-white z-50 px-4 py-4 border-b flex items-center justify-between">
+        <button onclick="history.back()" class="text-gray-600 hover:text-gray-800">
+          <i class="fas fa-arrow-left mr-2"></i>뒤로
+        </button>
+        <h1 class="font-bold text-lg">공고 상세</h1>
+        <div class="flex items-center gap-3">
+          <button onclick="toggleBookmark()" id="bookmarkBtn" class="text-gray-600 hover:text-gray-800" title="관심 공고에 추가">
+            <i class="fas fa-bookmark text-xl"></i>
+          </button>
+          <button onclick="shareJob()" class="text-gray-600 hover:text-gray-800">
+            <i class="fas fa-share-alt"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="jobInfo"></div>
+
+      <div class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 shadow-lg">
+        <div class="max-w-2xl mx-auto">
+          <button onclick="applyForExperience()" id="applyBtn"
+                  class="w-full bg-orange-500 text-white py-4 rounded-lg font-bold hover:bg-orange-600 transition text-lg flex items-center justify-center space-x-2">
+            <span>👀</span>
+            <span>1시간 체험 신청하기</span>
+          </button>
+          <p class="text-center text-xs text-gray-500 mt-2">
+            10 알비포인트가 차감됩니다
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 체험 신청 모달 -->
+  <div id="experienceModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6">
+      <div class="text-center mb-6">
+        <div class="text-6xl mb-4">👀</div>
+        <h2 class="text-2xl font-bold mb-2">1시간 체험 신청</h2>
+        <p class="text-gray-600 text-sm">일하기 전에 미리 체험해보세요!</p>
+      </div>
+
+      <div class="mb-6">
+        <label class="block text-sm font-bold text-gray-700 mb-2">희망 날짜</label>
+        <input type="date" id="experienceDate" 
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+               min="">
+      </div>
+
+      <div class="mb-6">
+        <label class="block text-sm font-bold text-gray-700 mb-2">희망 시간</label>
+        <select id="experienceTime" 
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+          <option value="">시간을 선택하세요</option>
+          <option value="09:00">오전 9시</option>
+          <option value="10:00">오전 10시</option>
+          <option value="11:00">오전 11시</option>
+          <option value="12:00">오후 12시</option>
+          <option value="13:00">오후 1시</option>
+          <option value="14:00">오후 2시</option>
+          <option value="15:00">오후 3시</option>
+          <option value="16:00">오후 4시</option>
+          <option value="17:00">오후 5시</option>
+          <option value="18:00">오후 6시</option>
+          <option value="19:00">오후 7시</option>
+          <option value="20:00">오후 8시</option>
+        </select>
+      </div>
+
+      <div class="mb-6">
+        <label class="block text-sm font-bold text-gray-700 mb-2">요청 사항 (선택)</label>
+        <textarea id="experienceMessage" 
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+                  rows="3"
+                  placeholder="궁금한 점이나 특별히 관찰하고 싶은 업무가 있다면 적어주세요"></textarea>
+      </div>
+
+      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+        <div class="flex items-start space-x-2">
+          <i class="fas fa-exclamation-triangle text-yellow-600 mt-1"></i>
+          <div class="text-sm text-yellow-800">
+            <p class="font-bold mb-1">체험 규칙</p>
+            <ul class="space-y-1 text-xs">
+              <li>• 관찰만 가능 (실제 업무 X)</li>
+              <li>• No-Touch Rule 준수</li>
+              <li>• 10 알비포인트 차감</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex space-x-3">
+        <button onclick="closeExperienceModal()" 
+                class="flex-1 py-3 px-4 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition">
+          취소
+        </button>
+        <button onclick="submitExperience()" id="submitExperienceBtn"
+                class="flex-1 py-3 px-4 bg-orange-500 text-white rounded-lg font-bold hover:bg-orange-600 transition">
+          신청하기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const jobId = urlParams.get('id');
+    let currentJob = null;
+
+    window.onload = function() {
+      if (!jobId) {
+        alert('잘못된 접근입니다.');
+        window.location.href = '/jobs';
+        return;
+      }
+      loadJobDetail();
+    };
+
+    async function loadJobDetail() {
+      try {
+        console.log('🔍 공고 조회 시작:', jobId);
+        const response = await axios.get(`/api/jobs/${jobId}`);
+        console.log('📦 API 응답:', response);
+
+        if (response.data.success) {
+          currentJob = response.data.job;
+          console.log('✅ 공고 데이터:', currentJob);
+          renderJobDetail(currentJob);
+          checkBookmarkStatus(); // 북마크 상태 확인
+        } else {
+          throw new Error(response.data.error || '공고 조회 실패');
+        }
+      } catch (error) {
+        console.error('❌ Load job detail error:', error);
+        console.error('Error details:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        });
+        
+        let errorMsg = '공고를 불러올 수 없습니다.';
+        if (error.response?.data?.error) {
+          errorMsg += '\n\n' + error.response.data.error;
+        } else if (error.message) {
+          errorMsg += '\n\n' + error.message;
+        }
+        
+        alert(errorMsg);
+        // 3초 후 목록으로 이동
+        setTimeout(() => {
+          window.location.href = '/jobs.html';
+        }, 3000);
+      } finally {
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('jobDetail').classList.remove('hidden');
+      }
+    }
+
+    function renderJobDetail(job) {
+      console.log('🎨 렌더링 시작:', job);
+      
+      // work_days가 문자열인 경우 처리 (예: "금, 토, 일")
+      let workDays = [];
+      if (job.work_days) {
+        if (typeof job.work_days === 'string') {
+          try {
+            // JSON 형식이면 파싱
+            workDays = JSON.parse(job.work_days);
+          } catch {
+            // 일반 문자열이면 쉼표로 분리
+            workDays = job.work_days.split(',').map(d => d.trim());
+          }
+        } else if (Array.isArray(job.work_days)) {
+          workDays = job.work_days;
+        }
+      }
+      
+      const categoryIcons = {
+        cafe: '☕',
+        cvs: '🏪',
+        convenience: '🏪',
+        restaurant: '🍽️',
+        fastfood: '🍔',
+        retail: '👕',
+        etc: '💼'
+      };
+
+      const categoryNames = {
+        cafe: '카페',
+        cvs: '편의점',
+        convenience: '편의점',
+        restaurant: '음식점',
+        fastfood: '패스트푸드',
+        retail: '매장',
+        etc: '기타'
+      };
+
+      document.getElementById('jobInfo').innerHTML = `
+        <div class="p-6">
+          ${job.hiring_type === 'immediate' ? `
+          <div class="bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-xl p-4 mb-4 flex items-center justify-center space-x-2">
+            <i class="fas fa-bolt text-2xl"></i>
+            <span class="font-bold text-lg">바로채용 가능 🔥</span>
+            <span class="text-sm opacity-90">체험 없이 즉시 채용</span>
+          </div>
+          ` : ''}
+          <div class="flex items-start space-x-4 mb-6">
+            <div class="w-20 h-20 bg-orange-100 rounded-2xl flex items-center justify-center text-4xl flex-shrink-0">
+              ${categoryIcons[job.job_type] || categoryIcons[job.category] || '💼'}
+            </div>
+            <div class="flex-1">
+              <h1 class="text-2xl font-bold text-gray-900 mb-2">${job.title}</h1>
+              <div class="flex items-center text-gray-600 mb-2">
+                <span><i class="fas fa-map-marker-alt mr-1"></i>${job.address || job.location || '위치 정보 없음'}</span>
+              </div>
+              <div class="flex items-center space-x-4 text-sm text-gray-500">
+                <span><i class="fas fa-eye mr-1"></i>${job.views || 0}회</span>
+                <span><i class="fas fa-calendar mr-1"></i>${job.created_at ? new Date(job.created_at).toLocaleDateString('ko-KR') : '날짜 정보 없음'}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gradient-to-r from-orange-500 to-red-500 text-white p-6 rounded-2xl mb-6 text-center">
+            <div class="text-sm opacity-90 mb-2">시급</div>
+            <div class="text-4xl font-bold mb-2">${job.hourly_wage.toLocaleString()}원</div>
+            <div class="text-sm opacity-90">2026년 최저시급 ${job.hourly_wage >= 10320 ? '✓' : '✗'}</div>
+          </div>
+
+          <div class="bg-white border border-gray-200 rounded-2xl p-6 mb-6">
+            <h3 class="text-lg font-bold mb-4">근무 조건</h3>
+            <div class="space-y-3">
+              ${job.work_hours ? `
+              <div class="flex items-center">
+                <span class="w-6 text-gray-500"><i class="fas fa-clock"></i></span>
+                <span class="ml-2">${job.work_hours}</span>
+              </div>
+              ` : ''}
+              ${workDays.length > 0 ? `
+              <div class="flex items-center">
+                <span class="w-6 text-gray-500"><i class="fas fa-calendar-week"></i></span>
+                <span class="ml-2">${workDays.join(', ')}</span>
+              </div>
+              ` : ''}
+              <div class="flex items-center">
+                <span class="w-6 text-gray-500"><i class="fas fa-map-marker-alt"></i></span>
+                <span class="ml-2">${job.address || job.location || '주소 정보 없음'}</span>
+              </div>
+              ${job.company_name ? `
+              <div class="flex items-center">
+                <span class="w-6 text-gray-500"><i class="fas fa-building"></i></span>
+                <span class="ml-2">${job.company_name}</span>
+              </div>
+              ` : ''}
+            </div>
+          </div>
+
+          ${job.experience_times ? `
+          <div class="bg-blue-50 border border-blue-200 rounded-2xl p-6 mb-6">
+            <h3 class="text-lg font-bold mb-4 text-blue-900">
+              <i class="fas fa-clock mr-2"></i>체험 가능 시간
+            </h3>
+            <div class="grid grid-cols-2 gap-3">
+              ${(typeof job.experience_times === 'string' ? JSON.parse(job.experience_times) : job.experience_times).map(time => `
+                <div class="bg-white border border-blue-200 rounded-lg p-3 text-center">
+                  <span class="text-blue-600 font-medium">${time}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          ` : ''}
+
+          ${job.description ? `
+          <div class="mb-6">
+            <h3 class="text-lg font-bold mb-3">상세 설명</h3>
+            <div class="bg-gray-50 p-4 rounded-xl">
+              <p class="text-gray-700 leading-relaxed whitespace-pre-wrap">${job.description}</p>
+            </div>
+          </div>
+          ` : ''}
+
+          ${job.requirements ? `
+          <div class="mb-6">
+            <h3 class="text-lg font-bold mb-3">지원 자격</h3>
+            <div class="bg-gray-50 p-4 rounded-xl">
+              <p class="text-gray-700 leading-relaxed whitespace-pre-wrap">${job.requirements}</p>
+            </div>
+          </div>
+          ` : ''}
+
+          ${job.benefits ? `
+          <div class="mb-6">
+            <h3 class="text-lg font-bold mb-3">복리후생</h3>
+            <div class="bg-gray-50 p-4 rounded-xl">
+              <p class="text-gray-700 leading-relaxed whitespace-pre-wrap">${job.benefits}</p>
+            </div>
+          </div>
+          ` : ''}
+
+          ${job.tags && job.tags.length > 0 ? `
+          <div class="mb-6">
+            <h3 class="text-lg font-bold mb-3">특징</h3>
+            <div class="flex flex-wrap gap-2">
+              ${(Array.isArray(job.tags) ? job.tags : JSON.parse(job.tags || '[]')).map(tag => `
+                <span class="bg-orange-100 text-orange-600 text-sm px-3 py-1 rounded-full">#${tag}</span>
+              `).join('')}
+            </div>
+          </div>
+          ` : ''}
+
+          <div class="bg-blue-50 border border-blue-200 rounded-2xl p-6 mb-6">
+            <h3 class="text-lg font-bold mb-3 text-blue-900">사업주 정보</h3>
+            <div class="flex items-center space-x-3">
+              <div class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center">
+                <i class="fas fa-user text-blue-600"></i>
+              </div>
+              <div>
+                <div class="font-bold text-blue-900">${job.employer_name || '사업주'}</div>
+                <div class="text-sm text-blue-600">알비 인증 사업주</div>
+              </div>
+            </div>
+          </div>
+
+          ${job.hiring_type === 'trial' ? `
+          <div class="bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-6 mb-20">
+            <h3 class="text-lg font-bold mb-3 text-yellow-900 flex items-center">
+              <span class="mr-2"><i class="fas fa-exclamation-triangle"></i></span>
+              1시간 체험 안내
+            </h3>
+            <ul class="text-sm text-yellow-800 space-y-2">
+              <li>• <strong>관찰만 가능</strong>: 실제 업무는 하지 않습니다</li>
+              <li>• <strong>No-Touch Rule</strong>: 도구나 상품을 만지지 않습니다</li>
+              <li>• <strong>질문 환영</strong>: 궁금한 점은 자유롭게 질문하세요</li>
+              <li>• <strong>안전 우선</strong>: 불편하면 언제든 중단 가능합니다</li>
+            </ul>
+          </div>
+          ` : `
+          <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-6 mb-20">
+            <h3 class="text-lg font-bold mb-3 text-red-900 flex items-center">
+              <span class="mr-2"><i class="fas fa-bolt"></i></span>
+              바로채용 안내
+            </h3>
+            <ul class="text-sm text-red-800 space-y-2">
+              <li>• <strong>즉시 근무 시작</strong>: 체험 없이 바로 일을 시작합니다</li>
+              <li>• <strong>신뢰도 중요</strong>: 노쇼 시 신뢰도 점수가 차감됩니다</li>
+              <li>• <strong>+15% 프리미엄</strong>: 급구 수수료가 추가 적용됩니다</li>
+              <li>• <strong>당일 급구</strong>: 빠른 채용이 필요한 공고입니다</li>
+            </ul>
+          </div>
+          `}
+        </div>
+      `;
+      
+      // 버튼 텍스트 업데이트
+      const applyBtn = document.getElementById('applyBtn');
+      if (job.hiring_type === 'immediate') {
+        applyBtn.innerHTML = '<span>⚡</span><span>바로 지원하기</span>';
+        applyBtn.classList.remove('bg-orange-500', 'hover:bg-orange-600');
+        applyBtn.classList.add('bg-red-500', 'hover:bg-red-600');
+        document.querySelector('.fixed.bottom-0 p').textContent = '바로 채용 시 15% 프리미엄이 추가됩니다';
+      } else {
+        applyBtn.innerHTML = '<span>👀</span><span>1시간 체험 신청하기</span>';
+        applyBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+        applyBtn.classList.add('bg-orange-500', 'hover:bg-orange-600');
+        document.querySelector('.fixed.bottom-0 p').textContent = '10 알비포인트가 차감됩니다';
+      }
+    }
+
+    function applyForExperience() {
+      const sessionToken = localStorage.getItem('albi_session_token');
+      const userId = localStorage.getItem('albi_user_id');
+      
+      if (!sessionToken || !userId) {
+        alert('로그인이 필요합니다.');
+        window.location.href = '/login.html';
+        return;
+      }
+
+      // 바로채용인 경우 즉시 지원 프로세스
+      if (currentJob.hiring_type === 'immediate') {
+        if (confirm('⚡ 바로 지원하시겠습니까?\n\n• 체험 없이 즉시 근무를 시작합니다\n• 노쇼 시 신뢰도 점수가 차감됩니다\n• 15% 프리미엄 수수료가 적용됩니다')) {
+          applyImmediate();
+        }
+        return;
+      }
+
+      // 체험 후 채용인 경우 모달 열기
+      document.getElementById('experienceModal').classList.remove('hidden');
+      
+      // 최소 날짜 설정 (오늘 이후)
+      const today = new Date();
+      today.setDate(today.getDate() + 1); // 내일부터
+      const minDate = today.toISOString().split('T')[0];
+      document.getElementById('experienceDate').setAttribute('min', minDate);
+    }
+    
+    async function applyImmediate() {
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        const response = await axios.post(`/api/experiences`, {
+          job_id: jobId,
+          status: 'immediate_apply',
+          message: '바로채용 지원'
+        }, {
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.data.success) {
+          alert('✅ 바로 지원이 완료되었습니다!\n\n구인자가 확인 후 연락을 드릴 예정입니다.');
+          window.location.href = '/mypage.html';
+        } else {
+          throw new Error(response.data.error || '지원 실패');
+        }
+      } catch (error) {
+        console.error('바로 지원 오류:', error);
+        alert(error.response?.data?.error || error.message || '지원 중 오류가 발생했습니다.');
+      }
+    }
+
+    function closeExperienceModal() {
+      document.getElementById('experienceModal').classList.add('hidden');
+      document.getElementById('experienceDate').value = '';
+      document.getElementById('experienceTime').value = '';
+      document.getElementById('experienceMessage').value = '';
+    }
+
+    async function submitExperience() {
+      const sessionToken = localStorage.getItem('albi_session_token');
+      const date = document.getElementById('experienceDate').value;
+      const time = document.getElementById('experienceTime').value;
+      const message = document.getElementById('experienceMessage').value;
+
+      if (!date) {
+        alert('희망 날짜를 선택해주세요.');
+        return;
+      }
+
+      if (!time) {
+        alert('희망 시간을 선택해주세요.');
+        return;
+      }
+
+      const submitBtn = document.getElementById('submitExperienceBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>신청 중...';
+
+      try {
+        const response = await axios.post('/api/experiences', {
+          job_id: jobId,
+          requested_date: date,
+          requested_time: time,
+          message: message
+        }, {
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.data.success) {
+          closeExperienceModal();
+          alert('✅ 체험 신청이 완료되었습니다!\\n\\n사업주의 승인을 기다려주세요.\\n승인 결과는 알림으로 보내드립니다.');
+          window.location.href = '/my-experiences.html';
+        } else {
+          throw new Error(response.data.error || '체험 신청에 실패했습니다.');
+        }
+      } catch (error) {
+        console.error('체험 신청 에러:', error);
+        
+        let errorMsg = '체험 신청 중 오류가 발생했습니다.';
+        if (error.response?.data?.error) {
+          errorMsg = error.response.data.error;
+        } else if (error.message) {
+          errorMsg = error.message;
+        }
+        
+        alert('❌ ' + errorMsg);
+        
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '신청하기';
+      }
+    }
+
+    function shareJob() {
+      const shareData = {
+        title: currentJob.title,
+        text: `${currentJob.title} - 시급 ${currentJob.hourly_wage.toLocaleString()}원`,
+        url: window.location.href
+      };
+
+      if (navigator.share) {
+        navigator.share(shareData);
+      } else {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+          alert('공고 링크가 복사되었습니다!');
+        });
+      }
+    }
+
+    // 북마크 토글
+    async function toggleBookmark() {
+      const token = localStorage.getItem('albi_session_token');
+      if (!token) {
+        alert('로그인이 필요한 기능입니다.');
+        window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+        return;
+      }
+
+      const bookmarkBtn = document.getElementById('bookmarkBtn');
+      const icon = bookmarkBtn.querySelector('i');
+      const isBookmarked = icon.classList.contains('text-orange-500');
+
+      try {
+        if (isBookmarked) {
+          // 북마크 삭제
+          const response = await fetch(`/api/bookmarks/${currentJob.id}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            icon.classList.remove('text-orange-500');
+            icon.classList.add('text-gray-600');
+            bookmarkBtn.title = '관심 공고에 추가';
+            alert('관심 공고에서 제거되었습니다.');
+          } else {
+            alert(data.error || '북마크 삭제에 실패했습니다.');
+          }
+        } else {
+          // 북마크 추가
+          console.log('🔖 북마크 추가 시도:', currentJob.id);
+          const response = await fetch('/api/bookmarks', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ job_id: currentJob.id })
+          });
+
+          console.log('📡 Response status:', response.status);
+          const data = await response.json();
+          console.log('📦 Response data:', data);
+          
+          if (data.success) {
+            icon.classList.remove('text-gray-600');
+            icon.classList.add('text-orange-500');
+            bookmarkBtn.title = '관심 공고에서 제거';
+            alert('관심 공고에 추가되었습니다!');
+          } else {
+            console.error('❌ 북마크 추가 실패:', data.error);
+            alert(data.error || '북마크 추가에 실패했습니다.');
+          }
+        }
+      } catch (error) {
+        console.error('Bookmark error:', error);
+        alert('북마크 처리 중 오류가 발생했습니다.');
+      }
+    }
+
+    // 페이지 로드 시 북마크 상태 확인
+    async function checkBookmarkStatus() {
+      const token = localStorage.getItem('albi_session_token');
+      if (!token || !currentJob) {
+        console.log('⚠️ 북마크 상태 확인 스킵:', { hasToken: !!token, hasCurrentJob: !!currentJob });
+        return;
+      }
+
+      try {
+        console.log('🔍 북마크 상태 확인 중...', 'currentJob.id:', currentJob.id);
+        const response = await fetch('/api/bookmarks/list', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+        console.log('📋 북마크 목록:', data);
+        
+        if (data.success && data.bookmarks) {
+          console.log('🔎 북마크 목록에서 검색:', {
+            currentJobId: currentJob.id,
+            bookmarkIds: data.bookmarks.map(b => b.job_id)
+          });
+          
+          const isBookmarked = data.bookmarks.some(b => {
+            console.log(`비교: "${b.job_id}" === "${currentJob.id}"`, b.job_id === currentJob.id);
+            return b.job_id === currentJob.id;
+          });
+          
+          console.log('✅ 북마크 여부:', isBookmarked);
+          
+          if (isBookmarked) {
+            const bookmarkBtn = document.getElementById('bookmarkBtn');
+            const icon = bookmarkBtn.querySelector('i');
+            icon.classList.remove('text-gray-600');
+            icon.classList.add('text-orange-500');
+            bookmarkBtn.title = '관심 공고에서 제거';
+            console.log('🧡 북마크 아이콘을 오렌지색으로 변경');
+          }
+        }
+      } catch (error) {
+        console.error('Check bookmark error:', error);
+      }
+    }
+  </script>
+  <div id="footer-container"></div>
+  <script src="/footer.js"></script>
+</body>
+</html>

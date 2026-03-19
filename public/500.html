@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>500 - 서버 오류 | 알비</title>
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      padding: 20px;
+    }
+
+    .error-container {
+      text-align: center;
+      max-width: 600px;
+      animation: fadeIn 0.6s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .error-code {
+      font-size: 120px;
+      font-weight: 900;
+      margin-bottom: 20px;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      animation: shake 2s ease-in-out infinite;
+    }
+
+    @keyframes shake {
+      0%, 100% {
+        transform: rotate(0deg);
+      }
+      25% {
+        transform: rotate(-5deg);
+      }
+      75% {
+        transform: rotate(5deg);
+      }
+    }
+
+    .error-icon {
+      font-size: 80px;
+      margin-bottom: 30px;
+      animation: rotate 4s linear infinite;
+    }
+
+    @keyframes rotate {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .error-title {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .error-message {
+      font-size: 18px;
+      margin-bottom: 40px;
+      opacity: 0.9;
+      line-height: 1.6;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 14px 32px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: white;
+      color: #f5576c;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(255,255,255,0.3);
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+
+    .info-box {
+      margin-top: 40px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 30px;
+      text-align: left;
+    }
+
+    .info-box h3 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .info-box ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .info-box li {
+      padding: 8px 0;
+      display: flex;
+      align-items: start;
+      gap: 12px;
+      font-size: 15px;
+      opacity: 0.95;
+    }
+
+    .info-box li i {
+      margin-top: 4px;
+      color: #FFD700;
+    }
+
+    .countdown {
+      margin-top: 30px;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    @media (max-width: 768px) {
+      .error-code {
+        font-size: 80px;
+      }
+
+      .error-icon {
+        font-size: 60px;
+      }
+
+      .error-title {
+        font-size: 24px;
+      }
+
+      .error-message {
+        font-size: 16px;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .info-box {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="error-container">
+    <div class="error-icon">⚙️</div>
+    <div class="error-code">500</div>
+    <h1 class="error-title">서버 오류가 발생했습니다</h1>
+    <p class="error-message">
+      일시적인 서버 문제가 발생했습니다.<br>
+      잠시 후 다시 시도해주세요.
+    </p>
+
+    <div class="action-buttons">
+      <button class="btn btn-primary" onclick="location.reload()">
+        <i class="fas fa-redo"></i>
+        새로고침
+      </button>
+      <a href="/" class="btn btn-secondary">
+        <i class="fas fa-home"></i>
+        홈으로 돌아가기
+      </a>
+      <a href="/support.html" class="btn btn-secondary">
+        <i class="fas fa-headset"></i>
+        고객센터
+      </a>
+    </div>
+
+    <div class="info-box">
+      <h3>
+        <i class="fas fa-lightbulb"></i>
+        이런 경우 시도해보세요
+      </h3>
+      <ul>
+        <li>
+          <i class="fas fa-check-circle"></i>
+          <span>페이지를 새로고침 해보세요 (Ctrl + F5)</span>
+        </li>
+        <li>
+          <i class="fas fa-check-circle"></i>
+          <span>브라우저 캐시를 삭제해보세요</span>
+        </li>
+        <li>
+          <i class="fas fa-check-circle"></i>
+          <span>잠시 후 다시 접속해보세요</span>
+        </li>
+        <li>
+          <i class="fas fa-check-circle"></i>
+          <span>문제가 계속되면 고객센터(1588-9999)로 문의해주세요</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="countdown">
+      <span id="autoRedirect"></span>
+    </div>
+  </div>
+
+  <script>
+    // 10초 후 자동 새로고침
+    let countdown = 10;
+    const countdownEl = document.getElementById('autoRedirect');
+    
+    function updateCountdown() {
+      if (countdown > 0) {
+        countdownEl.textContent = `${countdown}초 후 자동으로 새로고침됩니다...`;
+        countdown--;
+        setTimeout(updateCountdown, 1000);
+      } else {
+        location.reload();
+      }
+    }
+    
+    updateCountdown();
+
+    // 5초 이내에 사용자가 다른 행동을 하면 자동 새로고침 취소
+    let userInteracted = false;
+    
+    document.addEventListener('click', () => {
+      userInteracted = true;
+      countdown = 0;
+      countdownEl.textContent = '';
+    });
+  </script>
+</body>
+</html>

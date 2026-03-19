@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>패널 면접 결과 - Albi AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Phase 8.1: System Optimization -->
+    <link rel="stylesheet" href="/static/mobile-optimized.css">
+    <script src="/static/loading-manager.js"></script>
+    
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .result-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .grade-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen text-white">
+    <div class="container mx-auto px-4 py-8">
+        <!-- 헤더 -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold mb-2">
+                <i class="fas fa-clipboard-check mr-3"></i>패널 면접 결과
+            </h1>
+            <p class="text-gray-300">3명의 면접관이 종합 평가한 결과입니다</p>
+        </div>
+
+        <!-- 종합 점수 -->
+        <div class="result-card text-center">
+            <div class="grade-badge mx-auto mb-4" id="gradeBadge">A</div>
+            <h2 class="text-3xl font-bold mb-2" id="finalScore">85점</h2>
+            <p class="text-xl text-gray-300 mb-4" id="hiringRecommendation">추천</p>
+            <p class="text-gray-400" id="executiveSummary">
+                전반적으로 우수한 면접 수행을 보였습니다.
+            </p>
+        </div>
+
+        <!-- 면접관별 평가 -->
+        <div class="result-card">
+            <h3 class="text-2xl font-bold mb-6">
+                <i class="fas fa-users mr-2"></i>면접관별 평가
+            </h3>
+            <div id="interviewerScores" class="space-y-4">
+                <!-- 면접관별 점수가 여기에 렌더링됩니다 -->
+            </div>
+        </div>
+
+        <!-- 상세 평가 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- 강점 -->
+            <div class="result-card border-green-500/30">
+                <h3 class="text-xl font-bold mb-4 text-green-400">
+                    <i class="fas fa-thumbs-up mr-2"></i>주요 강점
+                </h3>
+                <ul id="keyStrengths" class="space-y-2">
+                    <!-- 강점 목록 -->
+                </ul>
+            </div>
+            
+            <!-- 개선 사항 -->
+            <div class="result-card border-yellow-500/30">
+                <h3 class="text-xl font-bold mb-4 text-yellow-400">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>개선 사항
+                </h3>
+                <ul id="keyConcerns" class="space-y-2">
+                    <!-- 개선 사항 목록 -->
+                </ul>
+            </div>
+        </div>
+
+        <!-- 전체 평가 -->
+        <div class="result-card">
+            <h3 class="text-2xl font-bold mb-4">
+                <i class="fas fa-comment-alt mr-2"></i>종합 평가
+            </h3>
+            <p id="overallAssessment" class="text-gray-300 leading-relaxed mb-6">
+                <!-- 종합 평가 내용 -->
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-bold mb-2 text-blue-400">면접관 공통 의견</h4>
+                    <ul id="consensusAreas" class="text-sm text-gray-300 space-y-1">
+                        <!-- 공통 의견 -->
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-2 text-purple-400">면접관 간 의견 차이</h4>
+                    <ul id="divergentViews" class="text-sm text-gray-300 space-y-1">
+                        <!-- 의견 차이 -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 추천 사항 -->
+        <div class="result-card">
+            <h3 class="text-2xl font-bold mb-4">
+                <i class="fas fa-lightbulb mr-2"></i>추천 사항
+            </h3>
+            <ul id="recommendations" class="space-y-2">
+                <!-- 추천 사항 목록 -->
+            </ul>
+        </div>
+
+        <!-- 다음 단계 -->
+        <div class="result-card bg-purple-900/30 border-purple-500/30">
+            <h3 class="text-2xl font-bold mb-4">
+                <i class="fas fa-arrow-right mr-2"></i>다음 단계
+            </h3>
+            <ul id="nextSteps" class="space-y-2 mb-6">
+                <!-- 다음 단계 목록 -->
+            </ul>
+            
+            <div class="flex gap-4 justify-center">
+                <button onclick="window.location.href='/panel-interview.html'" class="bg-purple-600 hover:bg-purple-700 px-8 py-3 rounded-xl font-bold transition-all">
+                    <i class="fas fa-redo mr-2"></i>다시 면접보기
+                </button>
+                <button onclick="window.location.href='/my-recordings.html'" class="bg-blue-600 hover:bg-blue-700 px-8 py-3 rounded-xl font-bold transition-all">
+                    <i class="fas fa-list mr-2"></i>면접 기록
+                </button>
+                <button onclick="window.location.href='/'  " class="bg-gray-600 hover:bg-gray-700 px-8 py-3 rounded-xl font-bold transition-all">
+                    <i class="fas fa-home mr-2"></i>홈으로
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 결과 로드
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('session');
+            
+            // localStorage에서 결과 가져오기
+            const resultData = localStorage.getItem('panelInterviewResult');
+            
+            if (resultData) {
+                const result = JSON.parse(resultData);
+                renderResult(result);
+                localStorage.removeItem('panelInterviewResult');
+            } else if (sessionId) {
+                // API에서 결과 가져오기
+                loadResultFromAPI(sessionId);
+            } else {
+                showError('결과를 불러올 수 없습니다.');
+            }
+        });
+        
+        // 결과 렌더링
+        function renderResult(result) {
+            // 종합 점수
+            document.getElementById('finalScore').textContent = `${result.finalScore}점`;
+            document.getElementById('gradeBadge').textContent = result.finalGrade;
+            document.getElementById('hiringRecommendation').textContent = result.hiringRecommendation;
+            
+            // 종합 평가
+            const synthesis = result.synthesis || {};
+            document.getElementById('executiveSummary').textContent = synthesis.executiveSummary || '';
+            document.getElementById('overallAssessment').textContent = synthesis.overallAssessment || '';
+            
+            // 면접관별 점수
+            const interviewerScores = document.getElementById('interviewerScores');
+            if (result.interviewerScores && result.interviewerScores.length > 0) {
+                interviewerScores.innerHTML = result.interviewerScores.map(is => `
+                    <div class="flex items-center justify-between bg-gray-800/50 rounded-lg p-4">
+                        <div>
+                            <span class="font-bold">면접관 ${is.interviewerId}</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="text-2xl font-bold">${is.avgScore.toFixed(1)}점</div>
+                            <div class="w-32 bg-gray-700 rounded-full h-2">
+                                <div class="bg-purple-500 h-2 rounded-full" style="width: ${is.avgScore}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // 강점
+            renderList('keyStrengths', synthesis.keyStrengths, 'text-green-400', 'check');
+            
+            // 개선 사항
+            renderList('keyConcerns', synthesis.keyConcerns, 'text-yellow-400', 'exclamation-circle');
+            
+            // 공통 의견
+            renderList('consensusAreas', synthesis.consensusAreas, 'text-blue-400', 'users');
+            
+            // 의견 차이
+            renderList('divergentViews', synthesis.divergentViews, 'text-purple-400', 'exchange-alt');
+            
+            // 추천 사항
+            renderList('recommendations', synthesis.recommendations, 'text-purple-400', 'arrow-right');
+            
+            // 다음 단계
+            renderList('nextSteps', synthesis.nextSteps, 'text-green-400', 'forward');
+        }
+        
+        // 목록 렌더링
+        function renderList(elementId, items, colorClass, iconName) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            if (items && items.length > 0) {
+                element.innerHTML = items.map(item => `
+                    <li class="flex items-start gap-2">
+                        <i class="fas fa-${iconName} ${colorClass} mt-1"></i>
+                        <span>${item}</span>
+                    </li>
+                `).join('');
+            } else {
+                element.innerHTML = '<li class="text-gray-500">내용이 없습니다.</li>';
+            }
+        }
+        
+        // API에서 결과 로드
+        async function loadResultFromAPI(sessionId) {
+            try {
+                showLoading('loadResult', {
+                    title: '결과 로드 중...',
+                    message: '잠시만 기다려주세요'
+                });
+                
+                const response = await fetch(`/api/panel-report?session=${sessionId}`);
+                const data = await response.json();
+                
+                hideLoading('loadResult');
+                
+                if (data.success) {
+                    renderResult(data.data);
+                } else {
+                    showError(data.error || '결과를 불러오는데 실패했습니다.');
+                }
+            } catch (error) {
+                hideLoading('loadResult');
+                showError('결과를 불러오는데 실패했습니다: ' + error.message);
+            }
+        }
+        
+        // 에러 표시
+        function showError(message) {
+            document.querySelector('.container').innerHTML = `
+                <div class="text-center py-20">
+                    <i class="fas fa-exclamation-triangle text-6xl text-red-500 mb-6"></i>
+                    <h2 class="text-2xl font-bold mb-4">오류</h2>
+                    <p class="text-gray-400 mb-8">${message}</p>
+                    <button onclick="window.location.href='/panel-interview.html'" class="bg-purple-600 hover:bg-purple-700 px-8 py-3 rounded-xl font-bold transition-all">
+                        <i class="fas fa-redo mr-2"></i>다시 시도
+                    </button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

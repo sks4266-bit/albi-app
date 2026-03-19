@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎤 음성 멘토링 - Albi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+    <style>
+        .pulse-animation {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        .wave {
+            position: relative;
+            display: inline-block;
+            width: 5px;
+            height: 20px;
+            background: linear-gradient(to top, #3B82F6, #8B5CF6);
+            margin: 0 2px;
+            animation: wave 1s ease-in-out infinite;
+        }
+        .wave:nth-child(2) { animation-delay: 0.1s; }
+        .wave:nth-child(3) { animation-delay: 0.2s; }
+        .wave:nth-child(4) { animation-delay: 0.3s; }
+        .wave:nth-child(5) { animation-delay: 0.4s; }
+        @keyframes wave {
+            0%, 100% { height: 20px; }
+            50% { height: 40px; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-purple-100 min-h-screen">
+    <!-- 헤더 -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <a href="/mentor-chat.html" class="text-2xl font-bold text-purple-600">
+                    <i class="fas fa-robot mr-2"></i>Albi
+                </a>
+                <span class="text-gray-400">|</span>
+                <h1 class="text-lg font-semibold text-gray-700">음성 멘토링</h1>
+            </div>
+            <a href="/mentor-chat.html" class="text-gray-600 hover:text-purple-600 transition">
+                <i class="fas fa-keyboard mr-1"></i>
+                <span class="hidden md:inline">텍스트 채팅</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-8">
+        <!-- 안내 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-3">
+                <i class="fas fa-microphone text-blue-600 mr-2"></i>음성으로 대화하기
+            </h2>
+            <p class="text-gray-600 mb-4">
+                마이크 버튼을 누르고 말하세요. AI 멘토가 음성으로 답변해드립니다.
+            </p>
+            
+            <!-- 브라우저 호환성 알림 -->
+            <div id="browserWarning" class="hidden bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                <div class="flex items-start gap-2">
+                    <i class="fas fa-exclamation-triangle text-yellow-600 mt-1"></i>
+                    <div class="flex-1">
+                        <p class="text-sm text-yellow-800 font-medium">브라우저 호환성 안내</p>
+                        <p class="text-xs text-yellow-700 mt-1">음성 인식은 Chrome, Edge, Safari에서 지원됩니다. 다른 브라우저에서는 텍스트 입력을 사용해주세요.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 구독 상태 -->
+            <div id="subscriptionStatus" class="flex items-center gap-2 text-sm">
+                <i class="fas fa-spinner fa-spin text-gray-400"></i>
+                <span class="text-gray-600">구독 상태 확인 중...</span>
+            </div>
+        </div>
+
+        <!-- 음성 인터페이스 -->
+        <div class="bg-white rounded-lg shadow-md p-8">
+            <!-- AI 아바타 -->
+            <div class="flex flex-col items-center mb-8">
+                <div id="avatarContainer" class="relative">
+                    <div id="avatar" class="w-32 h-32 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+                        <i class="fas fa-user-tie text-white text-5xl"></i>
+                    </div>
+                    <!-- 말하는 애니메이션 -->
+                    <div id="speakingIndicator" class="hidden absolute -bottom-4 left-1/2 transform -translate-x-1/2 flex items-end gap-1">
+                        <span class="wave"></span>
+                        <span class="wave"></span>
+                        <span class="wave"></span>
+                        <span class="wave"></span>
+                        <span class="wave"></span>
+                    </div>
+                </div>
+                <div id="statusText" class="mt-8 text-center">
+                    <p class="text-lg font-semibold text-gray-700">대기 중</p>
+                    <p class="text-sm text-gray-500 mt-1">마이크 버튼을 눌러 시작하세요</p>
+                </div>
+            </div>
+
+            <!-- 마이크 버튼 -->
+            <div class="flex justify-center mb-6">
+                <button 
+                    id="micBtn"
+                    class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                    onclick="toggleRecording()"
+                >
+                    <i id="micIcon" class="fas fa-microphone text-white text-3xl"></i>
+                </button>
+            </div>
+
+            <!-- 인식된 텍스트 -->
+            <div id="transcriptContainer" class="hidden mb-6">
+                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div class="flex items-start gap-2">
+                        <i class="fas fa-user text-purple-600 mt-1"></i>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-500 mb-1">당신</p>
+                            <p id="transcript" class="text-gray-800"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI 응답 -->
+            <div id="responseContainer" class="hidden">
+                <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                    <div class="flex items-start gap-2">
+                        <i class="fas fa-robot text-blue-600 mt-1"></i>
+                        <div class="flex-1">
+                            <p class="text-sm text-blue-600 mb-1">AI 멘토</p>
+                            <p id="response" class="text-gray-800"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 대화 기록 -->
+            <div id="historyContainer" class="hidden mt-6 pt-6 border-t">
+                <h3 class="text-sm font-semibold text-gray-700 mb-3">대화 기록</h3>
+                <div id="history" class="space-y-3 max-h-64 overflow-y-auto"></div>
+            </div>
+        </div>
+
+        <!-- 도움말 -->
+        <div class="mt-6 bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-3">
+                <i class="fas fa-question-circle text-purple-600 mr-2"></i>사용 방법
+            </h3>
+            <div class="space-y-2 text-sm text-gray-600">
+                <p><strong>1단계:</strong> 마이크 버튼을 클릭하세요</p>
+                <p><strong>2단계:</strong> 질문이나 고민을 말씀해주세요</p>
+                <p><strong>3단계:</strong> AI 멘토의 음성 답변을 들어보세요</p>
+                <p class="text-xs text-gray-500 mt-4">
+                    💡 팁: 조용한 환경에서 사용하면 더 정확한 인식이 가능합니다.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const userId = localStorage.getItem('albi_user_id') || 'demo-user-' + Date.now();
+        localStorage.setItem('albi_user_id', userId);
+
+        let recognition = null;
+        let synthesis = window.speechSynthesis;
+        let isRecording = false;
+        let isSpeaking = false;
+        let conversationHistory = [];
+
+        // 음성 인식 초기화
+        function initSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.lang = 'ko-KR';
+                recognition.continuous = false;
+                recognition.interimResults = false;
+
+                recognition.onstart = () => {
+                    console.log('음성 인식 시작');
+                    updateStatus('듣는 중...', '편하게 말씀해주세요');
+                    document.getElementById('avatar').classList.add('pulse-animation');
+                };
+
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    console.log('인식된 텍스트:', transcript);
+                    displayTranscript(transcript);
+                    sendToAI(transcript);
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('음성 인식 오류:', event.error);
+                    updateStatus('오류 발생', event.error);
+                    stopRecording();
+                };
+
+                recognition.onend = () => {
+                    console.log('음성 인식 종료');
+                    stopRecording();
+                };
+            } else {
+                document.getElementById('browserWarning').classList.remove('hidden');
+                document.getElementById('micBtn').disabled = true;
+            }
+        }
+
+        // 녹음 시작/중지
+        function toggleRecording() {
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        }
+
+        function startRecording() {
+            if (!recognition) return;
+            
+            isRecording = true;
+            document.getElementById('micIcon').className = 'fas fa-stop text-white text-3xl';
+            document.getElementById('micBtn').classList.add('pulse-animation');
+            
+            recognition.start();
+        }
+
+        function stopRecording() {
+            if (!recognition) return;
+            
+            isRecording = false;
+            document.getElementById('micIcon').className = 'fas fa-microphone text-white text-3xl';
+            document.getElementById('micBtn').classList.remove('pulse-animation');
+            document.getElementById('avatar').classList.remove('pulse-animation');
+            
+            if (recognition) {
+                recognition.stop();
+            }
+        }
+
+        // 인식된 텍스트 표시
+        function displayTranscript(text) {
+            document.getElementById('transcript').textContent = text;
+            document.getElementById('transcriptContainer').classList.remove('hidden');
+        }
+
+        // AI에게 전송
+        async function sendToAI(text) {
+            updateStatus('AI가 생각 중...', '잠시만 기다려주세요');
+            document.getElementById('micBtn').disabled = true;
+
+            try {
+                const response = await axios.post('/api/mentor-chat', {
+                    user_id: userId,
+                    message: text
+                });
+
+                if (response.data.success) {
+                    const aiResponse = response.data.data.mentor_response;
+                    displayResponse(aiResponse);
+                    speakResponse(aiResponse);
+                    
+                    // 대화 기록 추가
+                    conversationHistory.push({
+                        user: text,
+                        ai: aiResponse,
+                        time: new Date().toLocaleTimeString()
+                    });
+                    updateHistory();
+                } else {
+                    throw new Error(response.data.error);
+                }
+            } catch (error) {
+                console.error('AI 응답 오류:', error);
+                if (error.response?.status === 403) {
+                    alert('구독이 필요한 서비스입니다.');
+                    window.location.href = '/payment.html';
+                } else {
+                    alert('오류: ' + (error.response?.data?.error || error.message));
+                    updateStatus('오류 발생', '다시 시도해주세요');
+                }
+            } finally {
+                document.getElementById('micBtn').disabled = false;
+            }
+        }
+
+        // 응답 표시
+        function displayResponse(text) {
+            document.getElementById('response').textContent = text;
+            document.getElementById('responseContainer').classList.remove('hidden');
+        }
+
+        // 음성 출력
+        function speakResponse(text) {
+            if (!synthesis) return;
+
+            // 기존 음성 중지
+            synthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ko-KR';
+            utterance.rate = 1.0;
+            utterance.pitch = 1.0;
+
+            utterance.onstart = () => {
+                isSpeaking = true;
+                updateStatus('AI가 답변 중...', '');
+                document.getElementById('speakingIndicator').classList.remove('hidden');
+            };
+
+            utterance.onend = () => {
+                isSpeaking = false;
+                updateStatus('대기 중', '마이크 버튼을 눌러 다시 질문하세요');
+                document.getElementById('speakingIndicator').classList.add('hidden');
+            };
+
+            utterance.onerror = (event) => {
+                console.error('음성 출력 오류:', event);
+                isSpeaking = false;
+                document.getElementById('speakingIndicator').classList.add('hidden');
+            };
+
+            synthesis.speak(utterance);
+        }
+
+        // 상태 업데이트
+        function updateStatus(title, subtitle) {
+            document.getElementById('statusText').innerHTML = `
+                <p class="text-lg font-semibold text-gray-700">${title}</p>
+                ${subtitle ? `<p class="text-sm text-gray-500 mt-1">${subtitle}</p>` : ''}
+            `;
+        }
+
+        // 대화 기록 업데이트
+        function updateHistory() {
+            if (conversationHistory.length === 0) return;
+
+            document.getElementById('historyContainer').classList.remove('hidden');
+            const historyEl = document.getElementById('history');
+            
+            historyEl.innerHTML = conversationHistory.slice().reverse().map((item, idx) => `
+                <div class="text-sm">
+                    <div class="flex items-start gap-2 mb-2">
+                        <i class="fas fa-user text-purple-600 text-xs mt-1"></i>
+                        <div class="flex-1">
+                            <span class="text-xs text-gray-500">${item.time}</span>
+                            <p class="text-gray-700">${escapeHtml(item.user)}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-2 ml-4 mb-3">
+                        <i class="fas fa-robot text-blue-600 text-xs mt-1"></i>
+                        <p class="flex-1 text-gray-600">${escapeHtml(item.ai)}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 구독 확인
+        async function checkSubscription() {
+            try {
+                const response = await axios.get(`/api/mentor-subscription?user_id=${userId}`);
+                
+                if (response.data.success && response.data.data) {
+                    const sub = response.data.data;
+                    if (sub.status === 'active') {
+                        document.getElementById('subscriptionStatus').innerHTML = `
+                            <i class="fas fa-check-circle text-green-600"></i>
+                            <span class="text-green-700 font-medium">구독 활성 (${sub.plan})</span>
+                            <span class="text-gray-500">| 만료: ${new Date(sub.expires_at).toLocaleDateString()}</span>
+                        `;
+                    } else {
+                        showSubscriptionRequired();
+                    }
+                } else {
+                    showSubscriptionRequired();
+                }
+            } catch (error) {
+                console.error('구독 확인 오류:', error);
+            }
+        }
+
+        function showSubscriptionRequired() {
+            document.getElementById('subscriptionStatus').innerHTML = `
+                <i class="fas fa-exclamation-circle text-red-600"></i>
+                <span class="text-red-700">구독이 필요합니다</span>
+                <a href="/payment.html" class="text-purple-600 hover:text-purple-800 font-medium ml-2">→ 구독하기</a>
+            `;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 초기화
+        window.addEventListener('DOMContentLoaded', () => {
+            initSpeechRecognition();
+            checkSubscription();
+        });
+
+        // 페이지 떠날 때 음성 중지
+        window.addEventListener('beforeunload', () => {
+            if (synthesis) {
+                synthesis.cancel();
+            }
+        });
+    </script>
+</body>
+</html>

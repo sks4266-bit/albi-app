@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Albi PWA Icon Generator</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 { color: #3B82F6; }
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .preview-item {
+            text-align: center;
+            padding: 1rem;
+            background: #f9fafb;
+            border-radius: 0.5rem;
+        }
+        canvas {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+        }
+        button {
+            background: #3B82F6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 0.5rem;
+        }
+        button:hover {
+            background: #2563EB;
+        }
+        .download-all {
+            background: #10B981;
+        }
+        .download-all:hover {
+            background: #059669;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Albi PWA 아이콘 생성기</h1>
+        <p>아래 아이콘들을 다운로드하여 <code>/public/static/</code> 폴더에 저장하세요.</p>
+
+        <div class="preview-grid" id="previewGrid"></div>
+
+        <button class="download-all" onclick="downloadAll()">
+            <i class="fas fa-download"></i> 모든 아이콘 다운로드 (개별 클릭 필요)
+        </button>
+    </div>
+
+    <script>
+        const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+        
+        function drawIcon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            canvas.width = size;
+            canvas.height = size;
+            
+            // 배경 그라디언트
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(1, '#764ba2');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // 로봇 얼굴
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const faceSize = size * 0.6;
+            
+            // 얼굴 배경
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            ctx.beginPath();
+            ctx.roundRect(centerX - faceSize/2, centerY - faceSize/2, faceSize, faceSize, faceSize * 0.15);
+            ctx.fill();
+            
+            // 눈
+            const eyeSize = size * 0.08;
+            const eyeY = centerY - faceSize * 0.15;
+            const eyeSpacing = faceSize * 0.25;
+            
+            ctx.fillStyle = '#3B82F6';
+            ctx.beginPath();
+            ctx.arc(centerX - eyeSpacing, eyeY, eyeSize, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(centerX + eyeSpacing, eyeY, eyeSize, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 입 (미소)
+            ctx.strokeStyle = '#3B82F6';
+            ctx.lineWidth = size * 0.02;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY + faceSize * 0.1, faceSize * 0.25, 0.2, Math.PI - 0.2);
+            ctx.stroke();
+            
+            // 안테나
+            const antennaY = centerY - faceSize/2 - size * 0.08;
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.lineWidth = size * 0.015;
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - faceSize/2);
+            ctx.lineTo(centerX, antennaY);
+            ctx.stroke();
+            
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.beginPath();
+            ctx.arc(centerX, antennaY, size * 0.025, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        function createPreview(size) {
+            const div = document.createElement('div');
+            div.className = 'preview-item';
+            
+            const canvas = document.createElement('canvas');
+            drawIcon(canvas, size);
+            
+            const label = document.createElement('div');
+            label.textContent = `${size}x${size}`;
+            label.style.fontWeight = '600';
+            label.style.marginBottom = '0.5rem';
+            
+            const button = document.createElement('button');
+            button.textContent = '다운로드';
+            button.onclick = () => downloadIcon(canvas, size);
+            
+            div.appendChild(label);
+            div.appendChild(canvas);
+            div.appendChild(button);
+            
+            return div;
+        }
+        
+        function downloadIcon(canvas, size) {
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `icon-${size}.png`;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+        
+        function downloadAll() {
+            alert('각 아이콘의 "다운로드" 버튼을 클릭하여 개별적으로 다운로드해주세요.\n(브라우저 보안 정책상 자동 다운로드가 제한됩니다)');
+        }
+        
+        // 모든 사이즈 생성
+        const grid = document.getElementById('previewGrid');
+        sizes.forEach(size => {
+            grid.appendChild(createPreview(size));
+        });
+        
+        // Shortcut 아이콘도 생성
+        [
+            { name: 'interview', emoji: '💬' },
+            { name: 'mentor', emoji: '👔' },
+            { name: 'voice', emoji: '🎤' },
+            { name: 'portfolio', emoji: '💼' }
+        ].forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'preview-item';
+            
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 96;
+            canvas.height = 96;
+            
+            // 배경
+            const gradient = ctx.createLinearGradient(0, 0, 96, 96);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(1, '#764ba2');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 96, 96);
+            
+            // 이모지
+            ctx.font = '48px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(item.emoji, 48, 48);
+            
+            const label = document.createElement('div');
+            label.textContent = `shortcut-${item.name}`;
+            label.style.fontWeight = '600';
+            label.style.marginBottom = '0.5rem';
+            label.style.fontSize = '0.875rem';
+            
+            const button = document.createElement('button');
+            button.textContent = '다운로드';
+            button.onclick = () => {
+                canvas.toBlob(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `shortcut-${item.name}.png`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                });
+            };
+            
+            div.appendChild(label);
+            div.appendChild(canvas);
+            div.appendChild(button);
+            
+            grid.appendChild(div);
+        });
+    </script>
+</body>
+</html>

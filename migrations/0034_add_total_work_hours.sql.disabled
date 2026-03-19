@@ -1,0 +1,16 @@
+-- ============================================
+-- 총 근무시간 컬럼 추가 (시간 기반 차등 결제)
+-- ============================================
+
+-- jobs 테이블에 total_work_hours 추가 (이미 존재하면 무시)
+-- SQLite는 IF NOT EXISTS를 지원하지 않으므로, 실패 시 무시되도록 처리
+-- PRAGMA를 사용하여 컬럼 존재 여부 확인은 불가능하므로, 이 마이그레이션은 건너뜀
+
+-- 기존 데이터 업데이트 (job_type 기반 기본값 설정)
+UPDATE jobs SET total_work_hours = 1 WHERE (job_type = '1시간체험' OR job_type LIKE '%1시간%') AND total_work_hours IS NULL;
+UPDATE jobs SET total_work_hours = 10 WHERE (job_type = '초단기' OR job_type LIKE '%초단기%') AND total_work_hours IS NULL;
+UPDATE jobs SET total_work_hours = 100 WHERE (job_type = '단기' OR job_type LIKE '%단기%') AND total_work_hours IS NULL;
+UPDATE jobs SET total_work_hours = 200 WHERE (job_type = '장기' OR job_type LIKE '%장기%') AND total_work_hours IS NULL;
+
+-- NULL인 경우 기본값 30시간으로 설정 (단기 기준)
+UPDATE jobs SET total_work_hours = 30 WHERE total_work_hours IS NULL;

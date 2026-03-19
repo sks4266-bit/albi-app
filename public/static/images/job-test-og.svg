@@ -1,0 +1,36 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 그라디언트 -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- 배경 -->
+  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+  
+  <!-- 반투명 원들 (장식) -->
+  <circle cx="200" cy="150" r="100" fill="white" opacity="0.1"/>
+  <circle cx="1000" cy="500" r="150" fill="white" opacity="0.1"/>
+  
+  <!-- 메인 텍스트 -->
+  <text x="600" y="250" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="white" text-anchor="middle">
+    직무적성 심리테스트
+  </text>
+  
+  <!-- 이모지 -->
+  <text x="600" y="360" font-size="100" text-anchor="middle">
+    🎯📊💬⚡
+  </text>
+  
+  <!-- 부제목 -->
+  <text x="600" y="460" font-family="Arial, sans-serif" font-size="36" fill="white" text-anchor="middle" opacity="0.95">
+    나의 업무 DNA를 찾아보세요
+  </text>
+  
+  <!-- 알비 로고/이름 -->
+  <text x="600" y="540" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="white" text-anchor="middle" opacity="0.9">
+    알비 ALBI
+  </text>
+</svg>

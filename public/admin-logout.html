@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그아웃 중...</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white rounded-lg shadow-lg p-8 max-w-md text-center">
+        <div class="mb-4">
+            <i class="fas fa-spinner fa-spin text-4xl text-blue-600"></i>
+        </div>
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">로그아웃 중...</h1>
+        <p class="text-gray-600">잠시만 기다려주세요.</p>
+    </div>
+    
+    <script>
+        // 모든 관리자 인증 정보 제거
+        localStorage.removeItem('admin_token');
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        
+        // 세션 스토리지도 제거
+        sessionStorage.clear();
+        
+        // 1초 후 로그인 페이지로 리다이렉트
+        setTimeout(() => {
+            window.location.href = '/admin-login.html';
+        }, 1000);
+    </script>
+</body>
+</html>

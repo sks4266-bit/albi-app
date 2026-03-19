@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>테스트 계정 생성 - 알비</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/footer.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-indigo-50 to-purple-50 min-h-screen flex items-center justify-center p-6">
+    <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="inline-block bg-gradient-to-r from-blue-600 to-purple-600 text-white text-4xl w-16 h-16 rounded-full flex items-center justify-center mb-4">
+                <i class="fas fa-vial"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">결제 테스트 계정 생성</h1>
+            <p class="text-sm text-gray-600">아임포트 정기결제 시스템 테스트용</p>
+        </div>
+
+        <!-- 테스트 계정 정보 생성 -->
+        <div class="space-y-6 mb-8">
+            <div class="bg-blue-50 rounded-lg p-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-user mr-2"></i>테스트 사용자 ID
+                </label>
+                <div class="flex items-center gap-2">
+                    <input type="text" id="test-user-id" readonly 
+                           class="flex-1 px-4 py-3 border border-gray-300 rounded-lg bg-white font-mono text-sm">
+                    <button onclick="copyToClipboard('test-user-id')" 
+                            class="bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-green-50 rounded-lg p-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-envelope mr-2"></i>테스트 이메일
+                </label>
+                <div class="flex items-center gap-2">
+                    <input type="text" id="test-email" readonly 
+                           class="flex-1 px-4 py-3 border border-gray-300 rounded-lg bg-white font-mono text-sm">
+                    <button onclick="copyToClipboard('test-email')" 
+                            class="bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-purple-50 rounded-lg p-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-key mr-2"></i>테스트 비밀번호
+                </label>
+                <div class="flex items-center gap-2">
+                    <input type="text" id="test-password" readonly 
+                           class="flex-1 px-4 py-3 border border-gray-300 rounded-lg bg-white font-mono text-sm">
+                    <button onclick="copyToClipboard('test-password')" 
+                            class="bg-purple-600 text-white px-4 py-3 rounded-lg hover:bg-purple-700 transition">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 테스트 정보 -->
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <h4 class="font-semibold text-yellow-800 mb-2 flex items-center">
+                <i class="fas fa-exclamation-triangle mr-2"></i>아임포트 테스트 카드 정보
+            </h4>
+            <ul class="text-xs text-yellow-700 space-y-1">
+                <li>• <strong>카드 번호</strong>: 5543-0400-0000-0009</li>
+                <li>• <strong>유효기간</strong>: 임의 미래 날짜 (예: 12/25)</li>
+                <li>• <strong>CVC</strong>: 임의 3자리 (예: 123)</li>
+                <li>• <strong>비밀번호</strong>: 앞 2자리 (예: 00)</li>
+                <li>• <strong>생년월일</strong>: 6자리 (예: 900101)</li>
+            </ul>
+        </div>
+
+        <!-- 액션 버튼 -->
+        <div class="space-y-3">
+            <button onclick="generateNewAccount()" 
+                    class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition">
+                <i class="fas fa-sync mr-2"></i>새 계정 생성
+            </button>
+            
+            <a href="/login.html" 
+               class="block w-full text-center bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition">
+                <i class="fas fa-sign-in-alt mr-2"></i>로그인 페이지로 이동
+            </a>
+            
+            <a href="/payment.html" 
+               class="block w-full text-center bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 transition">
+                <i class="fas fa-credit-card mr-2"></i>결제 페이지로 이동
+            </a>
+
+            <a href="/subscription-manage.html" 
+               class="block w-full text-center bg-gray-600 text-white font-bold py-3 rounded-lg hover:bg-gray-700 transition">
+                <i class="fas fa-cog mr-2"></i>구독 관리 페이지
+            </a>
+        </div>
+
+        <!-- 테스트 가이드 -->
+        <div class="mt-8 border-t pt-6">
+            <h3 class="font-semibold text-gray-800 mb-3 flex items-center">
+                <i class="fas fa-clipboard-list text-blue-600 mr-2"></i>테스트 사용 방법
+            </h3>
+            
+            <div class="space-y-4">
+                <!-- 로그인 테스트 -->
+                <div class="bg-indigo-50 rounded-lg p-4">
+                    <h4 class="font-semibold text-indigo-800 mb-2 flex items-center">
+                        <i class="fas fa-sign-in-alt mr-2"></i>로그인 테스트
+                    </h4>
+                    <ol class="text-sm text-indigo-700 space-y-1 list-decimal list-inside">
+                        <li>"<strong>새 계정 생성</strong>" 버튼 클릭</li>
+                        <li>"<strong>로그인 페이지로 이동</strong>" 버튼 클릭</li>
+                        <li>생성된 <strong>테스트 이메일</strong>과 <strong>비밀번호</strong> 입력</li>
+                        <li>로그인 후 서비스 이용</li>
+                    </ol>
+                </div>
+                
+                <!-- 결제 테스트 -->
+                <div class="bg-green-50 rounded-lg p-4">
+                    <h4 class="font-semibold text-green-800 mb-2 flex items-center">
+                        <i class="fas fa-credit-card mr-2"></i>결제 테스트
+                    </h4>
+                    <ol class="text-sm text-green-700 space-y-1 list-decimal list-inside">
+                        <li>"<strong>새 계정 생성</strong>" 버튼 클릭</li>
+                        <li>"<strong>결제 페이지로 이동</strong>" 버튼 클릭</li>
+                        <li>플랜 선택 (Basic/Standard/Premium/Unlimited)</li>
+                        <li>생성된 <strong>테스트 이메일</strong> 입력</li>
+                        <li>"결제하기" → 아임포트 결제창에서 <strong>테스트 카드</strong> 입력</li>
+                        <li>"<strong>구독 관리 페이지</strong>"에서 구독 확인</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- 관리자 링크 -->
+        <div class="mt-6 text-center">
+            <a href="/admin-login.html" class="text-sm text-gray-500 hover:text-gray-700">
+                <i class="fas fa-shield-alt mr-1"></i>관리자 페이지
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // 페이지 로드 시 자동 생성
+        window.addEventListener('load', () => {
+            generateNewAccount();
+        });
+
+        // 새 테스트 계정 생성
+        function generateNewAccount() {
+            const timestamp = Date.now();
+            const randomStr = Math.random().toString(36).substring(2, 8);
+            
+            // 테스트 사용자 ID 생성
+            const userId = `test_user_${randomStr}_${timestamp}`;
+            document.getElementById('test-user-id').value = userId;
+
+            // 테스트 이메일 생성
+            const testEmail = `test_${randomStr}@albi-test.com`;
+            document.getElementById('test-email').value = testEmail;
+
+            // 테스트 비밀번호 생성 (8자리 영숫자)
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let password = 'Test';
+            for (let i = 0; i < 4; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            password += '123';
+            document.getElementById('test-password').value = password;
+
+            console.log('✅ Test account generated:', { userId, testEmail, password });
+
+            // localStorage에 저장 (결제 페이지에서 자동 입력용)
+            localStorage.setItem('test_user_id', userId);
+            localStorage.setItem('test_email', testEmail);
+            localStorage.setItem('test_password', password);
+        }
+
+        // 클립보드 복사
+        function copyToClipboard(elementId) {
+            const input = document.getElementById(elementId);
+            input.select();
+            document.execCommand('copy');
+
+            // 복사 완료 알림
+            const button = event.target.closest('button');
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i>';
+            button.classList.add('bg-green-500');
+            
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+                button.classList.remove('bg-green-500');
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

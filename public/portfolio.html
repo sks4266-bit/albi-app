@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💼 포트폴리오 관리 - Albi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        .portfolio-card {
+            transition: all 0.3s ease;
+        }
+        .portfolio-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+        .type-btn {
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            background: white;
+            color: #6b7280;
+            transition: all 0.2s;
+            text-align: left;
+        }
+        .type-btn:hover {
+            border-color: #a855f7;
+            color: #a855f7;
+            transform: translateY(-2px);
+        }
+        .type-btn.active {
+            background: linear-gradient(to right, #2563eb, #9333ea);
+            border-color: #2563eb;
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        .template-card {
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #e5e7eb;
+        }
+        .template-card:hover {
+            border-color: #a855f7;
+            transform: scale(1.02);
+        }
+        .template-card.selected {
+            border-color: #2563eb;
+            background: linear-gradient(to br, #eff6ff, #f3e8ff);
+        }
+        .score-badge {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .print-area, .print-area * {
+                visibility: visible;
+            }
+            .print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 min-h-screen">
+    <!-- 헤더 -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <a href="/" class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    <i class="fas fa-robot mr-2"></i>Albi
+                </a>
+                <span class="text-gray-400">|</span>
+                <h1 class="text-lg font-semibold text-gray-700">
+                    <i class="fas fa-briefcase mr-2 text-purple-600"></i>포트폴리오 관리
+                </h1>
+            </div>
+            <nav class="hidden md:flex items-center gap-4">
+                <a href="/" class="text-gray-600 hover:text-purple-600 transition">
+                    <i class="fas fa-home mr-1"></i>홈
+                </a>
+                <a href="/chat" class="text-gray-600 hover:text-purple-600 transition">
+                    <i class="fas fa-comments mr-1"></i>AI 면접
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Hero 섹션 -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-2xl p-8 mb-8 text-white">
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <h2 class="text-3xl font-bold mb-3">
+                        <i class="fas fa-briefcase mr-3"></i>전문 포트폴리오 관리
+                    </h2>
+                    <p class="text-blue-100 mb-6 text-lg">
+                        취업 서류를 작성하고 AI 리뷰를 받아 완벽한 포트폴리오를 준비하세요.
+                        PDF 내보내기로 회사에 바로 제출할 수 있습니다.
+                    </p>
+                    <div class="flex gap-4">
+                        <button id="createNewBtn" class="bg-white text-purple-600 px-8 py-3 rounded-xl font-bold hover:bg-blue-50 transition transform hover:scale-105 shadow-lg">
+                            <i class="fas fa-plus mr-2"></i>새 포트폴리오 만들기
+                        </button>
+                        <button onclick="showTemplatesInfo()" class="bg-purple-500 bg-opacity-30 text-white px-6 py-3 rounded-xl font-semibold hover:bg-opacity-40 transition backdrop-blur">
+                            <i class="fas fa-question-circle mr-2"></i>템플릿 가이드
+                        </button>
+                    </div>
+                </div>
+                <div class="hidden lg:block">
+                    <i class="fas fa-file-invoice text-8xl opacity-20"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- 통계 카드 -->
+        <div class="grid md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm mb-1">총 포트폴리오</p>
+                        <p id="totalCount" class="text-3xl font-bold text-gray-800">0</p>
+                    </div>
+                    <div class="bg-blue-100 rounded-full p-4">
+                        <i class="fas fa-folder text-2xl text-blue-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm mb-1">평균 점수</p>
+                        <p id="avgScore" class="text-3xl font-bold text-gray-800">-</p>
+                    </div>
+                    <div class="bg-yellow-100 rounded-full p-4">
+                        <i class="fas fa-star text-2xl text-yellow-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm mb-1">AI 리뷰 완료</p>
+                        <p id="reviewedCount" class="text-3xl font-bold text-gray-800">0</p>
+                    </div>
+                    <div class="bg-green-100 rounded-full p-4">
+                        <i class="fas fa-check-circle text-2xl text-green-600"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 포트폴리오 목록 -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold text-gray-800">
+                    <i class="fas fa-list mr-2"></i>내 포트폴리오
+                </h3>
+                <div class="flex gap-2">
+                    <button onclick="filterPortfolios('all')" class="filter-btn active" data-filter="all">
+                        <i class="fas fa-th mr-1"></i>전체
+                    </button>
+                    <button onclick="filterPortfolios('resume')" class="filter-btn" data-filter="resume">
+                        <i class="fas fa-file-alt mr-1"></i>이력서
+                    </button>
+                    <button onclick="filterPortfolios('cover_letter')" class="filter-btn" data-filter="cover_letter">
+                        <i class="fas fa-pen-fancy mr-1"></i>자소서
+                    </button>
+                </div>
+            </div>
+
+            <!-- 로딩 상태 -->
+            <div id="loadingState" class="text-center py-12">
+                <i class="fas fa-spinner fa-spin text-4xl text-purple-600 mb-4"></i>
+                <p class="text-gray-600">포트폴리오를 불러오는 중...</p>
+            </div>
+
+            <!-- 빈 상태 -->
+            <div id="emptyState" class="hidden text-center py-16">
+                <div class="inline-block bg-gradient-to-br from-blue-100 to-purple-100 rounded-full p-8 mb-4">
+                    <i class="fas fa-folder-open text-6xl text-purple-500"></i>
+                </div>
+                <p class="text-gray-500 text-lg mb-4">아직 포트폴리오가 없습니다.</p>
+                <button onclick="showCreateModal()" class="text-purple-600 hover:text-purple-800 font-bold text-lg">
+                    <i class="fas fa-plus-circle mr-2"></i>첫 포트폴리오 만들어보세요
+                </button>
+            </div>
+
+            <!-- 포트폴리오 그리드 -->
+            <div id="portfolioList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+        </div>
+    </main>
+
+    <!-- 생성/수정 모달 -->
+    <div id="portfolioModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-5 flex justify-between items-center rounded-t-2xl">
+                <h3 id="modalTitle" class="text-2xl font-bold">
+                    <i class="fas fa-file-alt mr-2"></i>새 포트폴리오 만들기
+                </h3>
+                <button onclick="closeModal()" class="text-white hover:text-gray-200 transition">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+
+            <div class="p-8">
+                <!-- Step 1: 템플릿 선택 -->
+                <div id="step1" class="mb-8">
+                    <h4 class="text-lg font-bold text-gray-800 mb-4">
+                        <span class="bg-purple-600 text-white rounded-full w-8 h-8 inline-flex items-center justify-center mr-2">1</span>
+                        템플릿 선택
+                    </h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="template-card rounded-xl p-4 text-center selected" data-type="resume" onclick="selectTemplate(this, 'resume')">
+                            <div class="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-file-alt text-2xl text-blue-600"></i>
+                            </div>
+                            <h5 class="font-bold text-gray-800 mb-1">이력서</h5>
+                            <p class="text-xs text-gray-500">경력 중심</p>
+                        </div>
+                        <div class="template-card rounded-xl p-4 text-center" data-type="cover_letter" onclick="selectTemplate(this, 'cover_letter')">
+                            <div class="bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-pen-fancy text-2xl text-purple-600"></i>
+                            </div>
+                            <h5 class="font-bold text-gray-800 mb-1">자기소개서</h5>
+                            <p class="text-xs text-gray-500">스토리텔링</p>
+                        </div>
+                        <div class="template-card rounded-xl p-4 text-center" data-type="project" onclick="selectTemplate(this, 'project')">
+                            <div class="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-project-diagram text-2xl text-green-600"></i>
+                            </div>
+                            <h5 class="font-bold text-gray-800 mb-1">프로젝트</h5>
+                            <p class="text-xs text-gray-500">성과 중심</p>
+                        </div>
+                        <div class="template-card rounded-xl p-4 text-center" data-type="self_intro" onclick="selectTemplate(this, 'self_intro')">
+                            <div class="bg-yellow-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-user text-2xl text-yellow-600"></i>
+                            </div>
+                            <h5 class="font-bold text-gray-800 mb-1">자기소개</h5>
+                            <p class="text-xs text-gray-500">인물 중심</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 예시 채우기 버튼 -->
+                    <div class="mt-4">
+                        <button onclick="fillExample()" type="button" class="w-full bg-green-100 hover:bg-green-200 text-green-700 py-3 px-4 rounded-lg font-semibold transition flex items-center justify-center gap-2">
+                            <i class="fas fa-magic"></i>
+                            <span>예시로 채우기 (참고용)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2: 정보 입력 -->
+                <div id="step2" class="mb-8">
+                    <h4 class="text-lg font-bold text-gray-800 mb-4">
+                        <span class="bg-purple-600 text-white rounded-full w-8 h-8 inline-flex items-center justify-center mr-2">2</span>
+                        기본 정보
+                    </h4>
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-heading mr-1"></i>제목 *
+                        </label>
+                        <input 
+                            type="text" 
+                            id="portfolioTitle"
+                            placeholder="예: 2024년 삼성전자 소프트웨어 엔지니어 지원 이력서"
+                            class="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        />
+                    </div>
+
+                    <!-- 동적 콘텐츠 에디터 -->
+                    <div id="contentEditor" class="bg-gray-50 rounded-xl p-6">
+                        <!-- 이력서 템플릿 -->
+                        <div id="resumeTemplate" class="content-template space-y-4">
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">이름 *</label>
+                                    <input type="text" data-field="name" class="w-full border-2 border-gray-300 rounded-lg px-3 py-2" placeholder="홍길동">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">이메일 *</label>
+                                    <input type="email" data-field="email" class="w-full border-2 border-gray-300 rounded-lg px-3 py-2" placeholder="hong@example.com">
+                                </div>
+                            </div>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">전화번호</label>
+                                    <input type="tel" data-field="phone" class="w-full border-2 border-gray-300 rounded-lg px-3 py-2" placeholder="010-1234-5678">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">주소</label>
+                                    <input type="text" data-field="address" class="w-full border-2 border-gray-300 rounded-lg px-3 py-2" placeholder="서울시 강남구">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">경력 사항 *</label>
+                                <textarea data-field="experience" rows="5" class="w-full border-2 border-gray-300 rounded-lg px-3 py-2" placeholder="직장명, 기간, 업무 내용을 상세히 작성하세요..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">학력</label>
+                                <textarea data-field="education" rows="3" class="w-full border-2 border-gray-300 rounded-lg px-3 py-2" placeholder="학교명, 전공, 졸업년도..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">기술/자격증</label>
+                                <textarea data-field="skills" rows="3" class="w-full border-2 border-gray-300 rounded-lg px-3 py-2" placeholder="보유 기술, 자격증, 언어 능력..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- 자기소개서 템플릿 -->
+                        <div id="coverLetterTemplate" class="content-template hidden space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-bullseye mr-1"></i>지원 동기 (300-500자) *
+                                </label>
+                                <textarea data-field="motivation" rows="6" class="w-full border-2 border-gray-300 rounded-lg px-3 py-2" placeholder="왜 이 회사/직무에 지원하게 되었는지 구체적으로 작성하세요..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-seedling mr-1"></i>성장 과정 (300-500자)
+                                </label>
+                                <textarea data-field="background" rows="6" class="w-full border-2 border-gray-300 rounded-lg px-3 py-2" placeholder="성장 배경과 가치관 형성 과정..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-trophy mr-1"></i>경험 및 역량 (400-600자) *
+                                </label>
+                                <textarea data-field="competency" rows="7" class="w-full border-2 border-gray-300 rounded-lg px-3 py-2" placeholder="관련 경험과 역량을 STAR 기법으로 작성하세요..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-rocket mr-1"></i>입사 후 포부 (200-400자) *
+                                </label>
+                                <textarea data-field="aspiration" rows="5" class="w-full border-2 border-gray-300 rounded-lg px-3 py-2" placeholder="입사 후 계획과 포부..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- 프로젝트 템플릿 -->
+                        <div id="projectTemplate" class="content-template hidden space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">프로젝트명 *</label>
+                                <input type="text" data-field="project_name" class="w-full border-2 border-gray-300 rounded-lg px-3 py-2" placeholder="프로젝트 이름">
+                            </div>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">기간</label>
+                                    <input type="text" data-field="period" class="w-full border-2 border-gray-300 rounded-lg px-3 py-2" placeholder="2023.01 - 2023.06">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">기술 스택</label>
+                                    <input type="text" data-field="tech_stack" class="w-full border-2 border-gray-300 rounded-lg px-3 py-2" placeholder="React, Node.js, AWS">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">프로젝트 개요 *</label>
+                                <textarea data-field="overview" rows="4" class="w-full border-2 border-gray-300 rounded-lg px-3 py-2" placeholder="프로젝트 목적, 배경, 목표..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">역할 및 기여 *</label>
+                                <textarea data-field="role" rows="5" class="w-full border-2 border-gray-300 rounded-lg px-3 py-2" placeholder="담당 역할, 구현 내용, 기여도..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">성과 *</label>
+                                <textarea data-field="achievement" rows="4" class="w-full border-2 border-gray-300 rounded-lg px-3 py-2" placeholder="정량적/정성적 성과..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- 자기소개 템플릿 -->
+                        <div id="selfIntroTemplate" class="content-template hidden space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">자기소개 *</label>
+                                <textarea data-field="introduction" rows="8" class="w-full border-2 border-gray-300 rounded-lg px-3 py-2" placeholder="자신을 소개하는 글을 작성하세요..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">핵심 강점</label>
+                                <textarea data-field="strengths" rows="5" class="w-full border-2 border-gray-300 rounded-lg px-3 py-2" placeholder="주요 강점과 차별화 포인트..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">커리어 목표</label>
+                                <textarea data-field="goals" rows="4" class="w-full border-2 border-gray-300 rounded-lg px-3 py-2" placeholder="앞으로의 커리어 목표..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 액션 버튼 -->
+                <div class="flex gap-3">
+                    <button 
+                        id="saveBtn"
+                        onclick="savePortfolio()"
+                        class="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                    >
+                        <i class="fas fa-save mr-2"></i>저장하기
+                    </button>
+                    <button 
+                        id="reviewBtn"
+                        onclick="requestReview()"
+                        class="flex-1 bg-gradient-to-r from-green-600 to-teal-600 text-white py-4 rounded-xl font-bold hover:from-green-700 hover:to-teal-700 transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                    >
+                        <i class="fas fa-star mr-2"></i>AI 리뷰 받기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 상세보기 모달 -->
+    <div id="detailModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-5 flex justify-between items-center rounded-t-2xl">
+                <h3 id="detailTitle" class="text-2xl font-bold">포트폴리오 상세</h3>
+                <div class="flex gap-3">
+                    <button onclick="exportPDF()" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition backdrop-blur">
+                        <i class="fas fa-file-pdf mr-2"></i>PDF 저장
+                    </button>
+                    <button onclick="closeDetailModal()" class="text-white hover:text-gray-200 transition">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="detailContent" class="p-8 print-area">
+                <!-- 동적으로 채워짐 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/portfolio.js?v=20260303-2"></script>
+</body>
+</html>
+<style>
+.filter-btn {
+    padding: 0.5rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.5rem;
+    background: white;
+    color: #6b7280;
+    transition: all 0.2s;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+.filter-btn:hover {
+    border-color: #a855f7;
+    color: #a855f7;
+}
+.filter-btn.active {
+    background: linear-gradient(to right, #2563eb, #9333ea);
+    border-color: #2563eb;
+    color: white;
+}
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>

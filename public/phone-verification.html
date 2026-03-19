@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>휴대폰 본인인증 - 알비</title>
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif;
+      background: #f8f9fa;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .logo {
+      font-size: 28px;
+      font-weight: 700;
+      color: #FF6B35;
+      margin-bottom: 8px;
+    }
+    
+    h1 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .subtitle {
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: #FF6B35;
+      box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+    }
+    
+    select.form-input {
+      cursor: pointer;
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background: #FF6B35;
+      color: white;
+      margin-bottom: 10px;
+    }
+    
+    .btn-primary:hover {
+      background: #E55A2B;
+    }
+    
+    .btn-primary:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .btn-secondary {
+      background: #10B981;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #059669;
+    }
+    
+    .verification-options {
+      display: none;
+      margin-top: 20px;
+    }
+    
+    .option-card {
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .option-card:hover {
+      border-color: #FF6B35;
+      background: #fff5f2;
+    }
+    
+    .option-card.selected {
+      border-color: #FF6B35;
+      background: #fff5f2;
+    }
+    
+    .option-title {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    
+    .option-desc {
+      font-size: 13px;
+      color: #666;
+    }
+    
+    .info-box {
+      background: #f0f9ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 6px;
+      padding: 12px;
+      margin-top: 20px;
+    }
+    
+    .info-box p {
+      font-size: 13px;
+      color: #1e40af;
+      line-height: 1.5;
+    }
+    
+    .mock-code-box {
+      background: #fef3c7;
+      border: 2px dashed #f59e0b;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 20px;
+      text-align: center;
+    }
+    
+    .mock-code-title {
+      font-size: 14px;
+      color: #92400e;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .mock-code {
+      font-size: 32px;
+      font-weight: 700;
+      color: #f59e0b;
+      letter-spacing: 8px;
+      margin: 12px 0;
+    }
+    
+    .mock-code-desc {
+      font-size: 12px;
+      color: #92400e;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">🦞 알비</div>
+      <h1>휴대폰 본인인증</h1>
+      <p class="subtitle">본인명의 휴대폰으로 인증해주세요</p>
+    </div>
+    
+    <form id="verificationForm">
+      <div class="form-group">
+        <label class="form-label">이름 <span style="color: #dc2626;">*</span></label>
+        <input type="text" class="form-input" id="name" placeholder="홍길동" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">통신사 선택</label>
+        <select class="form-input" id="carrier" required>
+          <option value="">통신사를 선택하세요</option>
+          <option value="SKT">SKT</option>
+          <option value="KT">KT</option>
+          <option value="LG U+">LG U+</option>
+          <option value="SKT 알뜰폰">SKT 알뜰폰</option>
+          <option value="KT 알뜰폰">KT 알뜰폰</option>
+          <option value="LG U+ 알뜰폰">LG U+ 알뜰폰</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">휴대폰번호</label>
+        <input type="tel" class="form-input" id="phone" placeholder="010-1234-5678" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">생년월일</label>
+        <input type="text" class="form-input" id="birthDate" placeholder="YYYYMMDD (예: 19900101)" maxlength="8" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">성별</label>
+        <select class="form-input" id="gender" required>
+          <option value="">성별 선택</option>
+          <option value="M">남성</option>
+          <option value="F">여성</option>
+        </select>
+      </div>
+      
+      <button type="button" class="btn btn-primary" onclick="startSMSVerification()">
+        <i class="fas fa-comment-dots"></i> 인증번호 받기
+      </button>
+    </form>
+    
+    <!-- 인증 방법 선택 제거: SMS 인증만 사용 -->
+    
+    <div class="info-box">
+      <p><i class="fas fa-info-circle"></i> 본인명의 휴대폰으로만 인증 가능합니다.</p>
+      <p style="margin-top: 8px;"><i class="fas fa-shield-alt"></i> 입력하신 정보는 안전하게 보호됩니다.</p>
+    </div>
+    
+    <!-- SMS 인증번호 입력 -->
+    <div id="smsVerification" style="display: none;">
+      <div style="background: #f0f9ff; border: 2px solid #3b82f6; border-radius: 8px; padding: 20px; margin-top: 20px;">
+        <div style="text-align: center; margin-bottom: 16px;">
+          <i class="fas fa-comment-dots" style="font-size: 32px; color: #3b82f6;"></i>
+          <h3 style="font-size: 18px; font-weight: 600; color: #1e40af; margin-top: 12px; margin-bottom: 8px;">
+            인증번호가 발송되었습니다
+          </h3>
+          <p style="font-size: 14px; color: #1e40af; margin: 0;">
+            휴대폰으로 받은 6자리 인증번호를 입력하세요
+          </p>
+          <p id="phoneDisplay" style="font-size: 14px; color: #3b82f6; font-weight: 600; margin-top: 8px;"></p>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" style="color: #1e40af;">인증번호 (6자리)</label>
+          <input type="text" class="form-input" id="verificationCode" placeholder="000000" maxlength="6" pattern="[0-9]{6}" style="font-size: 20px; text-align: center; letter-spacing: 8px; font-weight: 600;">
+          <div id="codeError" style="color: #dc2626; font-size: 13px; margin-top: 8px; display: none;"></div>
+        </div>
+        
+        <div style="display: flex; gap: 8px; margin-top: 16px;">
+          <button type="button" class="btn btn-primary" onclick="verifyCode()" id="verifyBtn" style="flex: 1;">
+            <i class="fas fa-check"></i> 인증 확인
+          </button>
+          <button type="button" class="btn" onclick="resendCode()" style="flex: 1; background: #6b7280; color: white;">
+            <i class="fas fa-redo"></i> 재발송
+          </button>
+        </div>
+        
+        <div id="timerDisplay" style="text-align: center; margin-top: 12px; font-size: 14px; color: #dc2626; font-weight: 600;"></div>
+      </div>
+      
+      <!-- 개발 모드 힌트 (SMS 발송 실패 시에만 표시) -->
+      <div id="devModeHint" style="display: none; background: #fef3c7; border: 2px dashed #f59e0b; border-radius: 8px; padding: 16px; margin-top: 16px; text-align: center;">
+        <div style="font-size: 14px; color: #92400e; font-weight: 600; margin-bottom: 8px;">
+          <i class="fas fa-code"></i> 개발 모드 (SMS 미발송)
+        </div>
+        <div id="mockCode" style="font-size: 32px; font-weight: 700; color: #f59e0b; letter-spacing: 8px; margin: 12px 0;">------</div>
+        <div style="font-size: 12px; color: #92400e;">
+          위 코드를 복사하여 입력하세요
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let timerInterval = null;
+    let timeLeft = 300; // 5분 = 300초
+    let currentPhone = '';
+    let currentName = '';
+    let currentCarrier = '';
+    let currentBirthDate = '';
+    let currentGender = '';
+    
+    // SMS 인증 시작
+    async function startSMSVerification() {
+      const name = document.getElementById('name').value;
+      const carrier = document.getElementById('carrier').value;
+      const phone = document.getElementById('phone').value;
+      const birthDate = document.getElementById('birthDate').value;
+      const gender = document.getElementById('gender').value;
+      
+      if (!name) {
+        alert('이름을 입력해주세요.');
+        return;
+      }
+      
+      if (!carrier) {
+        alert('통신사를 선택해주세요.');
+        return;
+      }
+      
+      if (!phone) {
+        alert('휴대폰번호를 입력해주세요.');
+        return;
+      }
+      
+      // 전화번호 형식 검증
+      const cleanPhone = phone.replace(/-/g, '');
+      if (!/^01[0-9]{8,9}$/.test(cleanPhone)) {
+        alert('올바른 휴대폰 번호를 입력해주세요. (예: 010-1234-5678)');
+        return;
+      }
+      
+      if (!birthDate || birthDate.length !== 8) {
+        alert('생년월일을 8자리로 입력해주세요. (예: 19900101)');
+        return;
+      }
+      
+      if (!gender) {
+        alert('성별을 선택해주세요.');
+        return;
+      }
+      
+      // SMS 발송
+      await sendSMSCode(name, cleanPhone, carrier, birthDate, gender);
+    }
+    
+    async function sendSMSCode(name, phone, carrier, birthDate, gender) {
+      try {
+        // 현재 정보 저장
+        currentPhone = phone;
+        currentName = name;
+        currentCarrier = carrier;
+        currentBirthDate = birthDate;
+        currentGender = gender;
+        
+        console.log('📱 SMS 발송 요청:', { name, phone });
+        
+        // API 호출하여 SMS 발송
+        const response = await fetch('/api/sms/send', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name,
+            phone
+          })
+        });
+        
+        const data = await response.json();
+        console.log('📥 SMS 발송 응답:', data);
+        
+        if (data.success) {
+          // SMS 인증 화면 표시
+          document.getElementById('verificationForm').style.display = 'none';
+          document.getElementById('smsVerification').style.display = 'block';
+          
+          // 전화번호 표시
+          document.getElementById('phoneDisplay').textContent = `📱 ${phone}`;
+          
+          // 개발 모드 힌트 (SMS 미발송 시에만 표시)
+          if (!data.smsDelivered && data.verificationCode) {
+            document.getElementById('devModeHint').style.display = 'block';
+            document.getElementById('mockCode').textContent = data.verificationCode;
+          } else {
+            document.getElementById('devModeHint').style.display = 'none';
+          }
+          
+          // 타이머 시작
+          startTimer();
+          
+          alert('✅ 인증번호가 발송되었습니다.');
+        } else {
+          alert('❌ SMS 발송 실패: ' + (data.error || '알 수 없는 오류'));
+        }
+      } catch (error) {
+        console.error('❌ SMS 발송 오류:', error);
+        alert('SMS 발송 중 오류가 발생했습니다.');
+      }
+    }
+    
+    function startTimer() {
+      timeLeft = 300; // 5분 초기화
+      updateTimerDisplay();
+      
+      // 기존 타이머 제거
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
+      
+      // 새 타이머 시작
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay();
+        
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          alert('인증 시간이 만료되었습니다. 다시 시도해주세요.');
+          window.location.reload();
+        }
+      }, 1000);
+    }
+    
+    function updateTimerDisplay() {
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = timeLeft % 60;
+      const display = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      document.getElementById('timerDisplay').textContent = `⏱️ 남은 시간: ${display}`;
+      
+      // 1분 이하면 빨간색
+      if (timeLeft <= 60) {
+        document.getElementById('timerDisplay').style.color = '#dc2626';
+      }
+    }
+    
+    async function verifyCode() {
+      const code = document.getElementById('verificationCode').value.trim();
+      const codeError = document.getElementById('codeError');
+      const verifyBtn = document.getElementById('verifyBtn');
+      
+      // 입력값 검증
+      if (!code) {
+        codeError.textContent = '⚠️ 인증번호를 입력해주세요.';
+        codeError.style.display = 'block';
+        return;
+      }
+      
+      if (!/^[0-9]{6}$/.test(code)) {
+        codeError.textContent = '⚠️ 6자리 숫자를 입력해주세요.';
+        codeError.style.display = 'block';
+        return;
+      }
+      
+      // 버튼 비활성화
+      verifyBtn.disabled = true;
+      verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 확인 중...';
+      codeError.style.display = 'none';
+      
+      try {
+        console.log('🔍 인증번호 확인:', { phone: currentPhone, code });
+        
+        // 인증번호 확인 API 호출
+        const response = await fetch('/api/sms/verify', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            phone: currentPhone,
+            code: code
+          })
+        });
+        
+        const data = await response.json();
+        console.log('📥 인증 확인 응답:', data);
+        
+        if (data.success) {
+          // 인증 성공
+          clearInterval(timerInterval);
+          
+          // 부모 창에 인증 완료 메시지 전송
+          if (window.opener) {
+            window.opener.postMessage({
+              type: 'PHONE_VERIFICATION_SUCCESS',
+              name: currentName,
+              phone: currentPhone,
+              carrier: currentCarrier,
+              birthDate: currentBirthDate,
+              gender: currentGender,
+              verificationToken: data.verificationToken
+            }, '*');
+            
+            // 성공 메시지 표시 후 팝업 닫기
+            alert('✅ 인증이 완료되었습니다!');
+            setTimeout(() => {
+              window.close();
+            }, 500);
+          } else {
+            alert('✅ 인증이 완료되었습니다!');
+          }
+        } else {
+          // 인증 실패
+          codeError.textContent = '❌ ' + (data.error || '인증번호가 일치하지 않습니다.');
+          codeError.style.display = 'block';
+          verifyBtn.disabled = false;
+          verifyBtn.innerHTML = '<i class="fas fa-check"></i> 인증 확인';
+        }
+      } catch (error) {
+        console.error('❌ 인증 확인 오류:', error);
+        codeError.textContent = '❌ 인증 확인 중 오류가 발생했습니다.';
+        codeError.style.display = 'block';
+        verifyBtn.disabled = false;
+        verifyBtn.innerHTML = '<i class="fas fa-check"></i> 인증 확인';
+      }
+    }
+    
+    async function resendCode() {
+      if (!confirm('인증번호를 재발송하시겠습니까?')) {
+        return;
+      }
+      
+      // SMS 재발송
+      await sendSMSCode(currentName, currentPhone, currentCarrier, currentBirthDate, currentGender);
+      
+      // 입력창 초기화
+      document.getElementById('verificationCode').value = '';
+      document.getElementById('codeError').style.display = 'none';
+    }
+    
+    // Enter 키로 인증 확인
+    document.addEventListener('DOMContentLoaded', () => {
+      const codeInput = document.getElementById('verificationCode');
+      if (codeInput) {
+        codeInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            verifyCode();
+          }
+        });
+        
+        // 숫자만 입력 가능
+        codeInput.addEventListener('input', (e) => {
+          e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+      }
+    });
+  </script>
+</body>
+</html>

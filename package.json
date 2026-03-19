@@ -1,0 +1,39 @@
+{
+  "name": "albi-app",
+  "version": "1.0.0",
+  "description": "알비 - 1시간 직장체험 플랫폼",
+  "main": "functions/api/[[path]].ts",
+  "scripts": {
+    "dev": "wrangler pages dev public --compatibility-date=2024-01-01 --ip 0.0.0.0 --port 3000",
+    "build": "./build.sh",
+    "deploy": "./build.sh && wrangler pages deploy dist --project-name albi-app",
+    "db:create": "wrangler d1 create albi-production",
+    "db:init": "wrangler d1 execute albi-production --remote --file=./schema.sql",
+    "db:local": "wrangler d1 execute albi-production --local --file=./schema.sql",
+    "clean-port": "fuser -k 3000/tcp 2>/dev/null || true",
+    "git:init": "git init && git add . && git commit -m 'Initial commit'",
+    "git:commit": "git add . && git commit -m",
+    "git:status": "git status"
+  },
+  "keywords": [
+    "albi",
+    "job",
+    "cloudflare",
+    "hono"
+  ],
+  "author": "Albi Team",
+  "license": "MIT",
+  "dependencies": {
+    "@cloudflare/puppeteer": "^1.0.6",
+    "@portone/browser-sdk": "^0.1.3",
+    "hono": "^4.0.0",
+    "js-yaml": "^4.1.1",
+    "openai": "^6.25.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250705.0",
+    "esbuild": "^0.27.3",
+    "typescript": "^5.0.0",
+    "wrangler": "^3.78.0"
+  }
+}

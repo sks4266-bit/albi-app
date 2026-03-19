@@ -1,0 +1,79 @@
+-- Phase 5: 고급 분석 데이터 저장을 위한 테이블 추가
+
+-- 제스처 분석 데이터
+CREATE TABLE IF NOT EXISTS gesture_analysis (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  session_id TEXT NOT NULL,
+  gesture_frequency REAL NOT NULL,        -- 분당 제스처 빈도
+  movement_intensity INTEGER NOT NULL,    -- 움직임 강도 (0-100)
+  naturalness INTEGER NOT NULL,           -- 자연스러움 점수 (0-100)
+  confidence INTEGER NOT NULL,            -- 신뢰도 (0-100)
+  total_gestures INTEGER NOT NULL,        -- 총 제스처 수
+  hands_visible_time REAL NOT NULL,       -- 손 감지 시간 (초)
+  gesture_types TEXT,                     -- JSON: 제스처 타입별 분포
+  recommendation TEXT,                    -- 추천 사항
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (session_id) REFERENCES interview_sessions(session_id)
+);
+
+-- 음성 톤 분석 데이터
+CREATE TABLE IF NOT EXISTS voice_tone_analysis (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  session_id TEXT NOT NULL,
+  average_pitch REAL NOT NULL,            -- 평균 음높이 (Hz)
+  average_volume INTEGER NOT NULL,        -- 평균 음량 (0-100)
+  pitch_stability INTEGER NOT NULL,       -- 음높이 안정성 (0-100)
+  volume_stability INTEGER NOT NULL,      -- 음량 안정성 (0-100)
+  energy_level INTEGER NOT NULL,          -- 에너지 레벨 (0-100)
+  pitch_range TEXT,                       -- JSON: 음높이 범위 {min, max}
+  volume_range TEXT,                      -- JSON: 음량 범위 {min, max}
+  pitch_variation REAL,                   -- 음높이 변동 계수
+  volume_variation REAL,                  -- 음량 변동 계수
+  recommendation TEXT,                    -- 추천 사항
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (session_id) REFERENCES interview_sessions(session_id)
+);
+
+-- 말하기 분석 데이터
+CREATE TABLE IF NOT EXISTS speech_analysis (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  session_id TEXT NOT NULL,
+  words_per_minute INTEGER NOT NULL,      -- 분당 단어 수 (WPM)
+  average_pause_length REAL NOT NULL,     -- 평균 휴지기 길이 (ms)
+  pause_frequency REAL NOT NULL,          -- 휴지기 빈도 (분당)
+  clarity_score INTEGER NOT NULL,         -- 명확성 점수 (0-100)
+  fluency_score INTEGER NOT NULL,         -- 유창성 점수 (0-100)
+  total_words INTEGER NOT NULL,           -- 총 단어 수
+  total_pauses INTEGER NOT NULL,          -- 총 휴지기 수
+  filler_words INTEGER NOT NULL,          -- 필러 워드 수
+  filler_word_ratio REAL NOT NULL,        -- 필러 워드 비율 (%)
+  longest_pause REAL,                     -- 최장 휴지기 (ms)
+  recommendation TEXT,                    -- 추천 사항
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (session_id) REFERENCES interview_sessions(session_id)
+);
+
+-- 답변 감정 분석 데이터
+CREATE TABLE IF NOT EXISTS answer_sentiment_analysis (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  session_id TEXT NOT NULL,
+  question_id INTEGER NOT NULL,
+  positivity INTEGER NOT NULL,            -- 긍정성 점수 (0-100)
+  confidence INTEGER NOT NULL,            -- 자신감 점수 (0-100)
+  logical_structure INTEGER NOT NULL,     -- 논리성 점수 (0-100)
+  professionalism INTEGER NOT NULL,       -- 전문성 점수 (0-100)
+  overall_score INTEGER NOT NULL,         -- 종합 점수 (0-100)
+  strengths TEXT,                         -- JSON: 강점 목록
+  weaknesses TEXT,                        -- JSON: 약점 목록
+  detailed_feedback TEXT,                 -- 상세 피드백
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (session_id) REFERENCES interview_sessions(session_id),
+  FOREIGN KEY (question_id) REFERENCES interview_questions(id)
+);
+
+-- 인덱스 생성 (성능 최적화)
+CREATE INDEX IF NOT EXISTS idx_gesture_session ON gesture_analysis(session_id);
+CREATE INDEX IF NOT EXISTS idx_voice_tone_session ON voice_tone_analysis(session_id);
+CREATE INDEX IF NOT EXISTS idx_speech_session ON speech_analysis(session_id);
+CREATE INDEX IF NOT EXISTS idx_sentiment_session ON answer_sentiment_analysis(session_id);
+CREATE INDEX IF NOT EXISTS idx_sentiment_question ON answer_sentiment_analysis(question_id);

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오프라인 - Albi AI 면접</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-2xl w-full text-center">
+        <!-- 오프라인 아이콘 -->
+        <div class="mb-8 pulse-animation">
+            <i class="fas fa-wifi-slash text-9xl text-gray-400"></i>
+        </div>
+
+        <!-- 타이틀 -->
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+            인터넷 연결 끊김
+        </h1>
+        
+        <p class="text-gray-600 mb-8 text-lg">
+            현재 오프라인 상태입니다.<br>
+            인터넷 연결을 확인한 후 다시 시도해주세요.
+        </p>
+
+        <!-- 연결 상태 -->
+        <div id="connection-status" class="bg-white rounded-2xl shadow-xl p-6 mb-8">
+            <div class="flex items-center justify-center gap-3 text-gray-700">
+                <i class="fas fa-circle-notch fa-spin text-2xl text-blue-500"></i>
+                <span class="text-lg font-semibold">연결 상태 확인 중...</span>
+            </div>
+        </div>
+
+        <!-- 재시도 버튼 -->
+        <button 
+            onclick="location.reload()" 
+            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center gap-2 mx-auto"
+        >
+            <i class="fas fa-sync-alt"></i>
+            다시 시도
+        </button>
+
+        <!-- 도움말 -->
+        <div class="mt-12 bg-blue-50 border border-blue-200 rounded-xl p-6">
+            <h3 class="font-semibold text-gray-800 mb-4 flex items-center justify-center gap-2">
+                <i class="fas fa-lightbulb text-yellow-500"></i>
+                해결 방법
+            </h3>
+            <ul class="text-left text-gray-600 space-y-2">
+                <li class="flex items-start gap-2">
+                    <i class="fas fa-check text-blue-500 mt-1"></i>
+                    <span>Wi-Fi 또는 모바일 데이터 연결을 확인하세요</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <i class="fas fa-check text-blue-500 mt-1"></i>
+                    <span>비행기 모드가 꺼져있는지 확인하세요</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <i class="fas fa-check text-blue-500 mt-1"></i>
+                    <span>라우터를 재부팅해보세요</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <i class="fas fa-check text-blue-500 mt-1"></i>
+                    <span>VPN 연결이 방해가 되는지 확인하세요</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- 캐시된 데이터 -->
+        <div class="mt-8 text-gray-500 text-sm">
+            <p>
+                <i class="fas fa-info-circle"></i>
+                일부 페이지는 오프라인에서도 사용 가능합니다
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // 온라인 상태 모니터링
+        function updateConnectionStatus() {
+            const statusDiv = document.getElementById('connection-status');
+            
+            if (navigator.onLine) {
+                statusDiv.innerHTML = `
+                    <div class="flex items-center justify-center gap-3 text-green-600">
+                        <i class="fas fa-check-circle text-2xl"></i>
+                        <span class="text-lg font-semibold">연결됨! 페이지를 새로고침하세요</span>
+                    </div>
+                `;
+                statusDiv.classList.remove('bg-white');
+                statusDiv.classList.add('bg-green-50', 'border', 'border-green-200');
+                
+                // 자동 새로고침
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            } else {
+                statusDiv.innerHTML = `
+                    <div class="flex items-center justify-center gap-3 text-red-600">
+                        <i class="fas fa-exclamation-triangle text-2xl"></i>
+                        <span class="text-lg font-semibold">오프라인 상태</span>
+                    </div>
+                `;
+                statusDiv.classList.remove('bg-white');
+                statusDiv.classList.add('bg-red-50', 'border', 'border-red-200');
+            }
+        }
+
+        // 이벤트 리스너
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', updateConnectionStatus);
+
+        // 초기 상태 확인
+        updateConnectionStatus();
+
+        // 주기적 연결 테스트
+        setInterval(async () => {
+            try {
+                const response = await fetch('/', { method: 'HEAD', cache: 'no-store' });
+                if (response.ok) {
+                    updateConnectionStatus();
+                }
+            } catch (error) {
+                // 여전히 오프라인
+            }
+        }, 5000);
+    </script>
+</body>
+</html>

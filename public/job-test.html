@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>직무적성 심리테스트 | 나에게 맞는 알바 찾기 - 알비</title>
+    <meta name="description" content="16문항 4차원 심층 성향 분석으로 나의 업무 DNA를 파악하고, 맞춤 커리어 로드맵과 추천 공고를 확인하세요.">
+    <meta name="keywords" content="직무적성테스트, 심리테스트, 커리어, 알바, 적성검사, 성향분석, 알비">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="직무적성 심리테스트 | 나의 업무 DNA 발견">
+    <meta property="og:description" content="16문항으로 알아보는 나의 일하는 방식! 5년 커리어 로드맵까지 무료로 확인하세요.">
+    <meta property="og:image" content="https://albi.kr/static/images/job-test-og.png">
+    <meta property="og:url" content="https://albi.kr/job-test.html">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        .progress-bar {
+            transition: width 0.3s ease-out;
+        }
+        .option-card {
+            transition: all 0.2s ease;
+        }
+        .option-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        .option-card.selected {
+            border: 2px solid #3b82f6;
+            background: #eff6ff;
+        }
+        .dimension-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        .dim-behavior { background: #dbeafe; color: #1e40af; }
+        .dim-thinking { background: #fce7f3; color: #be185d; }
+        .dim-values { background: #dcfce7; color: #15803d; }
+        .dim-environment { background: #fef3c7; color: #a16207; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 min-h-screen">
+    <!-- 네비게이션 -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <a href="/" class="text-2xl font-bold text-blue-600">알비</a>
+                <div class="flex items-center gap-4">
+                    <a href="/jobs.html" class="text-gray-700 hover:text-blue-600">공고 찾기</a>
+                    <a href="/mypage.html" class="text-gray-700 hover:text-blue-600">마이페이지</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- 시작 화면 -->
+        <div id="startScreen" class="fade-in">
+            <div class="bg-white rounded-3xl shadow-2xl p-8 md:p-12 text-center">
+                <div class="text-6xl mb-6">🎯</div>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+                    나의 업무 DNA 찾기
+                </h1>
+                <p class="text-lg text-gray-600 mb-6">
+                    16문항 4차원 심층 성향 분석
+                </p>
+                
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 mb-8">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">무엇을 알 수 있나요?</h2>
+                    <div class="grid md:grid-cols-2 gap-4 text-left">
+                        <div class="flex items-start gap-3">
+                            <div class="text-2xl">🧬</div>
+                            <div>
+                                <h3 class="font-semibold text-gray-800">4차원 성향 분석</h3>
+                                <p class="text-sm text-gray-600">업무 행동, 사고방식, 가치관, 환경 적응성</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="text-2xl">💼</div>
+                            <div>
+                                <h3 class="font-semibold text-gray-800">맞춤 직무 추천</h3>
+                                <p class="text-sm text-gray-600">나에게 딱 맞는 3대 포지션 & 연봉</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="text-2xl">🗺️</div>
+                            <div>
+                                <h3 class="font-semibold text-gray-800">5년 커리어 로드맵</h3>
+                                <p class="text-sm text-gray-600">1-3년차 → 8년차 이후 성장 경로</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="text-2xl">🎁</div>
+                            <div>
+                                <h3 class="font-semibold text-gray-800">실전 채용 공고</h3>
+                                <p class="text-sm text-gray-600">지금 바로 지원 가능한 공고 3선</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-8">
+                    <p class="text-sm text-gray-700">
+                        <i class="fas fa-clock mr-2"></i>
+                        <strong>소요 시간:</strong> 약 5분 | 
+                        <strong>문항 수:</strong> 16문항 | 
+                        <strong>신뢰도:</strong> 최대 95%
+                    </p>
+                </div>
+
+                <button onclick="startTest()" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-12 py-4 rounded-full text-lg font-bold hover:shadow-lg transform hover:scale-105 transition">
+                    <i class="fas fa-play mr-2"></i>
+                    테스트 시작하기
+                </button>
+                
+                <p class="text-sm text-gray-500 mt-6">
+                    이미 테스트를 완료하셨나요? 
+                    <a href="/job-test-result.html" class="text-blue-600 hover:underline">결과 다시 보기</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- 테스트 진행 화면 -->
+        <div id="testScreen" class="hidden">
+            <!-- 진행률 바 -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-semibold text-gray-600">
+                        <span id="currentDimension" class="dimension-badge dim-behavior">Part 1: 업무 행동 패턴</span>
+                    </span>
+                    <span class="text-sm font-semibold text-gray-600">
+                        <span id="progressText">1/16</span>
+                    </span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                    <div id="progressBar" class="progress-bar bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full" style="width: 6.25%"></div>
+                </div>
+            </div>
+
+            <!-- 질문 카드 -->
+            <div id="questionCard" class="bg-white rounded-3xl shadow-2xl p-8 md:p-12 fade-in">
+                <div class="text-center mb-8">
+                    <div id="questionIcon" class="text-5xl mb-4">🤔</div>
+                    <h2 id="questionText" class="text-2xl font-bold text-gray-800 mb-2"></h2>
+                    <p class="text-gray-500 text-sm">가장 가까운 답변을 선택해주세요</p>
+                </div>
+
+                <div id="optionsContainer" class="space-y-4">
+                    <!-- 옵션들이 동적으로 추가됨 -->
+                </div>
+
+                <div class="flex justify-between mt-8">
+                    <button id="prevBtn" onclick="previousQuestion()" class="px-6 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        이전
+                    </button>
+                    <button id="nextBtn" onclick="nextQuestion()" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:shadow-lg transition disabled:opacity-50" disabled>
+                        다음
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 힌트 카드 -->
+            <div class="mt-6 bg-blue-50 rounded-xl p-4 text-center">
+                <p class="text-sm text-gray-600">
+                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                    정답은 없습니다. 평소 나의 모습을 솔직하게 선택해주세요.
+                </p>
+            </div>
+        </div>
+
+        <!-- 로딩 화면 -->
+        <div id="loadingScreen" class="hidden">
+            <div class="bg-white rounded-3xl shadow-2xl p-12 text-center">
+                <div class="text-6xl mb-6 animate-bounce">🔍</div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">분석 중입니다...</h2>
+                <p class="text-gray-600 mb-8">4차원 성향을 분석하고 있어요</p>
+                
+                <div class="space-y-3 max-w-md mx-auto">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                            <i class="fas fa-check text-blue-600"></i>
+                        </div>
+                        <div class="flex-1 text-left">
+                            <div class="text-sm font-semibold text-gray-700">업무 행동 패턴 분석</div>
+                            <div class="text-xs text-gray-500">Behavior Analysis</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center">
+                            <i class="fas fa-check text-pink-600"></i>
+                        </div>
+                        <div class="flex-1 text-left">
+                            <div class="text-sm font-semibold text-gray-700">사고 및 문제해결</div>
+                            <div class="text-xs text-gray-500">Thinking Pattern</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                            <i class="fas fa-check text-green-600"></i>
+                        </div>
+                        <div class="flex-1 text-left">
+                            <div class="text-sm font-semibold text-gray-700">가치관 및 동기</div>
+                            <div class="text-xs text-gray-500">Values & Motivation</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center">
+                            <i class="fas fa-spinner fa-spin text-yellow-600"></i>
+                        </div>
+                        <div class="flex-1 text-left">
+                            <div class="text-sm font-semibold text-gray-700">환경 적응성 분석</div>
+                            <div class="text-xs text-gray-500">Environment Fit</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/job-test.js?v=2.0"></script>
+</body>
+</html>

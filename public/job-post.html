@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>공고 등록 - 알비</title>
+  <link href="/styles.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Kakao 지도 API -->
+  <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=b69e30d2c21d6db82408ee9a2091d293&libraries=services"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+      background: #f8f9fa;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .header {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+    }
+    
+    .form-section {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 16px;
+    }
+    
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .section-title i {
+      color: #FF6B35;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .required {
+      color: #FF6B35;
+      margin-left: 4px;
+    }
+    
+    .form-input,
+    .form-textarea,
+    .form-select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: all 0.2s;
+    }
+    
+    .form-input:focus,
+    .form-textarea:focus,
+    .form-select:focus {
+      outline: none;
+      border-color: #FF6B35;
+      box-shadow: 0 0 0 3px rgba(255,107,53,0.1);
+    }
+    
+    .form-textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    .input-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    
+    .input-addon {
+      font-size: 14px;
+      color: #666;
+      white-space: nowrap;
+    }
+    
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background: #FF6B35;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #E55A2B;
+    }
+    
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #666;
+    }
+    
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+    
+    .btn-block {
+      width: 100%;
+    }
+    
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    
+    .category-btn {
+      padding: 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    
+    .category-btn:hover {
+      border-color: #FF6B35;
+    }
+    
+    .category-btn.active {
+      border-color: #FF6B35;
+      background: #FFF5F2;
+    }
+    
+    .category-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    
+    .category-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .address-search {
+      display: flex;
+      gap: 8px;
+    }
+    
+    #map {
+      width: 100%;
+      height: 300px;
+      border-radius: 8px;
+      margin-top: 12px;
+    }
+    
+    .helper-text {
+      font-size: 13px;
+      color: #666;
+      margin-top: 6px;
+    }
+    
+    .error-text {
+      font-size: 13px;
+      color: #FF6B35;
+      margin-top: 6px;
+    }
+    
+    @media (max-width: 768px) {
+      .category-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 헤더 -->
+  <div class="container">
+    <div class="header">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <button onclick="history.back()" style="background: none; border: none; color: #666; cursor: pointer;">
+          <i class="fas fa-arrow-left" style="font-size: 20px;"></i>
+        </button>
+        <div>
+          <h1 style="font-size: 24px; font-weight: 700; color: #333; margin-bottom: 4px;">
+            <i class="fas fa-briefcase" style="color: #FF6B35;"></i>
+            공고 등록
+          </h1>
+          <p style="font-size: 14px; color: #666;">구인 공고를 등록하고 좋은 인재를 찾아보세요</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 무료 등록 안내 -->
+    <div style="background: linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%); padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(255,107,53,0.2); margin-bottom: 20px;">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <div style="font-size: 48px;">🎯</div>
+        <div style="flex: 1;">
+          <h3 style="font-size: 20px; font-weight: 700; color: white; margin-bottom: 8px;">
+            완전 무료 공고 등록!
+          </h3>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <p style="font-size: 14px; color: rgba(255,255,255,0.95); display: flex; align-items: center; gap: 6px;">
+              <i class="fas fa-check-circle"></i>
+              <span>초기 비용 0원, 채용 성공 시에만 수수료 발생</span>
+            </p>
+            <p style="font-size: 14px; color: rgba(255,255,255,0.95); display: flex; align-items: center; gap: 6px;">
+              <i class="fas fa-clock"></i>
+              <span>1시간 체험도 무료, 정식 채용 시에만 결제</span>
+            </p>
+            <p style="font-size: 16px; font-weight: 600; color: white; display: flex; align-items: center; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.3);">
+              <i class="fas fa-sparkles"></i>
+              <span>새로운 요금 체계: 근무시간에 따라 합리적으로 책정!</span>
+            </p>
+            <p style="font-size: 13px; color: rgba(255,255,255,0.9); margin-left: 26px; margin-top: 4px;">
+              1시간 체험 무료 | 초단기(2~20h) 시간당 1,500원 | 단기 3만원 | 장기 5만원
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form id="jobPostForm">
+      <!-- 기본 정보 -->
+      <div class="form-section">
+        <div class="section-title">
+          <i class="fas fa-info-circle"></i>
+          기본 정보
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">공고 제목<span class="required">*</span></label>
+          <input type="text" class="form-input" id="title" placeholder="예) 홍대 감성 카페 바리스타 구합니다" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">회사명/상호명<span class="required">*</span></label>
+          <input type="text" class="form-input" id="companyName" placeholder="예) 홍대 카페" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">직무 유형<span class="required">*</span></label>
+          <div class="category-grid">
+            <div class="category-btn" data-category="cafe">
+              <div class="category-icon">☕</div>
+              <div class="category-name">카페</div>
+            </div>
+            <div class="category-btn" data-category="convenience">
+              <div class="category-icon">🏪</div>
+              <div class="category-name">편의점</div>
+            </div>
+            <div class="category-btn" data-category="restaurant">
+              <div class="category-icon">🍽️</div>
+              <div class="category-name">음식점</div>
+            </div>
+            <div class="category-btn" data-category="retail">
+              <div class="category-icon">👕</div>
+              <div class="category-name">소매/판매</div>
+            </div>
+            <div class="category-btn" data-category="fastfood">
+              <div class="category-icon">🍔</div>
+              <div class="category-name">패스트푸드</div>
+            </div>
+            <div class="category-btn" data-category="etc">
+              <div class="category-icon">💼</div>
+              <div class="category-name">기타</div>
+            </div>
+          </div>
+          <input type="hidden" id="jobType" required>
+        </div>
+      </div>
+
+      <!-- 근무 조건 -->
+      <div class="form-section">
+        <div class="section-title">
+          <i class="fas fa-clock"></i>
+          근무 조건
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">시급<span class="required">*</span></label>
+          <div class="input-group">
+            <input type="number" class="form-input" id="hourlyWage" placeholder="10320" min="10320" required>
+            <span class="input-addon">원</span>
+          </div>
+          <div class="helper-text">2026년 최저시급: 10,320원</div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">근무 시간</label>
+          <input type="text" class="form-input" id="workHours" placeholder="예) 09:00-18:00">
+          <div class="helper-text">휴게시간 포함 표기 (예: 09:00-18:00, 주 40시간)</div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">근무 요일</label>
+          <input type="text" class="form-input" id="workDays" placeholder="예) 월, 화, 수, 목, 금">
+          <div class="helper-text">가능한 근무 요일을 입력해주세요</div>
+        </div>
+        
+        <!-- 총 근무시간 입력 및 예상 수수료 계산 -->
+        <div class="form-group">
+          <label class="form-label">총 근무시간 (선택사항)</label>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <div style="flex: 1; position: relative;">
+              <input type="number" class="form-input" id="totalWorkHours" placeholder="예) 10" min="1" step="1">
+              <span class="input-addon">시간</span>
+            </div>
+            <button type="button" onclick="calculateExpectedFee()" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap; font-weight: 600;">
+              <i class="fas fa-calculator"></i> 수수료 계산
+            </button>
+          </div>
+          <div class="helper-text">
+            <i class="fas fa-lightbulb" style="color: #ffa726;"></i> 
+            총 근무시간을 입력하면 예상 채용 수수료를 확인할 수 있습니다
+          </div>
+          
+          <!-- 계산기 도우미 -->
+          <div style="background: #f5f5f5; border-radius: 8px; padding: 12px; margin-top: 12px; display: none;" id="workHoursCalculator">
+            <div style="font-weight: 600; margin-bottom: 8px; color: #333;">
+              <i class="fas fa-calculator"></i> 근무시간 계산기
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <input type="number" id="calcHoursPerDay" placeholder="하루" min="1" style="width: 70px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+              <span style="color: #666;">시간 ×</span>
+              <input type="number" id="calcDays" placeholder="일수" min="1" style="width: 70px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+              <span style="color: #666;">일 =</span>
+              <button type="button" onclick="applyCalculation()" style="padding: 8px 16px; background: #42a5f5; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                적용
+              </button>
+            </div>
+            <div style="font-size: 12px; color: #666; margin-top: 8px;">
+              예: 하루 2시간씩 5일 근무 = 10시간
+            </div>
+          </div>
+          
+          <button type="button" onclick="toggleCalculator()" style="margin-top: 8px; padding: 6px 12px; background: transparent; color: #667eea; border: 1px solid #667eea; border-radius: 4px; cursor: pointer; font-size: 13px;">
+            <i class="fas fa-calculator"></i> 계산기 사용하기
+          </button>
+        </div>
+        
+        <!-- 예상 수수료 표시 -->
+        <div id="expectedFeeSection" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+          <div style="color: white;">
+            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">
+              <i class="fas fa-info-circle"></i> 예상 채용 수수료
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div id="feeCategory" style="font-size: 16px; font-weight: 600; margin-bottom: 4px;"></div>
+                <div id="feeDescription" style="font-size: 13px; opacity: 0.8;"></div>
+              </div>
+              <div id="expectedFee" style="font-size: 32px; font-weight: 700;"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 채용 방식 선택 -->
+        <div class="form-group">
+          <label class="form-label">채용 방식<span class="required">*</span></label>
+          <div style="background: #fff3e0; border: 2px solid #ff9800; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <label style="flex: 1; min-width: 200px; cursor: pointer;">
+                <input type="radio" name="hiringType" value="trial" checked style="display: none;" class="hiring-type-radio">
+                <div class="hiring-type-card" data-type="trial" style="border: 3px solid #4caf50; background: white; border-radius: 12px; padding: 16px; transition: all 0.3s;">
+                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <i class="fas fa-user-clock" style="font-size: 24px; color: #4caf50;"></i>
+                    <div>
+                      <div style="font-weight: 700; font-size: 16px; color: #333;">체험 후 채용</div>
+                      <div style="font-size: 12px; color: #666;">기본 수수료</div>
+                    </div>
+                  </div>
+                  <div style="font-size: 13px; color: #666; line-height: 1.5;">
+                    • 1시간 무료 체험 제공<br>
+                    • 체험 후 채용 결정<br>
+                    • 일반 수수료 적용
+                  </div>
+                </div>
+              </label>
+              
+              <label style="flex: 1; min-width: 200px; cursor: pointer;">
+                <input type="radio" name="hiringType" value="immediate" style="display: none;" class="hiring-type-radio">
+                <div class="hiring-type-card" data-type="immediate" style="border: 3px solid #ddd; background: white; border-radius: 12px; padding: 16px; transition: all 0.3s;">
+                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <i class="fas fa-bolt" style="font-size: 24px; color: #ff5722;"></i>
+                    <div>
+                      <div style="font-weight: 700; font-size: 16px; color: #333;">바로 채용 🔥</div>
+                      <div style="font-size: 12px; color: #ff5722;">+15% 프리미엄</div>
+                    </div>
+                  </div>
+                  <div style="font-size: 13px; color: #666; line-height: 1.5;">
+                    • 체험 없이 즉시 채용<br>
+                    • 당일 급구에 적합<br>
+                    • 수수료 +15% 추가
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group" id="experienceTimeGroup">
+          <label class="form-label">체험 가능 시간대<span class="required">*</span></label>
+          <div style="background: #e3f2fd; border: 1px solid #90caf9; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+            <p style="font-size: 13px; color: #1565c0; margin: 0;">
+              <i class="fas fa-info-circle"></i> 구직자가 1시간 체험을 신청할 수 있는 시간대를 선택해주세요
+            </p>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <label style="cursor: pointer;">
+              <input type="checkbox" name="experienceTime" value="09:00-12:00" style="display: none;" class="exp-time-checkbox">
+              <div class="exp-time-btn" style="padding: 10px 16px; border: 2px solid #ddd; border-radius: 20px; font-size: 14px; transition: all 0.2s;">오전 (09:00-12:00)</div>
+            </label>
+            <label style="cursor: pointer;">
+              <input type="checkbox" name="experienceTime" value="12:00-15:00" style="display: none;" class="exp-time-checkbox">
+              <div class="exp-time-btn" style="padding: 10px 16px; border: 2px solid #ddd; border-radius: 20px; font-size: 14px; transition: all 0.2s;">점심 (12:00-15:00)</div>
+            </label>
+            <label style="cursor: pointer;">
+              <input type="checkbox" name="experienceTime" value="15:00-18:00" style="display: none;" class="exp-time-checkbox">
+              <div class="exp-time-btn" style="padding: 10px 16px; border: 2px solid #ddd; border-radius: 20px; font-size: 14px; transition: all 0.2s;">오후 (15:00-18:00)</div>
+            </label>
+            <label style="cursor: pointer;">
+              <input type="checkbox" name="experienceTime" value="18:00-22:00" style="display: none;" class="exp-time-checkbox">
+              <div class="exp-time-btn" style="padding: 10px 16px; border: 2px solid #ddd; border-radius: 20px; font-size: 14px; transition: all 0.2s;">저녁 (18:00-22:00)</div>
+            </label>
+          </div>
+          <div class="helper-text">최소 1개 이상 선택해주세요</div>
+        </div>
+      </div>
+
+      <!-- 근무지 정보 -->
+      <div class="form-section">
+        <div class="section-title">
+          <i class="fas fa-map-marker-alt"></i>
+          근무지 정보
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">주소<span class="required">*</span></label>
+          <div class="address-search">
+            <input type="text" class="form-input" id="address" placeholder="주소를 검색하세요" readonly required>
+            <button type="button" class="btn btn-secondary" onclick="searchAddress()">
+              <i class="fas fa-search"></i> 검색
+            </button>
+          </div>
+          <input type="hidden" id="latitude">
+          <input type="hidden" id="longitude">
+          <div id="map" style="display: none;"></div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">상세 주소</label>
+          <input type="text" class="form-input" id="addressDetail" placeholder="동, 호수 등 상세 주소">
+        </div>
+      </div>
+
+      <!-- 상세 설명 -->
+      <div class="form-section">
+        <div class="section-title">
+          <i class="fas fa-file-alt"></i>
+          상세 설명
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">업무 설명</label>
+          <textarea class="form-textarea" id="description" placeholder="어떤 일을 하게 되나요? 근무 환경은 어떤가요?"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">자격 요건</label>
+          <textarea class="form-textarea" id="requirements" placeholder="필요한 경력이나 자격이 있나요?"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">복리후생</label>
+          <textarea class="form-textarea" id="benefits" placeholder="식사 제공, 교통비 지원 등의 혜택"></textarea>
+        </div>
+      </div>
+
+      <!-- 연락처 정보 -->
+      <div class="form-section">
+        <div class="section-title">
+          <i class="fas fa-phone"></i>
+          연락처 정보
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">담당자명</label>
+          <input type="text" class="form-input" id="contactName" placeholder="홍길동">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">연락처</label>
+          <input type="tel" class="form-input" id="contactPhone" placeholder="010-1234-5678">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">이메일</label>
+          <input type="email" class="form-input" id="contactEmail" placeholder="example@company.com">
+        </div>
+      </div>
+
+      <!-- 제출 버튼 -->
+      <div class="form-section">
+        <button type="submit" class="btn btn-primary btn-block" id="submitBtn" style="background: linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%); font-size: 17px; padding: 16px; font-weight: 700;">
+          <i class="fas fa-check-circle"></i>
+          무료로 공고 등록하기
+        </button>
+        <p style="text-align: center; font-size: 13px; color: #666; margin-top: 12px;">
+          <i class="fas fa-info-circle" style="color: #ff6b35;"></i>
+          등록 후 바로 구직자들에게 공개됩니다 · 초기 비용 0원
+        </p>
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 8px;">
+          채용 성공 시에만 50,000원의 수수료가 발생합니다
+        </p>
+      </div>
+    </form>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+  <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+  <script>
+    console.log('📝 공고 등록 페이지 로드');
+    
+    let map = null;
+    let marker = null;
+    let selectedCategory = null;
+    
+    // ============================================
+    // 초기화
+    // ============================================
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log('✅ DOMContentLoaded');
+      
+      // 로그인 확인
+      const sessionToken = localStorage.getItem('albi_session_token');
+      const userType = localStorage.getItem('albi_user_type');
+      
+      if (!sessionToken) {
+        alert('로그인이 필요합니다.');
+        window.location.href = '/login.html';
+        return;
+      }
+      
+      if (userType !== 'employer') {
+        alert('구인자만 공고를 등록할 수 있습니다.');
+        window.location.href = '/';
+        return;
+      }
+      
+      // 카테고리 선택 이벤트
+      setupCategoryButtons();
+      
+      // 체험 시간 체크박스 스타일링
+      setupExperienceTimeCheckboxes();
+      
+      // 채용 방식 라디오 버튼 스타일링
+      setupHiringTypeRadios();
+      
+      // 폼 제출 이벤트
+      document.getElementById('jobPostForm').addEventListener('submit', handleSubmit);
+      
+      console.log('✅ 공고 등록 페이지 초기화 완료');
+    });
+    
+    // 체험 시간 체크박스 스타일링
+    function setupExperienceTimeCheckboxes() {
+      const checkboxes = document.querySelectorAll('.exp-time-checkbox');
+      checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+          const btn = this.nextElementSibling;
+          if (this.checked) {
+            btn.style.borderColor = '#2196f3';
+            btn.style.backgroundColor = '#e3f2fd';
+            btn.style.color = '#1565c0';
+          } else {
+            btn.style.borderColor = '#ddd';
+            btn.style.backgroundColor = 'white';
+            btn.style.color = '#333';
+          }
+        });
+      });
+    }
+    
+    // 채용 방식 라디오 버튼 스타일링
+    function setupHiringTypeRadios() {
+      const radios = document.querySelectorAll('.hiring-type-radio');
+      const experienceTimeGroup = document.getElementById('experienceTimeGroup');
+      
+      radios.forEach(radio => {
+        radio.addEventListener('change', function() {
+          // 모든 카드 스타일 초기화
+          document.querySelectorAll('.hiring-type-card').forEach(card => {
+            card.style.borderColor = '#ddd';
+            card.style.transform = 'scale(1)';
+          });
+          
+          // 선택된 카드 강조
+          const card = this.nextElementSibling;
+          if (this.value === 'trial') {
+            card.style.borderColor = '#4caf50';
+            experienceTimeGroup.style.display = 'block';
+          } else {
+            card.style.borderColor = '#ff5722';
+            experienceTimeGroup.style.display = 'none';
+          }
+          card.style.transform = 'scale(1.02)';
+          
+          // 수수료 재계산
+          const totalWorkHours = parseInt(document.getElementById('totalWorkHours').value);
+          if (totalWorkHours && totalWorkHours > 0) {
+            calculateExpectedFee();
+          }
+        });
+      });
+    }
+    
+    // ============================================
+    // 카테고리 선택
+    // ============================================
+    function setupCategoryButtons() {
+      const categoryBtns = document.querySelectorAll('.category-btn');
+      
+      categoryBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          // 모든 버튼 비활성화
+          categoryBtns.forEach(b => b.classList.remove('active'));
+          
+          // 클릭한 버튼 활성화
+          btn.classList.add('active');
+          selectedCategory = btn.dataset.category;
+          document.getElementById('jobType').value = selectedCategory;
+          
+          console.log('📂 카테고리 선택:', selectedCategory);
+        });
+      });
+    }
+    
+    // ============================================
+    // 주소 검색
+    // ============================================
+    function searchAddress() {
+      new daum.Postcode({
+        oncomplete: function(data) {
+          console.log('📍 주소 검색 완료:', data);
+          
+          // 주소 정보 입력
+          const fullAddress = data.address;
+          document.getElementById('address').value = fullAddress;
+          
+          // Kakao 지도 API로 좌표 검색
+          if (window.kakao && kakao.maps && kakao.maps.services) {
+            const geocoder = new kakao.maps.services.Geocoder();
+            
+            geocoder.addressSearch(fullAddress, function(result, status) {
+              if (status === kakao.maps.services.Status.OK) {
+                const coords = {
+                  lat: parseFloat(result[0].y),
+                  lng: parseFloat(result[0].x)
+                };
+                
+                console.log('🗺️ 좌표:', coords);
+                
+                // 좌표 저장
+                document.getElementById('latitude').value = coords.lat;
+                document.getElementById('longitude').value = coords.lng;
+                
+                // 지도 표시
+                showMap(coords);
+              }
+            });
+          }
+        }
+      }).open();
+    }
+    
+    // ============================================
+    // 예상 수수료 계산
+    // ============================================
+    function calculatePaymentAmount(totalWorkHours, hiringType = 'trial') {
+      let baseAmount = 0;
+      
+      if (totalWorkHours <= 1) {
+        baseAmount = 0;
+      } else if (totalWorkHours <= 20) {
+        baseAmount = Math.max(totalWorkHours * 1500, 3000);
+      } else if (totalWorkHours <= 160) {
+        baseAmount = 30000;
+      } else {
+        baseAmount = 50000;
+      }
+      
+      // 바로채용 시 15% 프리미엄 추가
+      if (hiringType === 'immediate' && baseAmount > 0) {
+        baseAmount = Math.round(baseAmount * 1.15);
+      }
+      
+      return baseAmount;
+    }
+    
+    function getPaymentDetails(totalWorkHours, hiringType = 'trial') {
+      const amount = calculatePaymentAmount(totalWorkHours, hiringType);
+      const isPremium = hiringType === 'immediate';
+      
+      if (totalWorkHours <= 1) {
+        return {
+          amount,
+          category: '1시간 체험',
+          description: '무료 체험 (수수료 없음)'
+        };
+      } else if (totalWorkHours <= 20) {
+        const baseDesc = `${totalWorkHours}시간 × 1,500원`;
+        return {
+          amount,
+          category: '초단기 근로' + (isPremium ? ' (바로채용 +15%)' : ''),
+          description: isPremium ? baseDesc + ' + 프리미엄 15%' : baseDesc
+        };
+      } else if (totalWorkHours <= 160) {
+        return {
+          amount,
+          category: '단기 근로' + (isPremium ? ' (바로채용 +15%)' : ''),
+          description: isPremium ? '고정 30,000원 + 프리미엄 15%' : '1주~1개월 고정 수수료'
+        };
+      } else {
+        return {
+          amount,
+          category: '장기 근로' + (isPremium ? ' (바로채용 +15%)' : ''),
+          description: isPremium ? '고정 50,000원 + 프리미엄 15%' : '1개월 이상 고정 수수료'
+        };
+      }
+    }
+    
+    function calculateExpectedFee() {
+      const totalWorkHours = parseInt(document.getElementById('totalWorkHours').value);
+      
+      if (!totalWorkHours || totalWorkHours < 1) {
+        alert('총 근무시간을 입력해주세요.');
+        return;
+      }
+      
+      const hiringType = document.querySelector('input[name="hiringType"]:checked').value;
+      const details = getPaymentDetails(totalWorkHours, hiringType);
+      
+      // 결과 표시
+      document.getElementById('expectedFeeSection').style.display = 'block';
+      document.getElementById('feeCategory').textContent = details.category;
+      document.getElementById('feeDescription').textContent = details.description;
+      document.getElementById('expectedFee').textContent = details.amount.toLocaleString() + '원';
+      
+      // 섹션으로 스크롤
+      document.getElementById('expectedFeeSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    
+    function toggleCalculator() {
+      const calculator = document.getElementById('workHoursCalculator');
+      calculator.style.display = calculator.style.display === 'none' ? 'block' : 'none';
+    }
+    
+    function applyCalculation() {
+      const hoursPerDay = parseInt(document.getElementById('calcHoursPerDay').value) || 0;
+      const days = parseInt(document.getElementById('calcDays').value) || 0;
+      
+      if (hoursPerDay < 1 || days < 1) {
+        alert('하루 시간과 일수를 모두 입력해주세요.');
+        return;
+      }
+      
+      const totalHours = hoursPerDay * days;
+      document.getElementById('totalWorkHours').value = totalHours;
+      
+      // 자동으로 수수료 계산
+      calculateExpectedFee();
+    }
+    
+    // ============================================
+    // 지도 표시
+    // ============================================
+    function showMap(coords) {
+      const mapContainer = document.getElementById('map');
+      mapContainer.style.display = 'block';
+      
+      if (!map) {
+        const mapOption = {
+          center: new kakao.maps.LatLng(coords.lat, coords.lng),
+          level: 3
+        };
+        
+        map = new kakao.maps.Map(mapContainer, mapOption);
+        marker = new kakao.maps.Marker({
+          position: new kakao.maps.LatLng(coords.lat, coords.lng)
+        });
+        marker.setMap(map);
+      } else {
+        const position = new kakao.maps.LatLng(coords.lat, coords.lng);
+        map.setCenter(position);
+        marker.setPosition(position);
+      }
+    }
+    
+    // ============================================
+    // 폼 제출
+    // ============================================
+    async function handleSubmit(e) {
+      e.preventDefault();
+      
+      console.log('📤 폼 제출 시작');
+      
+      // 필수 필드 검증
+      const title = document.getElementById('title').value.trim();
+      const companyName = document.getElementById('companyName').value.trim();
+      const jobType = document.getElementById('jobType').value;
+      const hourlyWage = parseInt(document.getElementById('hourlyWage').value);
+      const address = document.getElementById('address').value.trim();
+      const latitude = parseFloat(document.getElementById('latitude').value);
+      const longitude = parseFloat(document.getElementById('longitude').value);
+      
+      if (!title || !companyName || !jobType) {
+        alert('제목, 회사명, 직무 유형은 필수입니다.');
+        return;
+      }
+      
+      if (!hourlyWage || hourlyWage < 10320) {
+        alert('시급은 최저시급(10,320원) 이상이어야 합니다.');
+        return;
+      }
+      
+      if (!address || !latitude || !longitude) {
+        alert('주소를 검색하여 선택해주세요.');
+        return;
+      }
+      
+      // 채용 방식 가져오기
+      const hiringType = document.querySelector('input[name="hiringType"]:checked')?.value || 'trial';
+      
+      // 체험 시간 검증 (체험 후 채용 방식일 경우만)
+      const experienceTimes = Array.from(document.querySelectorAll('input[name="experienceTime"]:checked'))
+        .map(cb => cb.value);
+      
+      if (hiringType === 'trial' && experienceTimes.length === 0) {
+        alert('체험 가능 시간대를 최소 1개 이상 선택해주세요.');
+        return;
+      }
+      
+      // 폼 데이터 수집
+      // 총 근무시간 가져오기
+      const totalWorkHours = parseInt(document.getElementById('totalWorkHours').value) || null;
+      
+      const formData = {
+        title,
+        company_name: companyName,
+        job_type: jobType,
+        hourly_wage: hourlyWage,
+        work_hours: document.getElementById('workHours').value.trim() || null,
+        work_days: document.getElementById('workDays').value.trim() || null,
+        total_work_hours: totalWorkHours,
+        experience_times: hiringType === 'trial' ? JSON.stringify(experienceTimes) : null,
+        hiring_type: hiringType,
+        address: address + (document.getElementById('addressDetail').value.trim() ? ' ' + document.getElementById('addressDetail').value.trim() : ''),
+        latitude,
+        longitude,
+        description: document.getElementById('description').value.trim() || null,
+        requirements: document.getElementById('requirements').value.trim() || null,
+        benefits: document.getElementById('benefits').value.trim() || null,
+        contact_name: document.getElementById('contactName').value.trim() || null,
+        contact_phone: document.getElementById('contactPhone').value.trim() || null,
+        contact_email: document.getElementById('contactEmail').value.trim() || null
+      };
+      
+      console.log('📦 전송 데이터:', formData);
+      
+      // 제출 버튼 비활성화
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 등록 중...';
+      
+      try {
+        const sessionToken = localStorage.getItem('albi_session_token');
+        const response = await axios.post('/api/jobs', formData, {
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        console.log('✅ 응답:', response.data);
+        
+        if (response.data.success) {
+          alert('공고가 등록되었습니다!');
+          window.location.href = '/jobs.html';
+        } else {
+          throw new Error(response.data.error || '공고 등록 실패');
+        }
+      } catch (error) {
+        console.error('❌ 등록 실패:', error);
+        alert(error.response?.data?.error || error.message || '공고 등록 중 오류가 발생했습니다.');
+        
+        // 버튼 복구
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> 무료로 공고 등록하기';
+      }
+    }
+  </script>
+</body>
+</html>

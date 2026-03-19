@@ -1,0 +1,57 @@
+# Albi AI - Security Headers for Cloudflare Pages
+
+# Global security headers for all pages
+/*
+  # Content Security Policy
+  # Allows inline scripts and styles (needed for Tailwind CDN)
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://plausible.io https://static.cloudflareinsights.com https://developers.kakao.com https://dapi.kakao.com https://t1.daumcdn.net https://unpkg.com https://cdn.portone.io https://*.portone.io https://service.iamport.kr https://*.iamport.kr https://*.iamport.co; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://unpkg.com; img-src 'self' data: https: blob:; font-src 'self' data: https://cdn.jsdelivr.net https://unpkg.com; connect-src 'self' https://www.genspark.ai https://plausible.io https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://static.cloudflareinsights.com https://cloudflareinsights.com https://dapi.kakao.com https://t1.daumcdn.net https://unpkg.com https://api.portone.io https://checkout-service.prod.iamport.co https://*.iamport.kr https://*.iamport.co https://*.portone.io https://*.kakaopay.com wss: ws:; worker-src 'self' blob:; child-src 'self' blob: https://cdn.portone.io https://service.iamport.kr https://*.portone.io https://*.iamport.kr https://*.iamport.co https://*.kakaopay.com; frame-src 'self' blob: https://cdn.portone.io https://service.iamport.kr https://*.portone.io https://*.iamport.kr https://*.iamport.co https://*.kakaopay.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self';
+  
+  # Prevent clickjacking
+  X-Frame-Options: DENY
+  
+  # Prevent MIME type sniffing
+  X-Content-Type-Options: nosniff
+  
+  # Enable XSS protection
+  X-XSS-Protection: 1; mode=block
+  
+  # Referrer policy
+  Referrer-Policy: strict-origin-when-cross-origin
+  
+  # Permissions policy (Enable geolocation for jobs page)
+  Permissions-Policy: accelerometer=(), camera=(), geolocation=(self), gyroscope=(), magnetometer=(), microphone=(self), payment=(), usb=()
+  
+  # HSTS (HTTP Strict Transport Security)
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+
+# API endpoints - more permissive for CORS
+/api/*
+  Access-Control-Allow-Origin: *
+  Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+  Access-Control-Allow-Headers: Content-Type, Authorization
+  Access-Control-Max-Age: 86400
+  X-Content-Type-Options: nosniff
+
+# Static assets - long cache
+/static/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+
+# Service Worker - no cache
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+  Service-Worker-Allowed: /
+
+# Manifest - short cache
+/manifest.json
+  Cache-Control: public, max-age=86400
+  Content-Type: application/manifest+json
+
+# Sitemap and robots - short cache
+/sitemap.xml
+  Cache-Control: public, max-age=3600
+  Content-Type: application/xml
+
+/robots.txt
+  Cache-Control: public, max-age=3600
+  Content-Type: text/plain

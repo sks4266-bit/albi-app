@@ -1,0 +1,296 @@
+/* 모바일 최적화 CSS */
+
+/* 터치 타겟 크기 최적화 (최소 44x44px) */
+button,
+a,
+input[type="checkbox"],
+input[type="radio"] {
+    min-height: 44px;
+    min-width: 44px;
+}
+
+/* 모바일 텍스트 선택 방지 (UI 요소) */
+.no-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* 터치 피드백 */
+.touch-feedback {
+    transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
+.touch-feedback:active {
+    transform: scale(0.95);
+    opacity: 0.7;
+}
+
+/* 모바일 네비게이션 */
+.mobile-nav {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .mobile-nav {
+        display: block;
+    }
+    
+    .desktop-nav {
+        display: none;
+    }
+}
+
+/* 햄버거 메뉴 */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px;
+    cursor: pointer;
+}
+
+.hamburger span {
+    width: 24px;
+    height: 3px;
+    background: currentColor;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.hamburger.active span:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px);
+}
+
+.hamburger.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px);
+}
+
+@media (max-width: 768px) {
+    .hamburger {
+        display: flex;
+    }
+}
+
+/* 모바일 사이드 메뉴 */
+.mobile-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 80%;
+    max-width: 300px;
+    height: 100vh;
+    background: white;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+    transition: right 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.mobile-menu.active {
+    right: 0;
+}
+
+.mobile-menu-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 999;
+}
+
+.mobile-menu-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* 모바일 입력 필드 최적화 */
+@media (max-width: 768px) {
+    input,
+    textarea,
+    select {
+        font-size: 16px; /* iOS zoom 방지 */
+    }
+}
+
+/* 모바일 카드 그리드 */
+@media (max-width: 640px) {
+    .grid-cols-2,
+    .grid-cols-3,
+    .md\:grid-cols-2,
+    .lg\:grid-cols-3 {
+        grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+    }
+}
+
+/* 스와이프 제스처 힌트 */
+.swipeable {
+    touch-action: pan-y;
+    cursor: grab;
+}
+
+.swipeable:active {
+    cursor: grabbing;
+}
+
+/* 풀 스크린 모달 (모바일) */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+    }
+}
+
+/* 하단 고정 버튼 (모바일) */
+.mobile-bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    padding: 12px 16px;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 50;
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .mobile-bottom-bar {
+        display: block;
+    }
+    
+    /* 하단 버튼 있을 때 컨텐츠 패딩 */
+    body.has-bottom-bar {
+        padding-bottom: 80px;
+    }
+}
+
+/* 세이프 에어리어 (노치 대응) */
+@supports (padding: env(safe-area-inset-bottom)) {
+    .mobile-bottom-bar {
+        padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    }
+    
+    .mobile-menu {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+}
+
+/* 가로 스크롤 방지 */
+body {
+    overflow-x: hidden;
+}
+
+/* 모바일 폰트 크기 조정 */
+@media (max-width: 640px) {
+    html {
+        font-size: 14px;
+    }
+    
+    h1 {
+        font-size: 1.75rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+    
+    h3 {
+        font-size: 1.25rem;
+    }
+}
+
+/* 로딩 스피너 */
+.spinner {
+    border: 3px solid #f3f4f6;
+    border-top-color: #8b5cf6;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 스켈레톤 로딩 */
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        #f0f0f0 25%,
+        #e0e0e0 50%,
+        #f0f0f0 75%
+    );
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* 프로그레스 바 */
+.progress-bar {
+    height: 4px;
+    background: #e5e7eb;
+    overflow: hidden;
+    border-radius: 2px;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #8b5cf6, #6366f1);
+    transition: width 0.3s ease;
+}
+
+/* 토스트 알림 */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #1f2937;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 9999;
+}
+
+.toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+/* 풀 뷰포트 높이 (모바일 주소창 대응) */
+.full-vh {
+    height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
+}
+
+/* iOS 관성 스크롤 */
+.scroll-smooth {
+    -webkit-overflow-scrolling: touch;
+}

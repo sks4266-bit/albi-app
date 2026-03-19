@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결제 내역 - Albi AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .receipt-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .receipt-card {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- 헤더 -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg shadow-lg p-6 mb-6">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold mb-2">
+                        <i class="fas fa-receipt mr-2"></i>
+                        결제 내역
+                    </h1>
+                    <p class="text-blue-100">구독 및 결제 히스토리</p>
+                </div>
+                <div>
+                    <a href="/mentor-chat.html" class="bg-white text-blue-600 px-6 py-3 rounded-lg font-bold hover:bg-blue-50 transition-colors inline-block">
+                        <i class="fas fa-comments mr-2"></i>
+                        AI 멘토로 이동
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 통계 카드 -->
+        <div class="grid md:grid-cols-4 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">총 결제 횟수</p>
+                        <p class="text-3xl font-bold text-blue-600" id="totalPayments">-</p>
+                    </div>
+                    <div class="bg-blue-100 rounded-full p-4">
+                        <i class="fas fa-shopping-cart text-blue-600 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">성공한 결제</p>
+                        <p class="text-3xl font-bold text-green-600" id="successfulPayments">-</p>
+                    </div>
+                    <div class="bg-green-100 rounded-full p-4">
+                        <i class="fas fa-check-circle text-green-600 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">총 결제 금액</p>
+                        <p class="text-3xl font-bold text-purple-600" id="totalSpent">-</p>
+                    </div>
+                    <div class="bg-purple-100 rounded-full p-4">
+                        <i class="fas fa-won-sign text-purple-600 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">최근 결제일</p>
+                        <p class="text-lg font-bold text-gray-700" id="lastPayment">-</p>
+                    </div>
+                    <div class="bg-gray-100 rounded-full p-4">
+                        <i class="fas fa-calendar text-gray-600 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 결제 내역 리스트 -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold">
+                    <i class="fas fa-list mr-2"></i>
+                    결제 내역
+                </h2>
+                <div class="flex gap-2">
+                    <button onclick="filterPayments('all')" class="filter-btn active px-4 py-2 rounded-lg text-sm font-medium" data-filter="all">전체</button>
+                    <button onclick="filterPayments('approved')" class="filter-btn px-4 py-2 rounded-lg text-sm font-medium" data-filter="approved">성공</button>
+                    <button onclick="filterPayments('failed')" class="filter-btn px-4 py-2 rounded-lg text-sm font-medium" data-filter="failed">실패</button>
+                </div>
+            </div>
+
+            <div id="paymentList" class="space-y-4">
+                <!-- 로딩 상태 -->
+                <div class="text-center py-8">
+                    <i class="fas fa-spinner fa-spin text-4xl text-gray-400"></i>
+                    <p class="text-gray-500 mt-4">결제 내역을 불러오는 중...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 환불 안내 -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-6">
+            <h3 class="text-lg font-bold text-blue-800 mb-3">
+                <i class="fas fa-info-circle mr-2"></i>
+                환불 안내
+            </h3>
+            <ul class="text-blue-700 space-y-2">
+                <li><i class="fas fa-check mr-2"></i>구독 시작일로부터 <strong>7일 이내</strong> 환불 가능</li>
+                <li><i class="fas fa-check mr-2"></i>환불 요청은 <a href="mailto:albi260128@gmail.com" class="underline font-bold">albi260128@gmail.com</a>로 문의</li>
+                <li><i class="fas fa-check mr-2"></i>주문번호와 환불 사유를 함께 보내주세요</li>
+                <li><i class="fas fa-check mr-2"></i>영수증 재발급이 필요한 경우에도 연락주세요</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+    <script>
+        // URL 파라미터에서 userId 가져오기
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('user_id') || 'demo-user-123';
+
+        let allPayments = [];
+        let currentFilter = 'all';
+
+        // 결제 내역 로드
+        async function loadPaymentHistory() {
+            try {
+                const response = await axios.get(`/api/payment-history?user_id=${userId}`);
+                
+                if (response.data.success) {
+                    const { payments, stats } = response.data.data;
+                    allPayments = payments;
+                    
+                    // 통계 업데이트
+                    document.getElementById('totalPayments').textContent = stats.total_payments;
+                    document.getElementById('successfulPayments').textContent = stats.successful_payments;
+                    document.getElementById('totalSpent').textContent = `₩${stats.total_spent.toLocaleString()}`;
+                    document.getElementById('lastPayment').textContent = stats.last_payment_date 
+                        ? new Date(stats.last_payment_date).toLocaleDateString('ko-KR')
+                        : '없음';
+                    
+                    // 결제 내역 렌더링
+                    renderPayments(allPayments);
+                } else {
+                    showError('결제 내역을 불러올 수 없습니다');
+                }
+            } catch (error) {
+                console.error('Error loading payment history:', error);
+                showError('오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+        // 결제 내역 렌더링
+        function renderPayments(payments) {
+            const listDiv = document.getElementById('paymentList');
+            
+            if (payments.length === 0) {
+                listDiv.innerHTML = `
+                    <div class="text-center py-12">
+                        <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500 text-lg">결제 내역이 없습니다</p>
+                        <a href="/payment.html?user_id=${userId}" class="mt-4 inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                            첫 구독 시작하기
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            listDiv.innerHTML = payments.map(payment => {
+                const statusBadge = getStatusBadge(payment.status);
+                const statusIcon = getStatusIcon(payment.status);
+                
+                return `
+                    <div class="receipt-card border rounded-lg p-6 ${payment.status === 'approved' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}" data-status="${payment.status}">
+                        <div class="flex items-start justify-between flex-wrap gap-4">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-3">
+                                    ${statusIcon}
+                                    <div>
+                                        <h3 class="text-lg font-bold">${payment.order_name}</h3>
+                                        <p class="text-sm text-gray-600">주문번호: ${payment.order_id}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                    <div>
+                                        <p class="text-sm text-gray-600">결제 금액</p>
+                                        <p class="text-xl font-bold text-purple-600">₩${payment.amount.toLocaleString()}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-600">결제 수단</p>
+                                        <p class="font-medium">${payment.payment_method}</p>
+                                        ${payment.card_info ? `<p class="text-sm text-gray-600">${payment.card_info.company} ${payment.card_info.number}</p>` : ''}
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-600">결제 일시</p>
+                                        <p class="font-medium">${payment.approved_at ? new Date(payment.approved_at).toLocaleString('ko-KR') : new Date(payment.created_at).toLocaleString('ko-KR')}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-600">상태</p>
+                                        ${statusBadge}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            ${payment.status === 'approved' ? `
+                                <div class="flex flex-col gap-2">
+                                    <button onclick="downloadReceipt('${payment.order_id}')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                                        <i class="fas fa-download mr-2"></i>
+                                        영수증 다운로드
+                                    </button>
+                                    <button onclick="requestRefund('${payment.order_id}')" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors text-sm">
+                                        <i class="fas fa-undo mr-2"></i>
+                                        환불 요청
+                                    </button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 상태 뱃지
+        function getStatusBadge(status) {
+            const badges = {
+                'approved': '<span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">결제 완료</span>',
+                'pending': '<span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">대기 중</span>',
+                'failed': '<span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">결제 실패</span>'
+            };
+            return badges[status] || badges['pending'];
+        }
+
+        // 상태 아이콘
+        function getStatusIcon(status) {
+            const icons = {
+                'approved': '<div class="bg-green-100 rounded-full p-3"><i class="fas fa-check-circle text-green-600 text-2xl"></i></div>',
+                'pending': '<div class="bg-yellow-100 rounded-full p-3"><i class="fas fa-clock text-yellow-600 text-2xl"></i></div>',
+                'failed': '<div class="bg-red-100 rounded-full p-3"><i class="fas fa-times-circle text-red-600 text-2xl"></i></div>'
+            };
+            return icons[status] || icons['pending'];
+        }
+
+        // 필터
+        function filterPayments(filter) {
+            currentFilter = filter;
+            
+            // 버튼 스타일 업데이트
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-blue-600', 'text-white');
+                btn.classList.add('bg-gray-200', 'text-gray-700');
+            });
+            
+            const activeBtn = document.querySelector(`[data-filter="${filter}"]`);
+            activeBtn.classList.add('active', 'bg-blue-600', 'text-white');
+            activeBtn.classList.remove('bg-gray-200', 'text-gray-700');
+            
+            // 필터링
+            const filtered = filter === 'all' 
+                ? allPayments 
+                : allPayments.filter(p => p.status === filter);
+            
+            renderPayments(filtered);
+        }
+
+        // 영수증 다운로드
+        async function downloadReceipt(orderId) {
+            try {
+                const payment = allPayments.find(p => p.order_id === orderId);
+                if (!payment) return;
+
+                // 간단한 HTML 영수증 생성
+                const receiptHTML = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>결제 영수증 - ${orderId}</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+                            h1 { color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+                            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                            th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+                            th { background-color: #f8f9fa; font-weight: bold; }
+                            .total { font-size: 24px; font-weight: bold; color: #667eea; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>🧾 결제 영수증</h1>
+                        <p><strong>주문번호:</strong> ${payment.order_id}</p>
+                        <p><strong>결제일시:</strong> ${new Date(payment.approved_at).toLocaleString('ko-KR')}</p>
+                        
+                        <table>
+                            <tr><th>항목</th><th>금액</th></tr>
+                            <tr><td>${payment.order_name}</td><td>₩${payment.amount.toLocaleString()}</td></tr>
+                            <tr><th>총 결제금액</th><th class="total">₩${payment.amount.toLocaleString()}</th></tr>
+                        </table>
+                        
+                        <p><strong>결제 수단:</strong> ${payment.payment_method}</p>
+                        <p><strong>구매자:</strong> ${payment.user_name} (${payment.user_email})</p>
+                        
+                        <p style="margin-top: 40px; color: #666; font-size: 12px;">
+                            이 영수증은 Albi AI에서 자동 생성되었습니다.<br>
+                            문의사항: albi260128@gmail.com
+                        </p>
+                    </body>
+                    </html>
+                `;
+
+                // Blob 생성 및 다운로드
+                const blob = new Blob([receiptHTML], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `receipt_${orderId}.html`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                alert('✅ 영수증이 다운로드되었습니다!');
+            } catch (error) {
+                alert('❌ 영수증 다운로드 실패: ' + error.message);
+            }
+        }
+
+        // 환불 요청
+        function requestRefund(orderId) {
+            const subject = encodeURIComponent(`환불 요청 - 주문번호: ${orderId}`);
+            const body = encodeURIComponent(`안녕하세요,\n\n아래 주문에 대한 환불을 요청합니다.\n\n주문번호: ${orderId}\n환불 사유: \n\n감사합니다.`);
+            window.location.href = `mailto:albi260128@gmail.com?subject=${subject}&body=${body}`;
+        }
+
+        // 에러 표시
+        function showError(message) {
+            document.getElementById('paymentList').innerHTML = `
+                <div class="text-center py-12">
+                    <i class="fas fa-exclamation-triangle text-6xl text-red-300 mb-4"></i>
+                    <p class="text-red-500 text-lg">${message}</p>
+                    <button onclick="loadPaymentHistory()" class="mt-4 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                        다시 시도
+                    </button>
+                </div>
+            `;
+        }
+
+        // 페이지 로드 시 실행
+        loadPaymentHistory();
+    </script>
+</body>
+</html>

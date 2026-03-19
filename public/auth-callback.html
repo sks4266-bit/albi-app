@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>로그인 중... - 알비</title>
+  <!-- Google OAuth Callback Handler v2.0 -->
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif;
+      background: #f8f9fa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    
+    .loader-container {
+      text-align: center;
+      background: white;
+      padding: 48px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .loader {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #FF6B35;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 24px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .message {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .sub-message {
+      font-size: 14px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="loader-container">
+    <div class="loader"></div>
+    <div class="message">로그인 중...</div>
+    <div class="sub-message">잠시만 기다려주세요</div>
+  </div>
+
+  <script>
+    console.log('🚀 auth-callback.html 로드됨');
+    
+    // URL에서 세션 정보 추출
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session');
+    const provider = urlParams.get('provider');
+    const name = urlParams.get('name');
+    
+    console.log('📦 URL 파라미터:', { sessionId: !!sessionId, provider, name });
+    
+    if (sessionId) {
+      console.log('💾 localStorage 저장 시작');
+      
+      // 세션 정보를 먼저 저장
+      localStorage.setItem('albi_session_token', sessionId);
+      console.log('✅ albi_session_token 저장됨');
+      
+      if (name) {
+        localStorage.setItem('albi_user_name', decodeURIComponent(name));
+        console.log('✅ albi_user_name 저장됨:', decodeURIComponent(name));
+      }
+      
+      console.log('📡 /api/auth/me 호출 시작...');
+      
+      // API를 통해 사용자 정보 조회
+      fetch('/api/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${sessionId}`
+        }
+      })
+      .then(res => {
+        console.log('📥 API 응답 상태:', res.status);
+        return res.json();
+      })
+      .then(data => {
+        console.log('📄 API 응답 데이터:', data);
+        
+        if (data.success && data.data) {
+          // 사용자 정보 저장
+          localStorage.setItem('albi_user_id', data.data.id);
+          localStorage.setItem('albi_user_type', data.data.user_type || 'jobseeker');
+          localStorage.setItem('albi_user_name', data.data.name || name || '사용자');
+          
+          if (data.data.email) {
+            localStorage.setItem('albi_user_email', data.data.email);
+          }
+          
+          // 통합 사용자 정보 객체도 저장
+          localStorage.setItem('albi_user_info', JSON.stringify({
+            id: data.data.id,
+            name: data.data.name || name || '사용자',
+            type: data.data.user_type || 'jobseeker',
+            email: data.data.email || '',
+            sessionToken: sessionId
+          }));
+          
+          console.log('✅ localStorage 저장 완료:', {
+            userId: data.data.id,
+            userName: data.data.name,
+            userType: data.data.user_type
+          });
+          
+          console.log('🔍 localStorage 확인:', {
+            albi_user_id: localStorage.getItem('albi_user_id'),
+            albi_session_token: localStorage.getItem('albi_session_token'),
+            albi_user_name: localStorage.getItem('albi_user_name')
+          });
+          
+          // 리다이렉트 URL 확인
+          const redirectUrl = localStorage.getItem('redirect_after_login');
+          console.log('🔗 redirect_after_login:', redirectUrl);
+          
+          if (redirectUrl) {
+            console.log('↪️ 저장된 리다이렉트 URL로 이동:', redirectUrl);
+            localStorage.removeItem('redirect_after_login');
+            setTimeout(() => {
+              window.location.href = redirectUrl;
+            }, 1000);
+          } else {
+            console.log('🏠 메인 페이지로 이동');
+            setTimeout(() => {
+              window.location.href = '/';
+            }, 1000);
+          }
+        } else {
+          throw new Error('사용자 정보 조회 실패: ' + (data.error || 'Unknown error'));
+        }
+      })
+      .catch(error => {
+        console.error('❌ 사용자 정보 조회 실패:', error);
+        
+        // 사용자 정보 조회 실패해도 세션 토큰은 있으니 임시로 진행
+        // user_id를 세션 ID로 임시 설정
+        const tempUserName = name ? decodeURIComponent(name) : '알비사용자';
+        localStorage.setItem('albi_user_id', sessionId);
+        localStorage.setItem('albi_user_type', 'jobseeker');
+        localStorage.setItem('albi_user_name', tempUserName);
+        
+        // 통합 사용자 정보 객체도 저장
+        localStorage.setItem('albi_user_info', JSON.stringify({
+          id: sessionId,
+          name: tempUserName,
+          type: 'jobseeker',
+          sessionToken: sessionId
+        }));
+        
+        console.log('⚠️ 임시 데이터로 진행');
+        
+        // 리다이렉트 URL 확인
+        const redirectUrl = localStorage.getItem('redirect_after_login');
+        console.log('🔗 redirect_after_login:', redirectUrl);
+        
+        if (redirectUrl) {
+          console.log('↪️ 저장된 리다이렉트 URL로 이동:', redirectUrl);
+          localStorage.removeItem('redirect_after_login');
+          setTimeout(() => {
+            window.location.href = redirectUrl;
+          }, 1000);
+        } else {
+          console.log('🏠 메인 페이지로 이동');
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 1000);
+        }
+      });
+    } else {
+      // 오류 발생
+      console.error('❌ 세션 ID가 없습니다!');
+      document.querySelector('.message').textContent = '로그인 실패';
+      document.querySelector('.sub-message').textContent = '다시 시도해주세요';
+      
+      setTimeout(() => {
+        window.location.href = '/login.html';
+      }, 2000);
+    }
+  </script>
+</body>
+</html>

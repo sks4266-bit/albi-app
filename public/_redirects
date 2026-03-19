@@ -1,0 +1,26 @@
+# Cloudflare Pages Redirects
+# Fix: Prevent automatic .html redirects that cause Google Search Console issues
+
+# API routes (force through Functions)
+/api/*  200!
+
+# Main pages - Prevent .html redirect loops
+/  /index.html  200!
+/jobs  /jobs.html  200!
+/contact  /contact.html  200!
+/about  /about.html  200!
+/video-interview  /video-interview.html  200!
+/mentor-chat  /mentor-chat.html  200!
+/payment  /payment.html  200!
+/payment-callback  /payment-callback.html  200!
+/subscription-manage  /subscription-manage.html  200!
+/mypage  /mypage.html  200!
+/admin-login  /admin-login.html  200!
+/admin-dashboard  /admin-dashboard.html  200!
+/chat  /chat.html  200!
+
+# Explicitly serve .html files directly (no redirect)
+/*.html  200!
+
+# Disable Cloudflare Pages automatic .html removal
+# This prevents 301/302 redirects that Google Search Console flags as errors

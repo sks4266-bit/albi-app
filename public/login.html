@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>로그인 - 알비</title>
+  <link href="/styles.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+      background: #f8f9fa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .login-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 420px;
+    }
+    
+    .login-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    
+    .login-logo {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+    }
+    
+    .login-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #222;
+      margin-bottom: 8px;
+    }
+    
+    .login-subtitle {
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .form-group {
+      margin-bottom: 16px;
+    }
+    
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 15px;
+      transition: all 0.2s;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: #FF6B35;
+      box-shadow: 0 0 0 3px rgba(255,107,53,0.1);
+    }
+    
+    .form-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 16px 0;
+    }
+    
+    .form-checkbox input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    
+    .form-checkbox label {
+      font-size: 14px;
+      color: #555;
+      cursor: pointer;
+    }
+    
+    .btn-login {
+      width: 100%;
+      padding: 16px;
+      background: #FF6B35;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 8px;
+    }
+    
+    .btn-login:hover {
+      background: #E55A2B;
+    }
+    
+    .divider {
+      text-align: center;
+      margin: 24px 0;
+      position: relative;
+    }
+    
+    .divider::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 1px;
+      background: #e5e5e5;
+    }
+    
+    .divider span {
+      position: relative;
+      background: white;
+      padding: 0 16px;
+      font-size: 13px;
+      color: #999;
+    }
+    
+    .social-login {
+      display: grid;
+      gap: 10px;
+    }
+    
+    .btn-social {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: white;
+    }
+    
+    .btn-social:hover {
+      background: #f8f9fa;
+      border-color: #ccc;
+    }
+    
+    .btn-kakao {
+      background: #FEE500;
+      border-color: #FEE500;
+      color: #000;
+    }
+    
+    .btn-kakao:hover {
+      background: #FDDC3F;
+    }
+    
+    .btn-naver {
+      background: #03C75A;
+      border-color: #03C75A;
+      color: white;
+    }
+    
+    .btn-naver:hover {
+      background: #02B350;
+    }
+    
+    .btn-google {
+      background: white;
+      border: 1px solid #ddd;
+      color: #333;
+    }
+    
+    .login-links {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    
+    .login-links a {
+      color: #FF6B35;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    
+    .login-links a:hover {
+      color: #E55A2B;
+      text-decoration: underline;
+    }
+    
+    .login-links span {
+      color: #ddd;
+    }
+    
+    .signup-link {
+      text-align: center;
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid #e5e5e5;
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .signup-link a {
+      color: #FF6B35;
+      text-decoration: none;
+      font-weight: 600;
+      margin-left: 6px;
+    }
+    
+    .signup-link a:hover {
+      text-decoration: underline;
+    }
+    
+    @media (max-width: 480px) {
+      .login-container {
+        padding: 32px 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-header">
+      <img src="/albi-mascot.svg" alt="알비" class="login-logo">
+      <h1 class="login-title">알비 로그인</h1>
+      <p class="login-subtitle">AI가 추천하는 내 주변 알바</p>
+    </div>
+    
+    <form id="loginForm">
+      <div class="form-group">
+        <label class="form-label">이메일 또는 휴대폰번호</label>
+        <input type="text" class="form-input" id="username" placeholder="example@email.com" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">비밀번호</label>
+        <input type="password" class="form-input" id="password" placeholder="비밀번호를 입력하세요" required>
+      </div>
+      
+      <div class="form-checkbox">
+        <input type="checkbox" id="remember">
+        <label for="remember">로그인 상태 유지</label>
+      </div>
+      
+      <button type="submit" class="btn-login">로그인</button>
+    </form>
+    
+    <div class="login-links">
+      <a href="/find-id.html">아이디 찾기</a>
+      <span>|</span>
+      <a href="/find-password.html">비밀번호 찾기</a>
+    </div>
+    
+    <div class="divider">
+      <span>또는 간편 시작하기</span>
+    </div>
+    
+    <div class="social-login">
+      <p style="color: #666; font-size: 13px; text-align: center; margin: 0 0 16px 0;">
+        계정이 없으면 자동으로 가입되고, 있으면 바로 로그인됩니다
+      </p>
+      <button class="btn-social btn-kakao" onclick="socialLogin('kakao')">
+        <i class="fas fa-comment"></i>
+        <span>카카오로 시작하기</span>
+      </button>
+      <button class="btn-social btn-naver" onclick="socialLogin('naver')">
+        <span style="font-weight: 700;">N</span>
+        <span>네이버로 시작하기</span>
+      </button>
+      <button class="btn-social btn-google" onclick="socialLogin('google')">
+        <i class="fab fa-google"></i>
+        <span>Google로 시작하기</span>
+      </button>
+    </div>
+    
+    <div class="signup-link">
+      아직 회원이 아니신가요?
+      <a href="/signup.html">회원가입</a>
+    </div>
+  </div>
+  
+  <script>
+    // 로그인 폼 제출
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const remember = document.getElementById('remember').checked;
+      
+      if (!username || !password) {
+        alert('이메일/휴대폰번호와 비밀번호를 입력해주세요.');
+        return;
+      }
+      
+      const loginBtn = document.querySelector('.btn-login');
+      loginBtn.disabled = true;
+      loginBtn.textContent = '로그인 중...';
+      
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            username,
+            password,
+            remember
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || '로그인 실패');
+        }
+        
+        // 로그인 성공: 사용자 정보를 localStorage에 저장
+        localStorage.setItem('albi_user_id', data.data.userId);
+        localStorage.setItem('albi_user_type', data.data.userType);
+        localStorage.setItem('albi_user_name', data.data.name);
+        localStorage.setItem('albi_session_token', data.data.sessionToken);
+        
+        // 통합 사용자 정보 객체도 저장 (커뮤니티 등 다른 기능에서 사용)
+        localStorage.setItem('albi_user_info', JSON.stringify({
+          id: data.data.userId,
+          name: data.data.name,
+          type: data.data.userType,
+          sessionToken: data.data.sessionToken,
+          isTestAccount: data.data.isTestAccount || false // 테스트 계정 여부
+        }));
+        
+        // remember가 true면 장기 보관
+        if (remember) {
+          localStorage.setItem('albi_remember', 'true');
+        }
+        
+        // 환영 메시지 (테스트 계정은 특별 표시)
+        if (data.data.isTestAccount) {
+          alert(`🧪 테스트 계정으로 로그인했습니다!\n\n테스트 계정: ${data.data.name}\n\n결제 및 서비스 기능을 자유롭게 테스트해보세요. 😊`);
+        } else {
+          alert(`${data.data.name}님, 환영합니다! 🎉`);
+        }
+        
+        // 리다이렉트 URL 확인
+        const redirectUrl = localStorage.getItem('redirect_after_login');
+        
+        if (redirectUrl) {
+          // 리다이렉트 URL이 있으면 해당 페이지로 이동
+          localStorage.removeItem('redirect_after_login');
+          window.location.href = redirectUrl;
+        } else {
+          // 사용자 타입에 따라 페이지 이동
+          if (data.data.userType === 'employer') {
+            // 구인자: 면접 페이지로 이동
+            window.location.href = '/chat.html';
+          } else {
+            // 구직자: 면접 페이지로 이동
+            window.location.href = '/chat.html';
+          }
+        }
+      } catch (error) {
+        let errorMessage = '로그인 실패: ' + error.message;
+        
+        // 친절한 에러 메시지
+        if (error.message.includes('사용자') || error.message.includes('없') || error.message.includes('존재하지')) {
+          errorMessage = '등록되지 않은 이메일/휴대폰번호입니다.\n\n아이디를 잊으셨나요? 하단의 "아이디 찾기"를 이용해주세요.';
+        } else if (error.message.includes('비밀번호') || error.message.includes('password')) {
+          errorMessage = '비밀번호가 일치하지 않습니다.\n\n비밀번호를 잊으셨나요? 하단의 "비밀번호 찾기"를 이용해주세요.';
+        }
+        
+        alert(errorMessage);
+        loginBtn.disabled = false;
+        loginBtn.textContent = '로그인';
+      }
+    });
+    
+    // 소셜 로그인
+    function socialLogin(provider) {
+      console.log(`${provider} 로그인 시도`);
+      
+      // redirect_after_login이 설정되어 있는지 확인하고 로그 출력
+      const redirectUrl = localStorage.getItem('redirect_after_login');
+      if (redirectUrl) {
+        console.log('✅ redirect_after_login 설정됨:', redirectUrl);
+        console.log('💡 소셜 로그인 후 해당 페이지로 이동합니다');
+      }
+      
+      // WebView 감지 (간단한 방법)
+      const ua = navigator.userAgent.toLowerCase();
+      const isWebView = ua.includes('wv') || 
+                        ua.includes('webview') ||
+                        (ua.includes('iphone') && !ua.includes('safari')) ||
+                        (ua.includes('android') && ua.includes('version'));
+      
+      if (provider === 'google' && isWebView) {
+        alert('⚠️ Google 로그인은 외부 브라우저에서만 가능합니다.\n\nSafari, Chrome 등의 기본 브라우저에서 다시 시도해주세요.');
+        
+        // 외부 브라우저로 열기 시도
+        const url = window.location.origin + '/login.html';
+        window.open(url, '_system'); // '_system'은 외부 브라우저로 열기
+        return;
+      }
+      
+      // 소셜 로그인 페이지로 리다이렉트
+      // redirect_after_login은 localStorage에 그대로 유지됨 (중요!)
+      if (provider === 'kakao') {
+        window.location.href = '/api/auth/kakao';
+      } else if (provider === 'naver') {
+        window.location.href = '/api/auth/naver';
+      } else if (provider === 'google') {
+        window.location.href = '/api/auth/google';
+      }
+    }
+    
+    // 페이지 로드 시 처리
+    window.addEventListener('DOMContentLoaded', () => {
+      // 직접 로그인 페이지에 접속한 경우 (다른 페이지에서 온 게 아닌 경우)
+      // redirect_after_login을 메인 페이지로 설정
+      const referrer = document.referrer;
+      const currentHost = window.location.host;
+      const isDirectAccess = !referrer || !referrer.includes(currentHost) || referrer.includes('/login.html');
+      
+      if (isDirectAccess) {
+        console.log('🏠 직접 로그인 페이지 접속 → 메인 페이지로 리다이렉트 설정');
+        localStorage.setItem('redirect_after_login', '/');
+      }
+      
+      // 이미 로그인된 사용자 체크
+      const userId = localStorage.getItem('albi_user_id');
+      const sessionToken = localStorage.getItem('albi_session_token');
+      
+      if (userId && sessionToken) {
+        const userName = localStorage.getItem('albi_user_name') || '사용자';
+        const redirectUrl = localStorage.getItem('redirect_after_login') || '/';
+        if (confirm(`${userName}님, 이미 로그인되어 있습니다. ${redirectUrl === '/' ? '메인 페이지' : '이전 페이지'}로 이동하시겠어요?`)) {
+          localStorage.removeItem('redirect_after_login');
+          window.location.href = redirectUrl;
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+{
+  "name": "알비 - AI 알바 면접 연습",
+  "short_name": "알비",
+  "description": "AI 면접 연습, AI 멘토 상담, 음성 코칭으로 알바 면접 합격률 UP!",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#6366f1",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/static/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "productivity", "business"],
+  "screenshots": [
+    {
+      "src": "/static/screenshots/screenshot-1.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "AI 면접 연습",
+      "short_name": "면접",
+      "description": "AI와 실전 면접 연습하기",
+      "url": "/chat",
+      "icons": [{ "src": "/static/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "AI 멘토",
+      "short_name": "멘토",
+      "description": "AI 멘토와 상담하기",
+      "url": "/mentor-chat.html",
+      "icons": [{ "src": "/static/icons/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}

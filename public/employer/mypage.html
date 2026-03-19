@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>구인자 마이페이지 - 알비</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .tab-active {
+            border-bottom: 3px solid #FF6B35;
+            color: #FF6B35;
+            font-weight: 600;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <a href="/" class="text-2xl font-bold text-orange-600">
+                    <i class="fas fa-briefcase mr-2"></i>ALBI
+                </a>
+                <div class="flex items-center space-x-4">
+                    <a href="/employer/applications.html" class="text-gray-600 hover:text-orange-600">
+                        <i class="fas fa-users mr-1"></i>지원자 관리
+                    </a>
+                    <a href="/employer/guide.html" class="text-gray-600 hover:text-orange-600">
+                        <i class="fas fa-book mr-1"></i>가이드
+                    </a>
+                    <button onclick="logout()" class="text-gray-600 hover:text-orange-600">
+                        <i class="fas fa-sign-out-alt mr-1"></i>로그아웃
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- User Info Card -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-building text-3xl text-orange-600"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800" id="userName">구인자님</h1>
+                        <p class="text-gray-600" id="userEmail">email@example.com</p>
+                        <span class="inline-block mt-2 px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-semibold">
+                            <i class="fas fa-briefcase mr-1"></i>구인자
+                        </span>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-sm text-gray-600">가입일</div>
+                    <div class="text-lg font-semibold text-gray-800" id="joinDate">2024-01-01</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm">총 채용</p>
+                        <p class="text-2xl font-bold text-gray-800" id="totalHires">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-check-circle text-2xl text-green-600"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm">진행 중</p>
+                        <p class="text-2xl font-bold text-gray-800" id="inProgress">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-hourglass-half text-2xl text-blue-600"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm">총 결제</p>
+                        <p class="text-2xl font-bold text-gray-800" id="totalPayments">0원</p>
+                    </div>
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-credit-card text-2xl text-purple-600"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm">활성 공고</p>
+                        <p class="text-2xl font-bold text-gray-800" id="activeJobs">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-clipboard-list text-2xl text-orange-600"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="bg-white rounded-lg shadow-md">
+            <!-- Tab Headers -->
+            <div class="border-b border-gray-200">
+                <div class="flex space-x-8 px-6">
+                    <button class="tab-button py-4 text-gray-600 hover:text-orange-600 transition tab-active" data-tab="applications">
+                        <i class="fas fa-users mr-2"></i>지원자 관리
+                    </button>
+                    <button class="tab-button py-4 text-gray-600 hover:text-orange-600 transition" data-tab="payments">
+                        <i class="fas fa-credit-card mr-2"></i>결제 내역
+                    </button>
+                    <button class="tab-button py-4 text-gray-600 hover:text-orange-600 transition" data-tab="jobs">
+                        <i class="fas fa-clipboard-list mr-2"></i>내 공고
+                    </button>
+                    <button class="tab-button py-4 text-gray-600 hover:text-orange-600 transition" data-tab="profile">
+                        <i class="fas fa-user-edit mr-2"></i>프로필 설정
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab Contents -->
+            <div class="p-6">
+                <!-- Applications Tab -->
+                <div id="applications-tab" class="tab-content active">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-bold text-gray-800">
+                            <i class="fas fa-users mr-2 text-orange-600"></i>지원자 목록
+                        </h2>
+                        <a href="/employer/applications.html" class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition">
+                            <i class="fas fa-external-link-alt mr-2"></i>전체보기
+                        </a>
+                    </div>
+
+                    <div id="recentApplications" class="space-y-4">
+                        <div class="text-center py-12 text-gray-500">
+                            <i class="fas fa-inbox text-4xl mb-4"></i>
+                            <p>최근 지원자가 없습니다</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payments Tab -->
+                <div id="payments-tab" class="tab-content">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-bold text-gray-800">
+                            <i class="fas fa-credit-card mr-2 text-orange-600"></i>결제 내역
+                        </h2>
+                        <div class="flex gap-2">
+                            <select id="paymentStatusFilter" class="px-4 py-2 border border-gray-300 rounded-lg">
+                                <option value="">전체</option>
+                                <option value="completed">완료</option>
+                                <option value="refunded">환불</option>
+                                <option value="partial_refund">부분환불</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Payment Stats Summary -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-green-700">완료된 결제</p>
+                                    <p class="text-2xl font-bold text-green-800" id="completedPaymentsCount">0건</p>
+                                </div>
+                                <i class="fas fa-check-circle text-3xl text-green-600"></i>
+                            </div>
+                            <p class="text-sm text-green-700 mt-2" id="completedPaymentsAmount">총 0원</p>
+                        </div>
+
+                        <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-blue-700">이번 달 결제</p>
+                                    <p class="text-2xl font-bold text-blue-800" id="monthlyPaymentsCount">0건</p>
+                                </div>
+                                <i class="fas fa-calendar-alt text-3xl text-blue-600"></i>
+                            </div>
+                            <p class="text-sm text-blue-700 mt-2" id="monthlyPaymentsAmount">총 0원</p>
+                        </div>
+
+                        <div class="bg-red-50 rounded-lg p-4 border border-red-200">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-red-700">환불 처리</p>
+                                    <p class="text-2xl font-bold text-red-800" id="refundedPaymentsCount">0건</p>
+                                </div>
+                                <i class="fas fa-undo text-3xl text-red-600"></i>
+                            </div>
+                            <p class="text-sm text-red-700 mt-2" id="refundedPaymentsAmount">총 0원</p>
+                        </div>
+                    </div>
+
+                    <!-- Payment List -->
+                    <div id="paymentsList" class="space-y-4">
+                        <div class="text-center py-12 text-gray-500">
+                            <i class="fas fa-receipt text-4xl mb-4"></i>
+                            <p>결제 내역이 없습니다</p>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div id="paymentsPagination" class="mt-6 flex justify-center gap-2"></div>
+                </div>
+
+                <!-- Jobs Tab -->
+                <div id="jobs-tab" class="tab-content">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-bold text-gray-800">
+                            <i class="fas fa-clipboard-list mr-2 text-orange-600"></i>내 공고
+                        </h2>
+                        <a href="/jobs/create.html" class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition">
+                            <i class="fas fa-plus mr-2"></i>공고 등록
+                        </a>
+                    </div>
+
+                    <div id="jobsList" class="space-y-4">
+                        <div class="text-center py-12 text-gray-500">
+                            <i class="fas fa-clipboard text-4xl mb-4"></i>
+                            <p>등록된 공고가 없습니다</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Tab -->
+                <div id="profile-tab" class="tab-content">
+                    <h2 class="text-xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-user-edit mr-2 text-orange-600"></i>프로필 설정
+                    </h2>
+
+                    <form id="profileForm" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">이름</label>
+                                <input type="text" id="profileName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">이메일</label>
+                                <input type="email" id="profileEmail" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" disabled>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">전화번호</label>
+                                <input type="tel" id="profilePhone" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">회사명</label>
+                                <input type="text" id="profileCompany" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end gap-4">
+                            <button type="button" onclick="window.location.href='/'" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                                취소
+                            </button>
+                            <button type="submit" class="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition">
+                                <i class="fas fa-save mr-2"></i>저장
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';
+        let currentUser = null;
+        let currentPaymentPage = 1;
+        const paymentsPerPage = 10;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('albi_session_token');
+            if (!token) {
+                alert('로그인이 필요합니다.');
+                window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.href);
+                return;
+            }
+
+            await loadUserInfo();
+            await loadStats();
+            await loadRecentApplications();
+            await loadPayments();
+            setupTabs();
+            setupPaymentFilters();
+        });
+
+        // Tab switching
+        function setupTabs() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabName = button.getAttribute('data-tab');
+                    
+                    // Update button states
+                    tabButtons.forEach(btn => btn.classList.remove('tab-active'));
+                    button.classList.add('tab-active');
+                    
+                    // Update content visibility
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    document.getElementById(`${tabName}-tab`).classList.add('active');
+
+                    // Load tab data
+                    if (tabName === 'payments') {
+                        loadPayments();
+                    } else if (tabName === 'jobs') {
+                        loadJobs();
+                    }
+                });
+            });
+        }
+
+        // Load user info
+        async function loadUserInfo() {
+            try {
+                const token = localStorage.getItem('albi_session_token');
+                const response = await fetch(`${API_BASE}/api/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                if (data.success && data.user) {
+                    currentUser = data.user;
+                    document.getElementById('userName').textContent = data.user.name + '님';
+                    document.getElementById('userEmail').textContent = data.user.email;
+                    document.getElementById('joinDate').textContent = formatDate(data.user.created_at);
+                    
+                    // Profile form
+                    document.getElementById('profileName').value = data.user.name || '';
+                    document.getElementById('profileEmail').value = data.user.email || '';
+                    document.getElementById('profilePhone').value = data.user.phone || '';
+                    document.getElementById('profileCompany').value = data.user.company_name || '';
+                }
+            } catch (error) {
+                console.error('Failed to load user info:', error);
+            }
+        }
+
+        // Load statistics
+        async function loadStats() {
+            // TODO: Implement stats API
+            // For now, using placeholder data
+        }
+
+        // Load recent applications
+        async function loadRecentApplications() {
+            try {
+                const token = localStorage.getItem('albi_session_token');
+                const response = await fetch(`${API_BASE}/api/employer?limit=5`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                if (data.success && data.applications && data.applications.length > 0) {
+                    displayRecentApplications(data.applications);
+                }
+            } catch (error) {
+                console.error('Failed to load applications:', error);
+            }
+        }
+
+        // Display recent applications
+        function displayRecentApplications(applications) {
+            const container = document.getElementById('recentApplications');
+            container.innerHTML = applications.map(app => `
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-800">${app.job_title || '공고 제목'}</h3>
+                            <p class="text-sm text-gray-600 mt-1">
+                                <i class="fas fa-user mr-1"></i>${app.name || '지원자 이름'}
+                                <span class="mx-2">•</span>
+                                <i class="fas fa-phone mr-1"></i>${app.phone || '전화번호'}
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1">
+                                ${formatDateTime(app.created_at)}
+                            </p>
+                        </div>
+                        <div>
+                            ${getStatusBadge(app.status)}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Setup payment filters
+        function setupPaymentFilters() {
+            document.getElementById('paymentStatusFilter').addEventListener('change', () => {
+                currentPaymentPage = 1;
+                loadPayments();
+            });
+        }
+
+        // Load payments
+        async function loadPayments() {
+            try {
+                const token = localStorage.getItem('albi_session_token');
+                const status = document.getElementById('paymentStatusFilter').value;
+                
+                let url = `${API_BASE}/api/payments?page=${currentPaymentPage}&limit=${paymentsPerPage}`;
+                if (status) {
+                    url += `&status=${status}`;
+                }
+
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    displayPayments(data.payments || []);
+                    updatePaymentStats(data.payments || []);
+                    if (data.pagination) {
+                        displayPaymentsPagination(data.pagination);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load payments:', error);
+            }
+        }
+
+        // Display payments
+        function displayPayments(payments) {
+            const container = document.getElementById('paymentsList');
+            
+            if (payments.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-gray-500">
+                        <i class="fas fa-receipt text-4xl mb-4"></i>
+                        <p>결제 내역이 없습니다</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = payments.map(payment => `
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h3 class="font-semibold text-gray-800">${payment.job_title || '채용 공고'}</h3>
+                                ${getPaymentStatusBadge(payment.payment_status)}
+                            </div>
+                            <p class="text-sm text-gray-600">
+                                <i class="fas fa-building mr-1"></i>${payment.company_name || '-'}
+                                <span class="mx-2">•</span>
+                                <i class="fas fa-user mr-1"></i>${payment.applicant_name || '지원자'}
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1">
+                                <i class="fas fa-calendar mr-1"></i>${formatDateTime(payment.paid_at || payment.created_at)}
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xl font-bold text-gray-800">
+                                ${formatCurrency(payment.amount)}
+                            </div>
+                            <div class="text-sm text-gray-600">
+                                ${getPaymentMethodName(payment.payment_method)}
+                            </div>
+                            <div class="mt-2 flex gap-2">
+                                <button onclick="viewReceipt('${payment.id}')" class="px-3 py-1 bg-orange-600 text-white rounded text-sm hover:bg-orange-700 transition">
+                                    <i class="fas fa-receipt mr-1"></i>영수증
+                                </button>
+                                ${payment.payment_status === 'completed' ? `
+                                    ${payment.tax_invoice_status === 'issued' ? `
+                                        <a href="/employer/tax-invoice.html?id=${payment.tax_invoice_id}" target="_blank" class="inline-block px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 transition">
+                                            <i class="fas fa-file-invoice mr-1"></i>세금계산서 보기
+                                        </a>
+                                    ` : payment.tax_invoice_status === 'pending' ? `
+                                        <button class="px-3 py-1 bg-yellow-600 text-white rounded text-sm cursor-not-allowed" disabled>
+                                            <i class="fas fa-clock mr-1"></i>발급 대기 중
+                                        </button>
+                                    ` : payment.tax_invoice_status === 'rejected' ? `
+                                        <button onclick="requestTaxInvoice('${payment.id}')" class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition">
+                                            <i class="fas fa-exclamation-circle mr-1"></i>재신청
+                                        </button>
+                                    ` : `
+                                        <button onclick="requestTaxInvoice('${payment.id}')" class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition">
+                                            <i class="fas fa-file-invoice mr-1"></i>세금계산서
+                                        </button>
+                                    `}
+                                    <button onclick="requestRefund('${payment.id}')" class="px-3 py-1 bg-gray-600 text-white rounded text-sm hover:bg-gray-700 transition">
+                                        <i class="fas fa-undo mr-1"></i>환불
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update payment stats
+        function updatePaymentStats(payments) {
+            const completed = payments.filter(p => p.payment_status === 'completed');
+            const refunded = payments.filter(p => p.payment_status === 'refunded' || p.payment_status === 'partial_refund');
+            
+            const now = new Date();
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            const monthly = payments.filter(p => {
+                const paidDate = new Date(p.paid_at || p.created_at);
+                return paidDate >= monthStart && p.payment_status === 'completed';
+            });
+
+            document.getElementById('completedPaymentsCount').textContent = `${completed.length}건`;
+            document.getElementById('completedPaymentsAmount').textContent = `총 ${formatCurrency(completed.reduce((sum, p) => sum + (p.amount || 0), 0))}`;
+            
+            document.getElementById('monthlyPaymentsCount').textContent = `${monthly.length}건`;
+            document.getElementById('monthlyPaymentsAmount').textContent = `총 ${formatCurrency(monthly.reduce((sum, p) => sum + (p.amount || 0), 0))}`;
+            
+            document.getElementById('refundedPaymentsCount').textContent = `${refunded.length}건`;
+            document.getElementById('refundedPaymentsAmount').textContent = `총 ${formatCurrency(refunded.reduce((sum, p) => sum + (p.refund_amount || 0), 0))}`;
+
+            // Update header stats
+            document.getElementById('totalPayments').textContent = formatCurrency(completed.reduce((sum, p) => sum + (p.amount || 0), 0));
+        }
+
+        // Display payments pagination
+        function displayPaymentsPagination(pagination) {
+            const container = document.getElementById('paymentsPagination');
+            const { page, totalPages } = pagination;
+            
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            for (let i = 1; i <= totalPages; i++) {
+                html += `
+                    <button onclick="goToPaymentPage(${i})" 
+                            class="px-4 py-2 rounded ${i === page ? 'bg-orange-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}">
+                        ${i}
+                    </button>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        // Go to payment page
+        function goToPaymentPage(page) {
+            currentPaymentPage = page;
+            loadPayments();
+        }
+
+        // View receipt
+        function viewReceipt(paymentId) {
+            window.location.href = `/employer/payment-receipt?paymentId=${paymentId}`;
+        }
+
+        // Request tax invoice
+        async function requestTaxInvoice(paymentId) {
+            const businessNumber = prompt('사업자등록번호를 입력해주세요 (예: 123-45-67890):');
+            if (!businessNumber || businessNumber.trim() === '') {
+                alert('사업자등록번호를 입력해야 합니다.');
+                return;
+            }
+
+            const businessName = prompt('상호명을 입력해주세요:');
+            if (!businessName || businessName.trim() === '') {
+                alert('상호명을 입력해야 합니다.');
+                return;
+            }
+
+            const ceoName = prompt('대표자명을 입력해주세요:');
+            if (!ceoName || ceoName.trim() === '') {
+                alert('대표자명을 입력해야 합니다.');
+                return;
+            }
+
+            const email = prompt('세금계산서를 받을 이메일 주소를 입력해주세요:');
+            if (!email || email.trim() === '' || !email.includes('@')) {
+                alert('유효한 이메일 주소를 입력해야 합니다.');
+                return;
+            }
+
+            const businessAddress = prompt('사업장 주소를 입력해주세요 (선택):') || '';
+
+            if (!confirm('입력하신 정보로 세금계산서를 발행 요청하시겠습니까?')) {
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('albi_session_token');
+                const response = await fetch(`${API_BASE}/api/payments/tax-invoice`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        paymentId,
+                        businessNumber: businessNumber.trim(),
+                        businessName: businessName.trim(),
+                        ceoName: ceoName.trim(),
+                        businessAddress: businessAddress.trim(),
+                        email: email.trim()
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert(data.message || '세금계산서 발행 요청이 완료되었습니다.');
+                } else {
+                    alert('세금계산서 발행 요청 실패: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Tax invoice request failed:', error);
+                alert('세금계산서 발행 요청 중 오류가 발생했습니다.');
+            }
+        }
+
+        // Request refund
+        async function requestRefund(paymentId) {
+            const reason = prompt('환불 사유를 입력해주세요:');
+            if (!reason || reason.trim() === '') {
+                alert('환불 사유를 입력해야 합니다.');
+                return;
+            }
+
+            if (!confirm('정말 환불을 요청하시겠습니까?')) {
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('albi_session_token');
+                const response = await fetch(`${API_BASE}/api/payments/refund`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        paymentId,
+                        reason
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('환불이 성공적으로 처리되었습니다.');
+                    loadPayments();
+                } else {
+                    alert('환불 처리 실패: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Refund request failed:', error);
+                alert('환불 요청 중 오류가 발생했습니다.');
+            }
+        }
+
+        // Load jobs
+        async function loadJobs() {
+            // TODO: Implement jobs API
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('albi_session_token');
+            window.location.href = '/login.html';
+        }
+
+        // Utility functions
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ko-KR');
+        }
+
+        function formatDateTime(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleString('ko-KR');
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('ko-KR').format(amount) + '원';
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'pending': '<span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">대기중</span>',
+                'reviewing': '<span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">검토중</span>',
+                'experience_scheduled': '<span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">체험예정</span>',
+                'experience_completed': '<span class="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm">체험완료</span>',
+                'hired': '<span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">채용확정</span>',
+                'rejected': '<span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">불합격</span>'
+            };
+            return badges[status] || '<span class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">알 수 없음</span>';
+        }
+
+        function getPaymentStatusBadge(status) {
+            const badges = {
+                'completed': '<span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm"><i class="fas fa-check-circle mr-1"></i>완료</span>',
+                'pending': '<span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm"><i class="fas fa-clock mr-1"></i>대기중</span>',
+                'processing': '<span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"><i class="fas fa-spinner mr-1"></i>처리중</span>',
+                'failed': '<span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm"><i class="fas fa-times-circle mr-1"></i>실패</span>',
+                'refunded': '<span class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm"><i class="fas fa-undo mr-1"></i>환불완료</span>',
+                'partial_refund': '<span class="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm"><i class="fas fa-undo mr-1"></i>부분환불</span>'
+            };
+            return badges[status] || '<span class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">알 수 없음</span>';
+        }
+
+        function getPaymentMethodName(method) {
+            const methods = {
+                'card': '신용/체크카드',
+                'virtual_account': '가상계좌',
+                'transfer': '계좌이체',
+                'tosspay': '토스페이',
+                'kakaopay': '카카오페이',
+                'naverpay': '네이버페이'
+            };
+            return methods[method] || method || '-';
+        }
+    </script>
+</body>
+</html>

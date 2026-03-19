@@ -1,0 +1,31 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "albi-app",
+  "compatibility_date": "2024-01-01",
+  "pages_build_output_dir": "./dist",
+  "compatibility_flags": ["nodejs_compat"],
+  
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "albi-production",
+      "database_id": "cd20f633-d756-4249-87b8-2577775afef5"
+    }
+  ],
+  
+  "kv_namespaces": [
+    {
+      "binding": "KV",
+      "id": "a04e3f82aa4c4f0c92551599b30ac018"
+    }
+  ]
+  
+  // R2 스토리지 (면접 영상 저장용) - 향후 활성화
+  // 버킷 생성 명령: npx wrangler r2 bucket create albi-interview-recordings
+  // "r2_buckets": [
+  //   {
+  //     "binding": "R2",
+  //     "bucket_name": "albi-interview-recordings"
+  //   }
+  // ]
+}

@@ -1,0 +1,22 @@
+name = "albi-app"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "public"
+
+# D1 데이터베이스 설정
+# 로컬 개발: database_id는 로컬 모드에서는 자동 생성됩니다
+# 프로덕션: 'wrangler d1 create albi-production' 실행 후 실제 ID로 교체 필요
+[[d1_databases]]
+binding = "DB"
+database_name = "albi-production"
+database_id = "cd20f633-d756-4249-87b8-2577775afef5"
+
+# 환경 변수
+[vars]
+ENVIRONMENT = "production"
+
+# 주의: Workers AI 바인딩은 로컬 개발에서만 사용
+# 프로덕션 배포 시에는 Cloudflare Dashboard에서 설정 필요
+# 또는 아래 [ai] 섹션을 주석 처리하고 배포 후 Dashboard에서 수동 설정
+
+# [ai]
+# binding = "AI"

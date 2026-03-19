@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 내 성장 대시보드 - Albi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-7xl mx-auto p-6">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-chart-line text-blue-600 mr-2"></i>내 성장 대시보드
+            </h1>
+            <p class="text-gray-600">AI 멘토링 진행 현황 및 성장 추이</p>
+        </div>
+
+        <!-- 로딩 -->
+        <div id="loading" class="text-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p class="text-gray-600">데이터를 불러오는 중...</p>
+        </div>
+
+        <!-- 대시보드 내용 -->
+        <div id="dashboard" class="hidden">
+            <!-- 통계 카드 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="text-sm text-gray-600">총 대화 수</div>
+                        <i class="fas fa-comments text-blue-600"></i>
+                    </div>
+                    <div class="text-3xl font-bold text-gray-800" id="totalConversations">0</div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="text-sm text-gray-600">총 세션 수</div>
+                        <i class="fas fa-clock text-green-600"></i>
+                    </div>
+                    <div class="text-3xl font-bold text-gray-800" id="totalSessions">0</div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="text-sm text-gray-600">활성 세션</div>
+                        <i class="fas fa-fire text-orange-600"></i>
+                    </div>
+                    <div class="text-3xl font-bold text-gray-800" id="activeSessions">0</div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="text-sm text-gray-600">평균 응답 길이</div>
+                        <i class="fas fa-text-width text-purple-600"></i>
+                    </div>
+                    <div class="text-3xl font-bold text-gray-800"><span id="avgResponseLength">0</span>자</div>
+                </div>
+            </div>
+
+            <!-- 구독 정보 -->
+            <div id="subscriptionCard" class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg shadow-lg p-6 mb-8 text-white hidden">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-sm opacity-90 mb-1">구독 상태</div>
+                        <div class="text-2xl font-bold">AI 멘토 프리미엄 ⭐</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm opacity-90">만료일</div>
+                        <div class="text-lg font-semibold" id="expiresAt">-</div>
+                        <div class="text-xs opacity-75" id="daysLeft"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 활동 차트 -->
+            <div class="bg-white rounded-lg shadow p-6 mb-8">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-chart-bar mr-2"></i>최근 7일 활동
+                </h2>
+                <canvas id="activityChart"></canvas>
+            </div>
+
+            <!-- 최근 대화 -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-history mr-2"></i>최근 대화 내역
+                </h2>
+                <div id="recentConversations" class="space-y-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const userId = 'demo-user-' + Date.now();
+        let activityChart = null;
+
+        async function loadDashboard() {
+            try {
+                const response = await fetch(`/api/growth-dashboard?user_id=${userId}`);
+                const result = await response.json();
+
+                if (!result.success) {
+                    alert('데이터 로드 실패: ' + result.message);
+                    return;
+                }
+
+                const data = result.data;
+
+                // 통계 표시
+                document.getElementById('totalConversations').textContent = data.stats.total_conversations;
+                document.getElementById('totalSessions').textContent = data.stats.total_sessions;
+                document.getElementById('activeSessions').textContent = data.stats.active_sessions;
+                document.getElementById('avgResponseLength').textContent = data.stats.avg_response_length;
+
+                // 구독 정보 표시
+                if (data.has_subscription) {
+                    const expiresDate = new Date(data.subscription.expires_at);
+                    const daysLeft = Math.ceil((expiresDate - new Date()) / (1000 * 60 * 60 * 24));
+                    
+                    document.getElementById('expiresAt').textContent = expiresDate.toLocaleDateString('ko-KR');
+                    document.getElementById('daysLeft').textContent = `(${daysLeft}일 남음)`;
+                    document.getElementById('subscriptionCard').classList.remove('hidden');
+                }
+
+                // 활동 차트
+                renderActivityChart(data.activity.last_7_days);
+
+                // 최근 대화
+                renderRecentConversations(data.recent_conversations);
+
+                // 로딩 숨김, 대시보드 표시
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+
+            } catch (error) {
+                console.error('❌ Load error:', error);
+                alert('데이터 로드 중 오류가 발생했습니다.');
+            }
+        }
+
+        function renderActivityChart(activityData) {
+            const ctx = document.getElementById('activityChart').getContext('2d');
+            
+            // 날짜와 카운트 추출
+            const labels = activityData.map(d => new Date(d.date).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }));
+            const counts = activityData.map(d => d.count);
+
+            activityChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '대화 수',
+                        data: counts,
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderRecentConversations(conversations) {
+            const container = document.getElementById('recentConversations');
+            
+            if (conversations.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-8">아직 대화 내역이 없습니다. AI 멘토와 대화를 시작해보세요!</p>';
+                return;
+            }
+
+            container.innerHTML = conversations.map(conv => `
+                <div class="border-l-4 border-blue-600 bg-gray-50 p-4 rounded">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="text-sm text-gray-600">
+                            ${conv.job_type || 'General'} · Turn ${conv.turn_number}
+                        </div>
+                        <div class="text-xs text-gray-500">
+                            ${new Date(conv.created_at).toLocaleString('ko-KR')}
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <div class="text-sm font-semibold text-gray-700 mb-1">질문:</div>
+                        <div class="text-gray-800">${conv.user_message}</div>
+                    </div>
+                    <div>
+                        <div class="text-sm font-semibold text-gray-700 mb-1">답변:</div>
+                        <div class="text-gray-600 line-clamp-3">${conv.mentor_response}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 페이지 로드 시 대시보드 로드
+        loadDashboard();
+    </script>
+</body>
+</html>

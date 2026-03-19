@@ -1,0 +1,66 @@
+-- Phase 6: 면접 영상 녹화 & 리플레이 기능
+
+-- 면접 녹화 메타데이터 테이블
+CREATE TABLE IF NOT EXISTS interview_recordings (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  recording_id TEXT UNIQUE NOT NULL,          -- 고유 ID (rec_timestamp_random)
+  session_id TEXT NOT NULL,                   -- 면접 세션 ID
+  user_id TEXT NOT NULL,                      -- 사용자 ID
+  r2_key TEXT,                                -- R2 스토리지 키 (NULL이면 업로드 실패)
+  filename TEXT NOT NULL,                     -- 원본 파일명
+  content_type TEXT NOT NULL,                 -- MIME 타입 (video/webm 등)
+  size INTEGER NOT NULL,                      -- 파일 크기 (바이트)
+  duration INTEGER DEFAULT 0,                 -- 영상 길이 (초)
+  thumbnail_url TEXT,                         -- 썸네일 URL (옵션)
+  status TEXT DEFAULT 'active',               -- 상태 (active, deleted, processing)
+  views INTEGER DEFAULT 0,                    -- 조회수
+  last_viewed_at DATETIME,                    -- 마지막 조회 시간
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (session_id) REFERENCES interview_sessions(session_id)
+);
+
+-- 영상 타임스탬프 이벤트 테이블 (리플레이용)
+CREATE TABLE IF NOT EXISTS recording_timestamps (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  recording_id TEXT NOT NULL,                 -- 녹화 ID
+  timestamp_ms INTEGER NOT NULL,              -- 타임스탬프 (밀리초)
+  event_type TEXT NOT NULL,                   -- 이벤트 타입 (question, answer, analysis, feedback)
+  event_data TEXT,                            -- JSON: 이벤트 상세 데이터
+  score INTEGER,                              -- 해당 시점 점수 (옵션)
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (recording_id) REFERENCES interview_recordings(recording_id)
+);
+
+-- 영상 분석 스냅샷 테이블 (10초마다 저장)
+CREATE TABLE IF NOT EXISTS recording_analysis_snapshots (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  recording_id TEXT NOT NULL,                 -- 녹화 ID
+  timestamp_ms INTEGER NOT NULL,              -- 타임스탬프 (밀리초)
+  expression_score INTEGER,                   -- 표정 점수
+  gaze_score INTEGER,                         -- 시선 점수
+  posture_score INTEGER,                      -- 자세 점수
+  gesture_score INTEGER,                      -- 제스처 점수 (Phase 5)
+  voice_tone_score INTEGER,                   -- 음성 톤 점수 (Phase 5)
+  speech_score INTEGER,                       -- 말하기 점수 (Phase 5)
+  overall_score INTEGER,                      -- 종합 점수
+  snapshot_data TEXT,                         -- JSON: 상세 분석 데이터
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (recording_id) REFERENCES interview_recordings(recording_id)
+);
+
+-- 인덱스 생성 (성능 최적화)
+CREATE INDEX IF NOT EXISTS idx_recordings_session ON interview_recordings(session_id);
+CREATE INDEX IF NOT EXISTS idx_recordings_user ON interview_recordings(user_id);
+CREATE INDEX IF NOT EXISTS idx_recordings_created ON interview_recordings(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_timestamps_recording ON recording_timestamps(recording_id, timestamp_ms);
+CREATE INDEX IF NOT EXISTS idx_snapshots_recording ON recording_analysis_snapshots(recording_id, timestamp_ms);
+
+-- 트리거: updated_at 자동 업데이트
+CREATE TRIGGER IF NOT EXISTS update_recording_timestamp 
+AFTER UPDATE ON interview_recordings
+BEGIN
+  UPDATE interview_recordings 
+  SET updated_at = datetime('now')
+  WHERE recording_id = NEW.recording_id;
+END;

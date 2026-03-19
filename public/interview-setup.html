@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>면접 설정 - Albi AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Phase 8.1: System Optimization -->
+    <link rel="stylesheet" href="/static/mobile-optimized.css">
+    <script src="/static/loading-manager.js"></script>
+    
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .option-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .option-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .option-card.selected {
+            border-color: #a78bfa;
+            background: rgba(167, 139, 250, 0.2);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen text-white">
+    <div class="container mx-auto px-4 py-8">
+        <!-- 헤더 -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold mb-2">
+                <i class="fas fa-cog mr-3"></i>면접 설정
+            </h1>
+            <p class="text-gray-300">나에게 맞는 면접 환경을 설정하세요</p>
+        </div>
+
+        <!-- 진행 단계 -->
+        <div class="flex justify-center mb-12">
+            <div class="flex items-center gap-4">
+                <div class="flex items-center">
+                    <div id="step1Indicator" class="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center font-bold">1</div>
+                    <span class="ml-2">산업/직무</span>
+                </div>
+                <div class="w-16 h-0.5 bg-gray-600"></div>
+                <div class="flex items-center">
+                    <div id="step2Indicator" class="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center font-bold">2</div>
+                    <span class="ml-2">난이도</span>
+                </div>
+                <div class="w-16 h-0.5 bg-gray-600"></div>
+                <div class="flex items-center">
+                    <div id="step3Indicator" class="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center font-bold">3</div>
+                    <span class="ml-2">옵션</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 1: 산업 선택 -->
+        <div id="step1" class="mb-8">
+            <h2 class="text-2xl font-bold mb-6 text-center">산업 분야를 선택하세요</h2>
+            <div id="industryGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <!-- 산업 카드가 여기에 렌더링됩니다 -->
+            </div>
+        </div>
+
+        <!-- Step 2: 직무 및 난이도 선택 -->
+        <div id="step2" class="mb-8 hidden">
+            <h2 class="text-2xl font-bold mb-6 text-center">직무와 경력을 선택하세요</h2>
+            
+            <div class="max-w-2xl mx-auto mb-8">
+                <label class="block text-lg font-bold mb-3">직무</label>
+                <select id="positionSelect" class="w-full bg-gray-800 text-white border border-gray-600 rounded-xl p-4 text-lg">
+                    <option value="">직무를 선택하세요</option>
+                </select>
+            </div>
+            
+            <div class="max-w-2xl mx-auto">
+                <label class="block text-lg font-bold mb-3">난이도</label>
+                <div id="difficultyGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- 난이도 카드가 여기에 렌더링됩니다 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: 추가 옵션 -->
+        <div id="step3" class="mb-8 hidden">
+            <h2 class="text-2xl font-bold mb-6 text-center">면접 옵션을 선택하세요</h2>
+            
+            <div class="max-w-2xl mx-auto space-y-4">
+                <!-- AI 코칭 -->
+                <div class="option-card rounded-xl p-6 flex items-center justify-between" onclick="toggleOption('aiCoach')">
+                    <div class="flex items-center gap-4">
+                        <i class="fas fa-robot text-3xl text-purple-400"></i>
+                        <div>
+                            <h3 class="font-bold text-lg">AI 실시간 코칭</h3>
+                            <p class="text-sm text-gray-400">면접 중 실시간으로 피드백을 받습니다</p>
+                        </div>
+                    </div>
+                    <div id="aiCoachCheck" class="hidden">
+                        <i class="fas fa-check-circle text-3xl text-green-400"></i>
+                    </div>
+                </div>
+                
+                <!-- 녹화 -->
+                <div class="option-card rounded-xl p-6 flex items-center justify-between selected">
+                    <div class="flex items-center gap-4">
+                        <i class="fas fa-video text-3xl text-red-400"></i>
+                        <div>
+                            <h3 class="font-bold text-lg">면접 녹화</h3>
+                            <p class="text-sm text-gray-400">면접을 녹화하여 나중에 다시 볼 수 있습니다</p>
+                        </div>
+                    </div>
+                    <div>
+                        <i class="fas fa-check-circle text-3xl text-green-400"></i>
+                    </div>
+                </div>
+                
+                <!-- 음성 인식 -->
+                <div class="option-card rounded-xl p-6 flex items-center justify-between selected">
+                    <div class="flex items-center gap-4">
+                        <i class="fas fa-microphone text-3xl text-blue-400"></i>
+                        <div>
+                            <h3 class="font-bold text-lg">음성 인식</h3>
+                            <p class="text-sm text-gray-400">답변을 음성으로 자동 입력합니다</p>
+                        </div>
+                    </div>
+                    <div>
+                        <i class="fas fa-check-circle text-3xl text-green-400"></i>
+                    </div>
+                </div>
+                
+                <!-- TTS 음성 -->
+                <div class="option-card rounded-xl p-6 flex items-center justify-between selected">
+                    <div class="flex items-center gap-4">
+                        <i class="fas fa-volume-up text-3xl text-yellow-400"></i>
+                        <div>
+                            <h3 class="font-bold text-lg">TTS 음성</h3>
+                            <p class="text-sm text-gray-400">면접관이 질문을 음성으로 읽어줍니다</p>
+                        </div>
+                    </div>
+                    <div>
+                        <i class="fas fa-check-circle text-3xl text-green-400"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 버튼 -->
+        <div class="flex justify-center gap-4 mt-8">
+            <button id="backBtn" class="hidden bg-gray-600 hover:bg-gray-700 px-8 py-4 rounded-xl font-bold text-lg transition-all">
+                <i class="fas fa-arrow-left mr-2"></i>이전
+            </button>
+            <button id="nextBtn" class="bg-purple-600 hover:bg-purple-700 px-8 py-4 rounded-xl font-bold text-lg transition-all">
+                다음<i class="fas fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+
+        <!-- 설정 요약 -->
+        <div id="summaryCard" class="hidden max-w-2xl mx-auto mt-8 bg-gray-900/50 backdrop-blur-lg rounded-2xl p-6">
+            <h3 class="text-xl font-bold mb-4">선택한 설정</h3>
+            <div class="space-y-2 text-gray-300">
+                <p><strong>산업:</strong> <span id="summaryIndustry">-</span></p>
+                <p><strong>직무:</strong> <span id="summaryPosition">-</span></p>
+                <p><strong>난이도:</strong> <span id="summaryDifficulty">-</span></p>
+                <p><strong>AI 코칭:</strong> <span id="summaryCoach">-</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { INDUSTRIES, DIFFICULTY_LEVELS } from '/static/interview-config.js';
+        
+        let currentStep = 1;
+        let selectedIndustry = null;
+        let selectedPosition = null;
+        let selectedDifficulty = null;
+        let options = {
+            aiCoach: false,
+            recording: true,
+            speech: true,
+            tts: true
+        };
+        
+        // 초기화
+        renderIndustries();
+        renderDifficulties();
+        
+        // 이벤트 리스너
+        document.getElementById('backBtn').addEventListener('click', goBack);
+        document.getElementById('nextBtn').addEventListener('click', goNext);
+        
+        // 산업 렌더링
+        function renderIndustries() {
+            const grid = document.getElementById('industryGrid');
+            grid.innerHTML = INDUSTRIES.map(industry => `
+                <div class="option-card rounded-xl p-6 text-center" onclick="selectIndustry('${industry.id}')">
+                    <i class="fas ${industry.icon} text-4xl mb-3 text-purple-400"></i>
+                    <h3 class="font-bold">${industry.name}</h3>
+                </div>
+            `).join('');
+        }
+        
+        // 산업 선택
+        window.selectIndustry = function(id) {
+            selectedIndustry = id;
+            
+            // 선택 표시
+            document.querySelectorAll('#industryGrid .option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            
+            // 직무 옵션 업데이트
+            const industry = INDUSTRIES.find(i => i.id === id);
+            const select = document.getElementById('positionSelect');
+            select.innerHTML = '<option value="">직무를 선택하세요</option>' +
+                industry.positions.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        };
+        
+        // 난이도 렌더링
+        function renderDifficulties() {
+            const grid = document.getElementById('difficultyGrid');
+            grid.innerHTML = Object.values(DIFFICULTY_LEVELS).map(diff => `
+                <div class="option-card rounded-xl p-6 text-center" onclick="selectDifficulty('${diff.id}')">
+                    <h3 class="font-bold text-lg mb-2">${diff.name}</h3>
+                    <p class="text-sm text-gray-400 mb-3">${diff.description}</p>
+                    <p class="text-xs text-gray-500">${diff.questionStyle}</p>
+                </div>
+            `).join('');
+        }
+        
+        // 난이도 선택
+        window.selectDifficulty = function(id) {
+            selectedDifficulty = id;
+            
+            // 선택 표시
+            document.querySelectorAll('#difficultyGrid .option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+        };
+        
+        // 옵션 토글
+        window.toggleOption = function(option) {
+            options[option] = !options[option];
+            const check = document.getElementById(`${option}Check`);
+            const card = event.currentTarget;
+            
+            if (options[option]) {
+                check.classList.remove('hidden');
+                card.classList.add('selected');
+            } else {
+                check.classList.add('hidden');
+                card.classList.remove('selected');
+            }
+        };
+        
+        // 다음 단계
+        function goNext() {
+            if (currentStep === 1) {
+                if (!selectedIndustry) {
+                    alert('산업을 선택해주세요.');
+                    return;
+                }
+                showStep(2);
+            } else if (currentStep === 2) {
+                const position = document.getElementById('positionSelect').value;
+                if (!position || !selectedDifficulty) {
+                    alert('직무와 난이도를 선택해주세요.');
+                    return;
+                }
+                selectedPosition = position;
+                showStep(3);
+            } else if (currentStep === 3) {
+                startInterview();
+            }
+        }
+        
+        // 이전 단계
+        function goBack() {
+            if (currentStep > 1) {
+                showStep(currentStep - 1);
+            }
+        }
+        
+        // 단계 표시
+        function showStep(step) {
+            // 이전 단계 숨기기
+            document.getElementById(`step${currentStep}`).classList.add('hidden');
+            document.getElementById(`step${currentStep}Indicator`).classList.remove('bg-purple-600');
+            document.getElementById(`step${currentStep}Indicator`).classList.add('bg-gray-600');
+            
+            // 새 단계 표시
+            currentStep = step;
+            document.getElementById(`step${step}`).classList.remove('hidden');
+            document.getElementById(`step${step}Indicator`).classList.remove('bg-gray-600');
+            document.getElementById(`step${step}Indicator`).classList.add('bg-purple-600');
+            
+            // 버튼 업데이트
+            if (step === 1) {
+                document.getElementById('backBtn').classList.add('hidden');
+            } else {
+                document.getElementById('backBtn').classList.remove('hidden');
+            }
+            
+            if (step === 3) {
+                document.getElementById('nextBtn').innerHTML = '면접 시작<i class="fas fa-play ml-2"></i>';
+                updateSummary();
+            } else {
+                document.getElementById('nextBtn').innerHTML = '다음<i class="fas fa-arrow-right ml-2"></i>';
+            }
+        }
+        
+        // 요약 업데이트
+        function updateSummary() {
+            const industry = INDUSTRIES.find(i => i.id === selectedIndustry);
+            const position = industry.positions.find(p => p.id === selectedPosition);
+            const difficulty = DIFFICULTY_LEVELS[selectedDifficulty];
+            
+            document.getElementById('summaryIndustry').textContent = industry.name;
+            document.getElementById('summaryPosition').textContent = position.name;
+            document.getElementById('summaryDifficulty').textContent = difficulty.name + ' (' + difficulty.description + ')';
+            document.getElementById('summaryCoach').textContent = options.aiCoach ? '활성화' : '비활성화';
+            
+            document.getElementById('summaryCard').classList.remove('hidden');
+        }
+        
+        // 면접 시작
+        function startInterview() {
+            // 설정 저장
+            const config = {
+                industry: selectedIndustry,
+                position: selectedPosition,
+                difficulty: selectedDifficulty,
+                options: options
+            };
+            
+            localStorage.setItem('interviewConfig', JSON.stringify(config));
+            
+            // 면접 페이지로 이동
+            window.location.href = '/video-interview.html?config=custom';
+        }
+    </script>
+</body>
+</html>

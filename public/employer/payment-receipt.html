@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결제 영수증 - 알비</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @media print {
+            .no-print { display: none; }
+            body { background: white; }
+        }
+        .receipt-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .receipt-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        .receipt-section {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+        }
+        .receipt-label {
+            color: #6b7280;
+            font-weight: 500;
+        }
+        .receipt-value {
+            color: #1f2937;
+            font-weight: 600;
+        }
+        .total-section {
+            background: #f9fafb;
+            padding: 1.5rem;
+            margin: 1rem;
+            border-radius: 0.5rem;
+        }
+        .total-amount {
+            font-size: 2rem;
+            color: #667eea;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header (No Print) -->
+    <header class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 no-print">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">
+                <i class="fas fa-receipt mr-2"></i>결제 영수증
+            </h1>
+            <a href="/employer/applications.html" class="text-white hover:text-purple-200">
+                <i class="fas fa-arrow-left mr-1"></i>돌아가기
+            </a>
+        </div>
+    </header>
+
+    <div class="container mx-auto p-4 py-8">
+        <!-- Loading State -->
+        <div id="loading" class="text-center py-12">
+            <i class="fas fa-spinner fa-spin text-4xl text-purple-600 mb-4"></i>
+            <p class="text-gray-600">영수증을 불러오는 중...</p>
+        </div>
+
+        <!-- Receipt -->
+        <div id="receipt" class="receipt-container hidden">
+            <!-- Receipt Header -->
+            <div class="receipt-header">
+                <div class="text-4xl mb-2">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2">결제 완료</h1>
+                <p class="text-purple-100">정식 채용이 확정되었습니다</p>
+            </div>
+
+            <!-- Company Info -->
+            <div class="receipt-section">
+                <h2 class="text-lg font-bold mb-4 text-gray-800">
+                    <i class="fas fa-building mr-2 text-purple-600"></i>판매자 정보
+                </h2>
+                <div class="receipt-row">
+                    <span class="receipt-label">상호명</span>
+                    <span class="receipt-value">알비 주식회사</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">사업자등록번호</span>
+                    <span class="receipt-value">123-45-67890</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">대표자</span>
+                    <span class="receipt-value">홍길동</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">주소</span>
+                    <span class="receipt-value">서울특별시 강남구 테헤란로 123</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">고객센터</span>
+                    <span class="receipt-value">1588-0000</span>
+                </div>
+            </div>
+
+            <!-- Payment Info -->
+            <div class="receipt-section">
+                <h2 class="text-lg font-bold mb-4 text-gray-800">
+                    <i class="fas fa-credit-card mr-2 text-purple-600"></i>결제 정보
+                </h2>
+                <div class="receipt-row">
+                    <span class="receipt-label">결제 번호</span>
+                    <span class="receipt-value" id="paymentId">-</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">주문 번호</span>
+                    <span class="receipt-value" id="orderId">-</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">결제 일시</span>
+                    <span class="receipt-value" id="paidAt">-</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">결제 수단</span>
+                    <span class="receipt-value" id="paymentMethod">-</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">결제 상태</span>
+                    <span class="receipt-value">
+                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                            <i class="fas fa-check-circle mr-1"></i>결제 완료
+                        </span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Job & Applicant Info -->
+            <div class="receipt-section">
+                <h2 class="text-lg font-bold mb-4 text-gray-800">
+                    <i class="fas fa-briefcase mr-2 text-purple-600"></i>채용 정보
+                </h2>
+                <div class="receipt-row">
+                    <span class="receipt-label">채용 공고</span>
+                    <span class="receipt-value" id="jobTitle">-</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">회사명</span>
+                    <span class="receipt-value" id="companyName">-</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">근무지</span>
+                    <span class="receipt-value" id="location">-</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">채용된 구직자</span>
+                    <span class="receipt-value" id="applicantName">-</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">연락처</span>
+                    <span class="receipt-value" id="applicantPhone">-</span>
+                </div>
+            </div>
+
+            <!-- Amount Details -->
+            <div class="receipt-section">
+                <h2 class="text-lg font-bold mb-4 text-gray-800">
+                    <i class="fas fa-calculator mr-2 text-purple-600"></i>결제 금액
+                </h2>
+                <div class="receipt-row">
+                    <span class="receipt-label">채용 성공 수수료</span>
+                    <span class="receipt-value" id="baseAmount">50,000원</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">부가세 (10%)</span>
+                    <span class="receipt-value" id="vat">5,000원</span>
+                </div>
+            </div>
+
+            <!-- Total Amount -->
+            <div class="total-section">
+                <div class="flex justify-between items-center">
+                    <span class="text-xl font-bold text-gray-800">총 결제 금액</span>
+                    <span class="total-amount" id="totalAmount">55,000원</span>
+                </div>
+            </div>
+
+            <!-- Notice -->
+            <div class="receipt-section bg-blue-50">
+                <h3 class="font-bold text-gray-800 mb-2">
+                    <i class="fas fa-info-circle mr-2 text-blue-600"></i>안내사항
+                </h3>
+                <ul class="text-sm text-gray-600 space-y-1 list-disc list-inside">
+                    <li>본 영수증은 전자영수증으로, 세금계산서 발행이 필요한 경우 고객센터로 문의하세요.</li>
+                    <li>환불은 결제일로부터 7일 이내, 근무 시작 전에만 가능합니다.</li>
+                    <li>구직자의 귀책 사유로 근무를 시작하지 못한 경우 전액 환불됩니다.</li>
+                    <li>영수증 관련 문의: support@albi.co.kr</li>
+                </ul>
+            </div>
+
+            <!-- Action Buttons (No Print) -->
+            <div class="p-6 flex gap-4 no-print">
+                <button onclick="window.print()" class="flex-1 bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition">
+                    <i class="fas fa-print mr-2"></i>인쇄하기
+                </button>
+                <button onclick="downloadReceipt()" class="flex-1 bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition">
+                    <i class="fas fa-download mr-2"></i>PDF 저장
+                </button>
+                <button onclick="goToApplications()" class="flex-1 bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition">
+                    <i class="fas fa-list mr-2"></i>지원자 목록
+                </button>
+            </div>
+        </div>
+
+        <!-- Error State -->
+        <div id="error" class="hidden max-w-md mx-auto bg-white rounded-lg shadow-lg p-8 text-center">
+            <div class="text-red-500 text-6xl mb-4">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">영수증을 불러올 수 없습니다</h2>
+            <p class="text-gray-600 mb-6" id="errorMessage">잘못된 접근입니다.</p>
+            <button onclick="goToApplications()" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition">
+                <i class="fas fa-arrow-left mr-2"></i>지원자 목록으로
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';
+        let receiptData = null;
+
+        // URL에서 파라미터 추출
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentId = urlParams.get('paymentId');
+
+        // 페이지 로드 시 영수증 데이터 가져오기
+        async function loadReceipt() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showError('로그인이 필요합니다.');
+                setTimeout(() => {
+                    window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.href);
+                }, 2000);
+                return;
+            }
+
+            if (!paymentId) {
+                showError('결제 정보가 없습니다.');
+                return;
+            }
+
+            try {
+                // 결제 상세 정보 가져오기
+                const response = await fetch(`${API_BASE}/api/payments?paymentId=${paymentId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || '영수증을 불러오는데 실패했습니다.');
+                }
+
+                if (!data.payment) {
+                    throw new Error('결제 정보를 찾을 수 없습니다.');
+                }
+
+                receiptData = data.payment;
+                displayReceipt(receiptData);
+
+            } catch (error) {
+                console.error('Load receipt error:', error);
+                showError(error.message);
+            }
+        }
+
+        // 영수증 표시
+        function displayReceipt(payment) {
+            // 결제 정보
+            document.getElementById('paymentId').textContent = payment.id || '-';
+            document.getElementById('orderId').textContent = payment.transaction_id || '-';
+            document.getElementById('paidAt').textContent = formatDateTime(payment.paid_at) || '-';
+            document.getElementById('paymentMethod').textContent = getPaymentMethodName(payment.payment_method) || '-';
+
+            // 채용 정보
+            document.getElementById('jobTitle').textContent = payment.job_title || '-';
+            document.getElementById('companyName').textContent = payment.company_name || '-';
+            document.getElementById('location').textContent = payment.location || '-';
+            document.getElementById('applicantName').textContent = payment.applicant_name || '-';
+            document.getElementById('applicantPhone').textContent = payment.applicant_phone || '-';
+
+            // 금액 정보
+            const baseAmount = payment.amount || 50000;
+            const vat = Math.floor(baseAmount * 0.1);
+            const totalAmount = baseAmount + vat;
+
+            document.getElementById('baseAmount').textContent = formatCurrency(baseAmount);
+            document.getElementById('vat').textContent = formatCurrency(vat);
+            document.getElementById('totalAmount').textContent = formatCurrency(totalAmount);
+
+            // 로딩 숨기고 영수증 표시
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('receipt').classList.remove('hidden');
+        }
+
+        // 에러 표시
+        function showError(message) {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('error').classList.remove('hidden');
+        }
+
+        // 결제 수단 이름 변환
+        function getPaymentMethodName(method) {
+            const methods = {
+                'card': '신용/체크카드',
+                'virtual_account': '가상계좌',
+                'transfer': '계좌이체',
+                'tosspay': '토스페이',
+                'kakaopay': '카카오페이',
+                'naverpay': '네이버페이'
+            };
+            return methods[method] || method;
+        }
+
+        // 날짜 포맷팅
+        function formatDateTime(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleString('ko-KR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        // 금액 포맷팅
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('ko-KR').format(amount) + '원';
+        }
+
+        // PDF 다운로드
+        function downloadReceipt() {
+            // 실제로는 서버에서 PDF 생성 API를 호출해야 하지만
+            // 간단하게 인쇄 다이얼로그를 띄웁니다
+            window.print();
+        }
+
+        // 지원자 목록으로 이동
+        function goToApplications() {
+            window.location.href = '/employer/applications.html';
+        }
+
+        // 페이지 로드 시 실행
+        loadReceipt();
+    </script>
+</body>
+</html>

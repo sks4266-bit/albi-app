@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin-login.html
+Disallow: /admin-dashboard.html
+Disallow: /session-stats.html
+Disallow: /admin-logout.html
+
+# Sitemap location
+Sitemap: https://albi.kr/sitemap.xml
+
+# Crawl delay
+Crawl-delay: 1
+
+# Specific rules for major search engines
+User-agent: Googlebot
+Allow: /
+Disallow: /api/
+Disallow: /admin-*
+
+User-agent: Yeti
+Allow: /
+Disallow: /api/
+Disallow: /admin-*

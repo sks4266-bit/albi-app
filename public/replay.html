@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>면접 리플레이 - Albi AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Phase 8.1: System Optimization -->
+    <link rel="stylesheet" href="/static/mobile-optimized.css">
+    <script src="/static/error-handler.js"></script>
+    <script src="/static/loading-manager.js"></script>
+    
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .timeline-container {
+            position: relative;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .timeline-marker {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #a78bfa;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .timeline-marker:hover {
+            width: 4px;
+            background: #c4b5fd;
+        }
+        
+        .timeline-label {
+            position: absolute;
+            top: -25px;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            white-space: nowrap;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            pointer-events: none;
+        }
+        
+        .analysis-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+        
+        .metric-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .metric-badge.excellent {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+        
+        .metric-badge.good {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+        
+        .metric-badge.fair {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+        
+        .metric-badge.poor {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen text-white">
+    <div class="container mx-auto px-4 py-8">
+        <!-- 헤더 -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-4xl font-bold mb-2">
+                    <i class="fas fa-play-circle mr-3"></i>면접 리플레이
+                </h1>
+                <p class="text-gray-300" id="interviewTitle">면접 녹화 재생</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="window.location.href='/my-recordings.html'" class="bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-xl font-bold transition-all">
+                    <i class="fas fa-arrow-left mr-2"></i>목록으로
+                </button>
+                <button id="downloadBtn" class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-xl font-bold transition-all">
+                    <i class="fas fa-download mr-2"></i>다운로드
+                </button>
+                <button id="pdfBtn" class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl font-bold transition-all">
+                    <i class="fas fa-file-pdf mr-2"></i>PDF 리포트
+                </button>
+            </div>
+        </div>
+
+        <!-- 비디오 플레이어 & 분석 -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- 비디오 플레이어 -->
+            <div class="lg:col-span-2">
+                <div class="bg-gray-900/50 backdrop-blur-lg rounded-2xl p-6">
+                    <div class="relative rounded-xl overflow-hidden mb-4" style="aspect-ratio: 16/9;">
+                        <video id="replayVideo" class="w-full h-full object-cover" controls>
+                            <source src="" type="video/webm">
+                            녹화된 영상이 없습니다.
+                        </video>
+                    </div>
+                    
+                    <!-- 재생 컨트롤 -->
+                    <div class="flex items-center gap-4 mb-4">
+                        <button id="playPauseBtn" class="bg-purple-600 hover:bg-purple-700 w-12 h-12 rounded-full flex items-center justify-center transition-all">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <div class="flex-1">
+                            <input type="range" id="progressBar" class="w-full" min="0" max="100" value="0">
+                        </div>
+                        <span id="currentTime" class="text-sm font-mono">00:00</span>
+                        <span class="text-gray-500">/</span>
+                        <span id="duration" class="text-sm font-mono">00:00</span>
+                        <button id="speedBtn" class="bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-lg text-sm transition-all">
+                            1.0x
+                        </button>
+                    </div>
+                    
+                    <!-- 타임라인 -->
+                    <div class="mb-4">
+                        <h3 class="text-sm font-bold mb-2 flex items-center gap-2">
+                            <i class="fas fa-clock"></i>
+                            질문 타임라인
+                        </h3>
+                        <div id="timeline" class="timeline-container"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 실시간 분석 -->
+            <div class="lg:col-span-1">
+                <div class="analysis-panel sticky top-8">
+                    <h3 class="text-xl font-bold mb-4">
+                        <i class="fas fa-chart-line mr-2"></i>
+                        현재 분석
+                    </h3>
+                    
+                    <div id="currentAnalysis" class="space-y-4">
+                        <!-- 질문 정보 -->
+                        <div class="bg-gray-900/30 rounded-lg p-4">
+                            <p class="text-sm text-gray-400 mb-1">질문</p>
+                            <p id="currentQuestion" class="font-semibold">재생을 시작하세요</p>
+                        </div>
+                        
+                        <!-- 메트릭 -->
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-sm">표정 분석</span>
+                                    <span id="expressionScore" class="font-bold">-</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div id="expressionBar" class="bg-yellow-500 h-2 rounded-full transition-all" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-sm">시선 분석</span>
+                                    <span id="gazeScore" class="font-bold">-</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div id="gazeBar" class="bg-blue-500 h-2 rounded-full transition-all" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-sm">자세 분석</span>
+                                    <span id="postureScore" class="font-bold">-</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div id="postureBar" class="bg-green-500 h-2 rounded-full transition-all" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-sm">제스처 분석</span>
+                                    <span id="gestureScore" class="font-bold">-</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div id="gestureBar" class="bg-purple-500 h-2 rounded-full transition-all" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 실시간 피드백 -->
+                        <div class="bg-blue-900/30 rounded-lg p-4 border border-blue-500/30">
+                            <p class="text-sm font-bold mb-2">
+                                <i class="fas fa-lightbulb mr-1"></i>
+                                실시간 피드백
+                            </p>
+                            <p id="realtimeFeedback" class="text-sm text-gray-300">
+                                타임라인에서 특정 구간을 클릭하세요
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 종합 리포트 -->
+        <div class="bg-gray-900/50 backdrop-blur-lg rounded-2xl p-8 mb-8">
+            <h2 class="text-2xl font-bold mb-6">
+                <i class="fas fa-clipboard-check mr-2"></i>
+                종합 평가 리포트
+            </h2>
+            
+            <div id="comprehensiveReport" class="space-y-6">
+                <!-- 로딩 상태 -->
+                <div class="text-center py-12">
+                    <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent mb-4"></div>
+                    <p class="text-gray-400">리포트를 불러오는 중...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/replay-player.js"></script>
+</body>
+</html>

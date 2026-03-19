@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>세금계산서 - 알비</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      body {
+        background: white;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+  
+  <!-- 헤더 -->
+  <header class="bg-white shadow-sm no-print">
+    <div class="max-w-4xl mx-auto px-4 py-4">
+      <div class="flex items-center justify-between">
+        <button onclick="history.back()" class="flex items-center text-gray-600 hover:text-gray-900">
+          <i class="fas fa-arrow-left mr-2"></i>
+          돌아가기
+        </button>
+        <h1 class="text-xl font-bold text-gray-800">세금계산서</h1>
+        <div class="flex space-x-2">
+          <button onclick="window.print()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+            <i class="fas fa-print mr-2"></i>인쇄
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 로딩 -->
+  <div id="loading" class="max-w-4xl mx-auto px-4 py-12 text-center">
+    <i class="fas fa-spinner fa-spin text-4xl text-blue-500 mb-4"></i>
+    <p class="text-gray-600">세금계산서를 불러오는 중...</p>
+  </div>
+
+  <!-- 에러 -->
+  <div id="error" class="max-w-4xl mx-auto px-4 py-12 text-center hidden">
+    <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-4"></i>
+    <h2 class="text-xl font-bold text-gray-800 mb-2">세금계산서를 찾을 수 없습니다</h2>
+    <p class="text-gray-600 mb-6">요청하신 세금계산서가 존재하지 않거나 접근 권한이 없습니다.</p>
+    <button onclick="location.href='/employer/mypage.html'" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+      마이페이지로 이동
+    </button>
+  </div>
+
+  <!-- 세금계산서 내용 -->
+  <div id="invoice-container" class="max-w-4xl mx-auto px-4 py-8 hidden">
+    <!-- JavaScript에서 동적으로 생성 -->
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+  <script>
+    const API_BASE = '';
+    
+    // URL에서 세금계산서 ID 가져오기
+    const urlParams = new URLSearchParams(window.location.search);
+    const invoiceId = urlParams.get('id');
+
+    if (!invoiceId) {
+      showError();
+    } else {
+      loadTaxInvoice();
+    }
+
+    async function loadTaxInvoice() {
+      try {
+        const token = localStorage.getItem('sessionToken');
+        if (!token) {
+          location.href = '/login.html?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+          return;
+        }
+
+        const response = await axios.get(`${API_BASE}/api/payments/tax-invoice/${invoiceId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.data.success) {
+          renderInvoice(response.data.invoice);
+        } else {
+          showError();
+        }
+      } catch (error) {
+        console.error('Error loading tax invoice:', error);
+        showError();
+      }
+    }
+
+    function renderInvoice(data) {
+      document.getElementById('loading').classList.add('hidden');
+      const container = document.getElementById('invoice-container');
+      container.classList.remove('hidden');
+
+      // 공급가액과 세액 계산
+      const supplyPrice = 50000;
+      const taxAmount = 5000;
+      const totalAmount = data.amount || 55000;
+
+      // 발행일 포맷팅
+      const issueDate = new Date(data.issued_at || data.created_at);
+      const formattedDate = `${issueDate.getFullYear()}년 ${issueDate.getMonth() + 1}월 ${issueDate.getDate()}일`;
+      
+      // 계산서 번호 생성
+      const invoiceNumber = `ALBI-${issueDate.getFullYear()}${String(issueDate.getMonth() + 1).padStart(2, '0')}${String(issueDate.getDate()).padStart(2, '0')}-${String(data.payment_id).padStart(6, '0')}`;
+
+      container.innerHTML = `
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+          <!-- 헤더 -->
+          <div class="border-b-4 border-gray-800 p-8 text-center">
+            <h1 class="text-4xl font-bold text-gray-900 mb-3">세 금 계 산 서</h1>
+            <div class="text-gray-600">
+              <p class="text-lg">계산서 번호: ${invoiceNumber}</p>
+              <p class="text-lg">발행일: ${formattedDate}</p>
+            </div>
+          </div>
+
+          <div class="p-8">
+            <!-- 공급받는자 (매입자) -->
+            <div class="mb-8">
+              <div class="bg-blue-50 border-l-4 border-blue-500 px-4 py-3 mb-4">
+                <h2 class="text-lg font-bold text-gray-800">▣ 공급받는자 (매입자)</h2>
+              </div>
+              <table class="w-full border-collapse border border-gray-300">
+                <tr>
+                  <td class="bg-gray-100 border border-gray-300 px-4 py-3 w-1/3 font-semibold">사업자등록번호</td>
+                  <td class="border border-gray-300 px-4 py-3">${data.business_number}</td>
+                </tr>
+                <tr>
+                  <td class="bg-gray-100 border border-gray-300 px-4 py-3 font-semibold">상호 (법인명)</td>
+                  <td class="border border-gray-300 px-4 py-3">${data.business_name}</td>
+                </tr>
+                <tr>
+                  <td class="bg-gray-100 border border-gray-300 px-4 py-3 font-semibold">대표자 성명</td>
+                  <td class="border border-gray-300 px-4 py-3">${data.ceo_name}</td>
+                </tr>
+                <tr>
+                  <td class="bg-gray-100 border border-gray-300 px-4 py-3 font-semibold">사업장 주소</td>
+                  <td class="border border-gray-300 px-4 py-3">${data.business_address || '(주소 미제공)'}</td>
+                </tr>
+              </table>
+            </div>
+
+            <!-- 공급자 (매출자) -->
+            <div class="mb-8">
+              <div class="bg-blue-50 border-l-4 border-blue-500 px-4 py-3 mb-4">
+                <h2 class="text-lg font-bold text-gray-800">▣ 공급자 (매출자)</h2>
+              </div>
+              <table class="w-full border-collapse border border-gray-300">
+                <tr>
+                  <td class="bg-gray-100 border border-gray-300 px-4 py-3 w-1/3 font-semibold">사업자등록번호</td>
+                  <td class="border border-gray-300 px-4 py-3">531-08-03526</td>
+                </tr>
+                <tr>
+                  <td class="bg-gray-100 border border-gray-300 px-4 py-3 font-semibold">상호 (법인명)</td>
+                  <td class="border border-gray-300 px-4 py-3">알비</td>
+                </tr>
+                <tr>
+                  <td class="bg-gray-100 border border-gray-300 px-4 py-3 font-semibold">대표자 성명</td>
+                  <td class="border border-gray-300 px-4 py-3">박지훈</td>
+                </tr>
+                <tr>
+                  <td class="bg-gray-100 border border-gray-300 px-4 py-3 font-semibold">사업장 주소</td>
+                  <td class="border border-gray-300 px-4 py-3">경상남도 양산시 동면 사송로 155, 807동 1405호</td>
+                </tr>
+              </table>
+            </div>
+
+            <!-- 품목 내역 -->
+            <div class="mb-8">
+              <div class="bg-blue-50 border-l-4 border-blue-500 px-4 py-3 mb-4">
+                <h2 class="text-lg font-bold text-gray-800">▣ 품목 내역</h2>
+              </div>
+              <table class="w-full border-collapse border border-gray-300">
+                <thead>
+                  <tr class="bg-blue-500 text-white">
+                    <th class="border border-blue-600 px-4 py-3 w-16">월</th>
+                    <th class="border border-blue-600 px-4 py-3 w-16">일</th>
+                    <th class="border border-blue-600 px-4 py-3">품목</th>
+                    <th class="border border-blue-600 px-4 py-3 w-20">수량</th>
+                    <th class="border border-blue-600 px-4 py-3 w-32">단가</th>
+                    <th class="border border-blue-600 px-4 py-3 w-32">공급가액</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="border border-gray-300 px-4 py-3 text-center">${issueDate.getMonth() + 1}</td>
+                    <td class="border border-gray-300 px-4 py-3 text-center">${issueDate.getDate()}</td>
+                    <td class="border border-gray-300 px-4 py-3">채용 성공 수수료 - ${data.job_title || '채용 서비스'}</td>
+                    <td class="border border-gray-300 px-4 py-3 text-center">1</td>
+                    <td class="border border-gray-300 px-4 py-3 text-right">${supplyPrice.toLocaleString()}원</td>
+                    <td class="border border-gray-300 px-4 py-3 text-right">${supplyPrice.toLocaleString()}원</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- 합계 금액 -->
+            <div class="border-2 border-gray-800 p-6 bg-gray-50">
+              <div class="flex justify-between items-center py-3 text-lg">
+                <span class="font-semibold">공급가액 (Supply Amount)</span>
+                <span class="font-bold">${supplyPrice.toLocaleString()}원</span>
+              </div>
+              <div class="flex justify-between items-center py-3 text-lg border-b-2 border-gray-300">
+                <span class="font-semibold">세액 (VAT 10%)</span>
+                <span class="font-bold">${taxAmount.toLocaleString()}원</span>
+              </div>
+              <div class="flex justify-between items-center pt-4 text-2xl text-blue-600">
+                <span class="font-bold">총 금액 (Total Amount)</span>
+                <span class="font-bold">${totalAmount.toLocaleString()}원</span>
+              </div>
+            </div>
+
+            <!-- 발행 날인 -->
+            <div class="mt-12 flex justify-end">
+              <div class="border-2 border-gray-800 px-16 py-12 text-center">
+                <div class="mb-6 font-bold text-gray-700">공급자 (발행자)</div>
+                <div class="text-2xl font-bold text-gray-900 mb-4">알비</div>
+                <div class="text-gray-500">(인)</div>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="mt-12 pt-8 border-t border-gray-300 text-center text-sm text-gray-600">
+              <p class="font-semibold text-gray-800 mb-2">알비 (ALBI)</p>
+              <p>사업자등록번호: 531-08-03526 | 경상남도 양산시 동면 사송로 155, 807동 1405호</p>
+              <p>전화: 010-4459-4226 | 이메일: albi260128@gmail.com</p>
+              <p>통신판매업: 제2026-경남양산-00526호</p>
+              <p class="mt-4 text-xs text-gray-500">본 세금계산서는 전자문서 및 전자거래 기본법에 따라 발행되었습니다.</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function showError() {
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('error').classList.remove('hidden');
+    }
+  </script>
+
+</body>
+</html>

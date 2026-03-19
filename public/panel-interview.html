@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>패널 면접 - 실전 면접 경험 | Albi AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Phase 8.1: System Optimization -->
+    <link rel="stylesheet" href="/static/mobile-optimized.css">
+    <script src="/static/error-handler.js"></script>
+    <script src="/static/loading-manager.js"></script>
+    <script src="/static/performance-monitor.js"></script>
+    <script src="/static/interviewers.js"></script>
+    <script src="/static/interviewer-animator.js"></script>
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #1a1a2e;
+        }
+        
+        .interview-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+        }
+        
+        /* 면접관 영역 - 상단 60% */
+        .interviewer-section {
+            height: 60vh;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 4px solid #a78bfa;
+        }
+        
+        .interviewer-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: relative;
+        }
+        
+        .interviewer-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            padding: 2rem;
+            color: white;
+        }
+        
+        .interviewer-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .interviewer-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid #a78bfa;
+            object-fit: cover;
+            box-shadow: 0 10px 40px rgba(167, 139, 250, 0.5);
+        }
+        
+        .question-bubble {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            margin-top: 1rem;
+            font-size: 1.5rem;
+            line-height: 1.8;
+        }
+        
+        /* 사용자 카메라 영역 - 하단 40% */
+        .user-section {
+            height: 40vh;
+            background: #16213e;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .user-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .user-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            padding: 1.5rem;
+        }
+        
+        /* 컨트롤 패널 */
+        .control-panel {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            gap: 1rem;
+            z-index: 100;
+        }
+        
+        .control-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .control-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .btn-start {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-mic {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+        }
+        
+        .btn-next {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+        }
+        
+        .btn-end {
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+            color: white;
+        }
+        
+        /* 진행 상황 바 */
+        .progress-bar-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 100;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+            transition: width 0.5s ease;
+        }
+        
+        /* 패널 표시기 */
+        .panel-indicator {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            z-index: 100;
+        }
+        
+        .panel-dot {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .panel-dot.active {
+            border-color: #a78bfa;
+            box-shadow: 0 0 20px rgba(167, 139, 250, 0.8);
+            transform: scale(1.2);
+        }
+        
+        .panel-dot img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* 답변 표시 */
+        .answer-display {
+            position: absolute;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-radius: 1rem;
+            color: white;
+            font-size: 1.2rem;
+            max-width: 80%;
+            text-align: center;
+        }
+        
+        /* 시작 화면 */
+        .start-screen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+        
+        .start-content {
+            text-align: center;
+            color: white;
+        }
+        
+        .start-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 1.5rem 3rem;
+            border-radius: 2rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+        
+        .start-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.7);
+        }
+        
+        /* 음성 인식 인디케이터 */
+        .voice-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(255, 0, 0, 0.3);
+            display: none;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .voice-indicator.active {
+            display: block;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.3);
+                opacity: 0.5;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 진행 상황 바 -->
+    <div class="progress-bar-container">
+        <div id="progressBar" class="progress-bar" style="width: 0%"></div>
+    </div>
+    
+    <!-- 패널 표시기 -->
+    <div id="panelIndicator" class="panel-indicator">
+        <!-- 동적으로 추가됨 -->
+    </div>
+    
+    <!-- 시작 화면 -->
+    <div id="startScreen" class="start-screen">
+        <div class="start-content">
+            <h1 class="text-6xl font-bold mb-4">
+                <i class="fas fa-users mr-4"></i>패널 면접
+            </h1>
+            <p class="text-2xl text-gray-300 mb-8">3명의 전문 면접관과 실전 면접을 경험하세요</p>
+            <button id="startBtn" class="start-btn">
+                <i class="fas fa-play mr-3"></i>면접 시작하기
+            </button>
+        </div>
+    </div>
+    
+    <!-- 메인 면접 화면 -->
+    <div id="interviewContainer" class="interview-container" style="display: none;">
+        <!-- 면접관 영역 (상단 60%) -->
+        <div class="interviewer-section">
+            <img id="interviewerImage" class="interviewer-video" src="/static/interviewer-hr.jpg" alt="면접관">
+            <div class="interviewer-overlay">
+                <div class="interviewer-info">
+                    <img id="interviewerAvatar" class="interviewer-avatar" src="/static/interviewer-hr.jpg" alt="면접관">
+                    <div>
+                        <h2 id="interviewerName" class="text-3xl font-bold">김서연</h2>
+                        <p id="interviewerRole" class="text-xl text-purple-300">HR 매니저</p>
+                    </div>
+                </div>
+                <div id="questionBubble" class="question-bubble">
+                    질문이 곧 표시됩니다...
+                </div>
+            </div>
+        </div>
+        
+        <!-- 사용자 카메라 영역 (하단 40%) -->
+        <div class="user-section">
+            <video id="userVideo" class="user-video" autoplay muted playsinline></video>
+            <canvas id="userCanvas" class="user-video" style="position: absolute; top: 0; left: 0; display: none;"></canvas>
+            <div class="voice-indicator" id="voiceIndicator"></div>
+            <div class="user-overlay">
+                <div id="answerDisplay" class="answer-display" style="display: none;">
+                    답변을 듣고 있습니다...
+                </div>
+                <div class="text-center">
+                    <p class="text-white text-xl">
+                        <i class="fas fa-video mr-2"></i>실시간 영상 분석 중
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 컨트롤 패널 -->
+    <div id="controlPanel" class="control-panel" style="display: none;">
+        <button id="micBtn" class="control-btn btn-mic" title="답변하기">
+            <i class="fas fa-microphone"></i>
+        </button>
+        <button id="nextBtn" class="control-btn btn-next" title="다음 질문">
+            <i class="fas fa-forward"></i>
+        </button>
+        <button id="endBtn" class="control-btn btn-end" title="면접 종료">
+            <i class="fas fa-stop"></i>
+        </button>
+    </div>
+    
+    <script>
+        // 전역 변수
+        let currentPanel = [];
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let currentInterviewer = null;
+        let recognition = null;
+        let currentAnswer = '';
+        let isRecording = false;
+        let interviewerAnimator = null;
+        let userStream = null;
+        
+        // 면접관 데이터
+        const INTERVIEWERS = [
+          {
+            id: 'interviewer_001',
+            name: '김서연',
+            role: 'HR 매니저',
+            specialty: 'HR',
+            imageUrl: '/static/interviewer-hr.jpg',
+            voice: 'alloy'
+          },
+          {
+            id: 'interviewer_002',
+            name: '박준혁',
+            role: '기술 리드',
+            specialty: 'TECH',
+            imageUrl: '/static/interviewer-tech.jpg',
+            voice: 'onyx'
+          },
+          {
+            id: 'interviewer_003',
+            name: '이민지',
+            role: '프로젝트 매니저',
+            specialty: 'PM',
+            imageUrl: '/static/interviewer-pm.jpg',
+            voice: 'nova'
+          }
+        ];
+        
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('[Panel Interview V2] Initialized');
+            
+            // 이벤트 리스너
+            document.getElementById('startBtn').addEventListener('click', startInterview);
+            document.getElementById('micBtn').addEventListener('click', toggleRecording);
+            document.getElementById('nextBtn').addEventListener('click', nextQuestion);
+            document.getElementById('endBtn').addEventListener('click', endInterview);
+            
+            // 음성 인식 초기화
+            initSpeechRecognition();
+            
+            // 패널 표시기 렌더링
+            renderPanelIndicator();
+        });
+        
+        // 음성 인식 초기화
+        function initSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.lang = 'ko-KR';
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                
+                recognition.onresult = (event) => {
+                    let interim = '';
+                    let final = '';
+                    
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const transcript = event.results[i][0].transcript;
+                        if (event.results[i].isFinal) {
+                            final += transcript + ' ';
+                        } else {
+                            interim += transcript;
+                        }
+                    }
+                    
+                    if (final) {
+                        currentAnswer += final;
+                    }
+                    
+                    // UI 업데이트
+                    const answerDisplay = document.getElementById('answerDisplay');
+                    answerDisplay.textContent = currentAnswer || interim;
+                    answerDisplay.style.display = 'block';
+                };
+                
+                recognition.onerror = (event) => {
+                    console.error('[SpeechRecognition] Error:', event.error);
+                };
+            }
+        }
+        
+        // 패널 표시기 렌더링
+        function renderPanelIndicator() {
+            const container = document.getElementById('panelIndicator');
+            container.innerHTML = '';
+            
+            INTERVIEWERS.forEach((interviewer, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'panel-dot';
+                if (index === 0) dot.classList.add('active');
+                dot.innerHTML = `<img src="${interviewer.imageUrl}" alt="${interviewer.name}">`;
+                container.appendChild(dot);
+            });
+        }
+        
+        // 면접 시작
+        async function startInterview() {
+            try {
+                // 카메라 권한 요청
+                userStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: true, 
+                    audio: true 
+                });
+                
+                document.getElementById('userVideo').srcObject = userStream;
+                
+                // UI 전환
+                document.getElementById('startScreen').style.display = 'none';
+                document.getElementById('interviewContainer').style.display = 'flex';
+                document.getElementById('controlPanel').style.display = 'flex';
+                
+                // 패널 설정
+                currentPanel = INTERVIEWERS;
+                
+                // 첫 질문 표시
+                showQuestion(0);
+                
+            } catch (error) {
+                console.error('[Panel Interview] Start error:', error);
+                alert('카메라 접근 권한이 필요합니다: ' + error.message);
+            }
+        }
+        
+        // 질문 표시
+        async function showQuestion(index) {
+            if (index >= currentPanel.length * 2) {
+                endInterview();
+                return;
+            }
+            
+            const interviewerIndex = Math.floor(index / 2);
+            const interviewer = currentPanel[interviewerIndex];
+            
+            currentInterviewer = interviewer;
+            currentQuestionIndex = index;
+            currentAnswer = '';
+            
+            // 패널 표시기 업데이트
+            document.querySelectorAll('.panel-dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === interviewerIndex);
+            });
+            
+            // 면접관 정보 업데이트
+            document.getElementById('interviewerImage').src = interviewer.imageUrl;
+            document.getElementById('interviewerAvatar').src = interviewer.imageUrl;
+            document.getElementById('interviewerName').textContent = interviewer.name;
+            document.getElementById('interviewerRole').textContent = interviewer.role;
+            
+            // 질문 생성 및 표시
+            const question = await generateQuestion(interviewer);
+            document.getElementById('questionBubble').textContent = question;
+            
+            // TTS로 질문 읽기
+            await speakQuestion(question, interviewer.voice);
+            
+            // 진행률 업데이트
+            const progress = ((index + 1) / (currentPanel.length * 2)) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+        
+        // 질문 생성
+        async function generateQuestion(interviewer) {
+            const questions = {
+                'interviewer_001': [
+                    "자기소개를 간단히 부탁드립니다.",
+                    "우리 회사에 지원하게 된 동기가 무엇인가요?"
+                ],
+                'interviewer_002': [
+                    "가장 어려웠던 기술적 문제와 해결 방법을 말씀해주세요.",
+                    "최근에 사용해본 기술 스택에 대해 설명해주세요."
+                ],
+                'interviewer_003': [
+                    "팀 프로젝트에서 겪었던 갈등 상황과 해결 방법을 말씀해주세요.",
+                    "프로젝트 일정이 지연되었을 때 어떻게 대처하시나요?"
+                ]
+            };
+            
+            const interviewerQuestions = questions[interviewer.id] || [];
+            const questionIndex = Math.floor(currentQuestionIndex / 2) % interviewerQuestions.length;
+            return interviewerQuestions[questionIndex];
+        }
+        
+        // TTS 음성 출력
+        async function speakQuestion(text, voice = 'alloy') {
+            try {
+                // 애니메이션 시작
+                if (interviewerAnimator) {
+                    interviewerAnimator.startSpeaking();
+                }
+                
+                // OpenAI TTS API 호출
+                const response = await fetch('/api/tts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, voice })
+                });
+                
+                if (response.ok) {
+                    const audioBlob = await response.blob();
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const audio = new Audio(audioUrl);
+                    
+                    audio.onended = () => {
+                        if (interviewerAnimator) {
+                            interviewerAnimator.stopSpeaking();
+                        }
+                    };
+                    
+                    await audio.play();
+                } else {
+                    console.warn('[TTS] API failed, using fallback');
+                    // Fallback: 브라우저 TTS
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'ko-KR';
+                    utterance.onend = () => {
+                        if (interviewerAnimator) {
+                            interviewerAnimator.stopSpeaking();
+                        }
+                    };
+                    speechSynthesis.speak(utterance);
+                }
+            } catch (error) {
+                console.error('[TTS] Error:', error);
+                // Fallback
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'ko-KR';
+                speechSynthesis.speak(utterance);
+            }
+        }
+        
+        // 음성 인식 토글
+        function toggleRecording() {
+            if (!recognition) return;
+            
+            if (isRecording) {
+                recognition.stop();
+                isRecording = false;
+                document.getElementById('micBtn').innerHTML = '<i class="fas fa-microphone"></i>';
+                document.getElementById('voiceIndicator').classList.remove('active');
+            } else {
+                recognition.start();
+                isRecording = true;
+                document.getElementById('micBtn').innerHTML = '<i class="fas fa-microphone-slash"></i>';
+                document.getElementById('voiceIndicator').classList.add('active');
+            }
+        }
+        
+        // 다음 질문
+        function nextQuestion() {
+            if (isRecording) {
+                toggleRecording();
+            }
+            showQuestion(currentQuestionIndex + 1);
+        }
+        
+        // 면접 종료
+        function endInterview() {
+            if (userStream) {
+                userStream.getTracks().forEach(track => track.stop());
+            }
+            alert('면접이 완료되었습니다! 평가 결과는 곧 제공됩니다.');
+            location.reload();
+        }
+    </script>
+</body>
+</html>

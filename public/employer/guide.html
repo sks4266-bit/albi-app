@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>구인자 가이드 - 알비</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .step-card {
+      transition: all 0.3s ease;
+    }
+    .step-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    .badge-number {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: bold;
+      color: white;
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <!-- 헤더 -->
+  <nav class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-4">
+      <div class="flex items-center justify-between">
+        <a href="/" class="text-2xl font-bold text-orange-600">
+          <i class="fas fa-briefcase mr-2"></i>ALBI
+        </a>
+        <div class="flex items-center space-x-4">
+          <a href="/employer/applications.html" class="text-gray-600 hover:text-orange-600">
+            <i class="fas fa-users mr-1"></i>지원자 관리
+          </a>
+          <a href="/mypage.html" class="text-gray-600 hover:text-orange-600">
+            <i class="fas fa-user-circle mr-1"></i>마이페이지
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-6xl mx-auto px-4 py-12">
+    <!-- 타이틀 섹션 -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-gray-800 mb-4">
+        <i class="fas fa-rocket text-orange-600 mr-2"></i>
+        구인자 가이드
+      </h1>
+      <p class="text-xl text-gray-600">
+        알비와 함께 최고의 알바생을 찾아보세요!
+      </p>
+      <p class="text-lg text-gray-500 mt-2">
+        초기 비용 0원, 성공한 만큼만 지불하세요 💰
+      </p>
+    </div>
+
+    <!-- 주요 특징 -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-6 text-white text-center">
+        <i class="fas fa-gift text-5xl mb-4"></i>
+        <h3 class="text-2xl font-bold mb-2">초기 비용 0원</h3>
+        <p class="text-blue-100">공고 등록, 지원자 조회 모두 무료</p>
+      </div>
+      
+      <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-6 text-white text-center">
+        <i class="fas fa-robot text-5xl mb-4"></i>
+        <h3 class="text-2xl font-bold mb-2">AI 면접 자동화</h3>
+        <p class="text-green-100">AI가 미리 검증한 우수한 지원자</p>
+      </div>
+      
+      <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-6 text-white text-center">
+        <i class="fas fa-clock text-5xl mb-4"></i>
+        <h3 class="text-2xl font-bold mb-2">1시간 체험</h3>
+        <p class="text-purple-100">채용 전 실제 근무 능력 확인</p>
+      </div>
+    </div>
+
+    <!-- 단계별 가이드 -->
+    <div class="bg-white rounded-lg shadow-lg p-8 mb-12">
+      <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">
+        <i class="fas fa-list-ol mr-2"></i>채용 프로세스 (5단계)
+      </h2>
+
+      <div class="space-y-8">
+        <!-- Step 1 -->
+        <div class="step-card border-l-4 border-orange-500 bg-orange-50 p-6 rounded-r-lg">
+          <div class="flex items-start">
+            <div class="badge-number mr-4">1</div>
+            <div class="flex-1">
+              <h3 class="text-xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-plus-circle text-orange-600 mr-2"></i>공고 등록
+              </h3>
+              <p class="text-gray-700 mb-4">
+                원하는 조건의 알바 공고를 등록하세요. 공고 등록은 무료입니다!
+              </p>
+              <div class="bg-white rounded-lg p-4">
+                <p class="font-semibold text-gray-800 mb-2">필수 정보:</p>
+                <ul class="list-disc list-inside text-gray-600 space-y-1">
+                  <li>공고 제목 및 업종</li>
+                  <li>근무 지역 및 시급</li>
+                  <li>근무 시간대 (오전/점심/오후/저녁)</li>
+                  <li>1시간 체험 가능 시간</li>
+                </ul>
+              </div>
+              <a href="/jobs/create.html" class="mt-4 inline-block px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
+                <i class="fas fa-plus mr-2"></i>공고 등록하기
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-card border-l-4 border-blue-500 bg-blue-50 p-6 rounded-r-lg">
+          <div class="flex items-start">
+            <div class="badge-number mr-4" style="background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);">2</div>
+            <div class="flex-1">
+              <h3 class="text-xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-users text-blue-600 mr-2"></i>AI 면접 완료된 지원자 확인
+              </h3>
+              <p class="text-gray-700 mb-4">
+                AI가 자동으로 면접을 진행하고 점수를 매겨줍니다. 우수한 지원자만 확인하세요!
+              </p>
+              <div class="bg-white rounded-lg p-4">
+                <p class="font-semibold text-gray-800 mb-2">AI 면접 평가 항목:</p>
+                <ul class="list-disc list-inside text-gray-600 space-y-1">
+                  <li>성실성 (35%): 출근율, 장기근무 의향</li>
+                  <li>직무적합성 (30%): 경험, 스킬, 학습능력</li>
+                  <li>서비스마인드 (25%): 고객응대, 팀워크</li>
+                  <li>근무조건매칭 (10%): 거리, 시간, 급여</li>
+                </ul>
+                <div class="mt-3 p-3 bg-blue-100 rounded-lg">
+                  <p class="text-sm text-blue-800">
+                    <i class="fas fa-star text-yellow-500 mr-1"></i>
+                    <strong>S급 (85점+)</strong>: 즉시 전력, 강력 추천<br>
+                    <i class="fas fa-star text-blue-500 mr-1"></i>
+                    <strong>A급 (70점+)</strong>: 우수, 1시간 체험 추천
+                  </p>
+                </div>
+              </div>
+              <a href="/employer/applications.html" class="mt-4 inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <i class="fas fa-users mr-2"></i>지원자 관리
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-card border-l-4 border-green-500 bg-green-50 p-6 rounded-r-lg">
+          <div class="flex items-start">
+            <div class="badge-number mr-4" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%);">3</div>
+            <div class="flex-1">
+              <h3 class="text-xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-clock text-green-600 mr-2"></i>1시간 체험 신청
+              </h3>
+              <p class="text-gray-700 mb-4">
+                마음에 드는 지원자에게 1시간 체험을 신청하세요. 체험도 무료입니다!
+              </p>
+              <div class="bg-white rounded-lg p-4">
+                <p class="font-semibold text-gray-800 mb-2">1시간 체험의 장점:</p>
+                <ul class="list-disc list-inside text-gray-600 space-y-1">
+                  <li>실제 근무 능력 확인 가능</li>
+                  <li>성격 및 태도 직접 확인</li>
+                  <li>미스매칭 방지 (채용 실패율 80% 감소)</li>
+                  <li>비용 부담 없음 (체험 무료)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step-card border-l-4 border-purple-500 bg-purple-50 p-6 rounded-r-lg">
+          <div class="flex items-start">
+            <div class="badge-number mr-4" style="background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);">4</div>
+            <div class="flex-1">
+              <h3 class="text-xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-handshake text-purple-600 mr-2"></i>정식 채용 결정 및 결제
+              </h3>
+              <p class="text-gray-700 mb-4">
+                1시간 체험 후 만족하셨다면 정식 채용을 확정하세요. <strong>이 단계에서만 결제가 발생합니다!</strong>
+              </p>
+              <div class="bg-white rounded-lg p-4">
+                <div class="flex items-center justify-between mb-3">
+                  <p class="font-semibold text-gray-800">채용 성공 수수료</p>
+                  <p class="text-3xl font-bold text-orange-600">50,000원</p>
+                </div>
+                <p class="text-sm text-gray-600 mb-3">(VAT 별도, 총 55,000원)</p>
+                
+                <div class="border-t pt-3">
+                  <p class="font-semibold text-gray-800 mb-2">경쟁사 비교:</p>
+                  <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                      <span class="text-gray-600">알바천국 (월 정액)</span>
+                      <span class="text-red-600 font-semibold">300,000원+</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-gray-600">알비 (성공 보수제)</span>
+                      <span class="text-green-600 font-semibold">50,000원/명</span>
+                    </div>
+                    <div class="bg-green-100 p-2 rounded">
+                      <p class="text-sm text-green-800 text-center">
+                        <i class="fas fa-arrow-down mr-1"></i>
+                        <strong>월 3명 채용 시 50% 절감!</strong>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="step-card border-l-4 border-pink-500 bg-pink-50 p-6 rounded-r-lg">
+          <div class="flex items-start">
+            <div class="badge-number mr-4" style="background: linear-gradient(135deg, #EC4899 0%, #BE185D 100%);">5</div>
+            <div class="flex-1">
+              <h3 class="text-xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-star text-pink-600 mr-2"></i>근무 시작 및 관리
+              </h3>
+              <p class="text-gray-700 mb-4">
+                결제 완료 후 구직자에게 채용 확정 알림이 전송됩니다. 이제 근무를 시작하세요!
+              </p>
+              <div class="bg-white rounded-lg p-4">
+                <p class="font-semibold text-gray-800 mb-2">알비가 제공하는 사후 관리:</p>
+                <ul class="list-disc list-inside text-gray-600 space-y-1">
+                  <li>결제 영수증 자동 발행</li>
+                  <li>조기 퇴사 시 환불 정책 (7일 100%, 8-30일 50%)</li>
+                  <li>근무 일정 관리 도구</li>
+                  <li>1:1 고객센터 지원</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="bg-white rounded-lg shadow-lg p-8 mb-12">
+      <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">
+        <i class="fas fa-question-circle mr-2"></i>자주 묻는 질문
+      </h2>
+
+      <div class="space-y-4">
+        <div class="border-b pb-4">
+          <h3 class="font-bold text-lg text-gray-800 mb-2">
+            <i class="fas fa-chevron-right text-orange-600 mr-2"></i>
+            정말 공고 등록이 무료인가요?
+          </h3>
+          <p class="text-gray-600 ml-6">
+            네, 공고 등록, 지원자 조회, AI 면접 결과 확인, 1시간 체험 신청까지 모두 무료입니다. 
+            <strong>정식 채용이 확정되었을 때만</strong> 채용 성공 수수료 50,000원이 발생합니다.
+          </p>
+        </div>
+
+        <div class="border-b pb-4">
+          <h3 class="font-bold text-lg text-gray-800 mb-2">
+            <i class="fas fa-chevron-right text-orange-600 mr-2"></i>
+            1시간 체험도 비용이 드나요?
+          </h3>
+          <p class="text-gray-600 ml-6">
+            1시간 체험은 완전 무료입니다. 체험 후 마음에 들지 않으면 채용하지 않아도 됩니다. 
+            채용을 확정했을 때만 수수료가 발생합니다.
+          </p>
+        </div>
+
+        <div class="border-b pb-4">
+          <h3 class="font-bold text-lg text-gray-800 mb-2">
+            <i class="fas fa-chevron-right text-orange-600 mr-2"></i>
+            환불이 가능한가요?
+          </h3>
+          <p class="text-gray-600 ml-6">
+            네, 가능합니다.<br>
+            - 채용자가 7일 이내 퇴사: <strong>100% 전액 환불</strong><br>
+            - 채용자가 8-30일 이내 퇴사: <strong>50% 부분 환불</strong><br>
+            - 31일 이상 근무 후 퇴사: 환불 불가
+          </p>
+        </div>
+
+        <div class="border-b pb-4">
+          <h3 class="font-bold text-lg text-gray-800 mb-2">
+            <i class="fas fa-chevron-right text-orange-600 mr-2"></i>
+            AI 면접 점수는 얼마나 정확한가요?
+          </h3>
+          <p class="text-gray-600 ml-6">
+            알비의 AI 면접은 500개 이상의 실전 질문 데이터셋을 기반으로 학습되었으며, 
+            실제 채용 성공률이 <strong>80% 이상</strong>입니다. 또한 1시간 체험을 통해 
+            최종 확인이 가능하므로 미스매칭 확률이 매우 낮습니다.
+          </p>
+        </div>
+
+        <div>
+          <h3 class="font-bold text-lg text-gray-800 mb-2">
+            <i class="fas fa-chevron-right text-orange-600 mr-2"></i>
+            결제 방법은 무엇이 있나요?
+          </h3>
+          <p class="text-gray-600 ml-6">
+            Toss Payments를 통해 다양한 결제 수단을 지원합니다:<br>
+            - 신용/체크카드<br>
+            - 계좌이체 (실시간)<br>
+            - 가상계좌<br>
+            - 간편결제 (토스페이, 카카오페이, 네이버페이)
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="bg-gradient-to-r from-orange-500 to-red-500 rounded-lg p-8 text-center text-white">
+      <h2 class="text-3xl font-bold mb-4">지금 바로 시작하세요!</h2>
+      <p class="text-xl mb-6">초기 비용 0원, 성공한 만큼만 지불하는 스마트한 채용</p>
+      <div class="flex justify-center space-x-4">
+        <a href="/jobs/create.html" class="px-8 py-4 bg-white text-orange-600 rounded-lg font-bold text-lg hover:bg-gray-100 transition">
+          <i class="fas fa-plus mr-2"></i>공고 등록하기
+        </a>
+        <a href="/employer/applications.html" class="px-8 py-4 bg-orange-700 text-white rounded-lg font-bold text-lg hover:bg-orange-800 transition">
+          <i class="fas fa-users mr-2"></i>지원자 관리
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 푸터 -->
+  <footer class="bg-gray-800 text-white py-8 mt-12">
+    <div class="max-w-6xl mx-auto px-4 text-center">
+      <p class="text-gray-400">© 2026 알비(ALBI). All rights reserved.</p>
+      <div class="mt-4 space-x-4">
+        <a href="/contact.html" class="text-gray-400 hover:text-white">고객센터</a>
+        <a href="/terms.html" class="text-gray-400 hover:text-white">이용약관</a>
+        <a href="/privacy.html" class="text-gray-400 hover:text-white">개인정보처리방침</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
