@@ -15,8 +15,24 @@
             <div class="inline-block bg-gradient-to-r from-blue-600 to-purple-600 text-white text-4xl w-16 h-16 rounded-full flex items-center justify-center mb-4">
                 <i class="fas fa-vial"></i>
             </div>
-            <h1 class="text-2xl font-bold text-gray-800 mb-2">결제 테스트 계정 생성</h1>
-            <p class="text-sm text-gray-600">아임포트 정기결제 시스템 테스트용</p>
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">테스트 계정</h1>
+            <p class="text-sm text-gray-600">로그인 및 결제 테스트용 고정 계정</p>
+        </div>
+
+        <!-- 고정 계정 안내 -->
+        <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded">
+            <h3 class="text-green-800 font-semibold mb-2 flex items-center gap-2">
+                <i class="fas fa-check-circle"></i>
+                고정 테스트 계정 (항상 로그인 가능)
+            </h3>
+            <p class="text-green-700 text-sm mb-2">
+                아래 계정은 <strong>항상 로그인 가능</strong>한 고정 테스트 계정입니다.
+            </p>
+            <ul class="text-green-700 text-xs space-y-1 list-disc list-inside">
+                <li>새로고침해도 계정이 유지됩니다</li>
+                <li>"새 계정 생성" 버튼으로 다른 테스트 계정으로 전환 가능</li>
+                <li>총 3개의 고정 계정이 순환됩니다</li>
+            </ul>
         </div>
 
         <!-- 테스트 계정 정보 생성 -->
@@ -82,7 +98,7 @@
         <div class="space-y-3">
             <button onclick="generateNewAccount()" 
                     class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition">
-                <i class="fas fa-sync mr-2"></i>새 계정 생성
+                <i class="fas fa-random mr-2"></i>다른 테스트 계정으로 전환
             </button>
             
             <a href="/login.html" 
@@ -147,39 +163,70 @@
     </div>
 
     <script>
-        // 페이지 로드 시 자동 생성
+        // 고정된 테스트 계정 (항상 로그인 가능)
+        const FIXED_ACCOUNTS = [
+            {
+                userId: 'test_demo_001',
+                email: 'test_demo@albi-test.com',
+                password: 'TestDemo123'
+            },
+            {
+                userId: 'test_user_002',
+                email: 'test_user@albi-test.com',
+                password: 'TestUser123'
+            },
+            {
+                userId: 'test_albi_003',
+                email: 'test_albi@albi-test.com',
+                password: 'TestAlbi123'
+            }
+        ];
+
+        let currentAccountIndex = 0;
+
+        // 페이지 로드 시 localStorage 확인
         window.addEventListener('load', () => {
-            generateNewAccount();
+            // localStorage에 저장된 계정이 있으면 사용, 없으면 첫 번째 고정 계정 사용
+            const savedEmail = localStorage.getItem('test_email');
+            const savedPassword = localStorage.getItem('test_password');
+            
+            if (savedEmail && savedPassword && savedEmail.includes('@albi-test.com')) {
+                // 저장된 계정이 고정 계정 중 하나인지 확인
+                const savedAccount = FIXED_ACCOUNTS.find(acc => acc.email === savedEmail);
+                if (savedAccount) {
+                    currentAccountIndex = FIXED_ACCOUNTS.indexOf(savedAccount);
+                    loadAccount(savedAccount);
+                } else {
+                    // 저장된 계정이 고정 계정이 아니면 첫 번째 계정 사용
+                    loadAccount(FIXED_ACCOUNTS[0]);
+                }
+            } else {
+                // 저장된 계정이 없으면 첫 번째 고정 계정 사용
+                loadAccount(FIXED_ACCOUNTS[0]);
+            }
         });
 
-        // 새 테스트 계정 생성
+        // 계정 정보 로드
+        function loadAccount(account) {
+            document.getElementById('test-user-id').value = account.userId;
+            document.getElementById('test-email').value = account.email;
+            document.getElementById('test-password').value = account.password;
+
+            // localStorage에 저장
+            localStorage.setItem('test_user_id', account.userId);
+            localStorage.setItem('test_email', account.email);
+            localStorage.setItem('test_password', account.password);
+
+            console.log('✅ Test account loaded:', account);
+        }
+
+        // 새 테스트 계정 생성 (고정 계정 순환)
         function generateNewAccount() {
-            const timestamp = Date.now();
-            const randomStr = Math.random().toString(36).substring(2, 8);
+            currentAccountIndex = (currentAccountIndex + 1) % FIXED_ACCOUNTS.length;
+            loadAccount(FIXED_ACCOUNTS[currentAccountIndex]);
             
-            // 테스트 사용자 ID 생성
-            const userId = `test_user_${randomStr}_${timestamp}`;
-            document.getElementById('test-user-id').value = userId;
-
-            // 테스트 이메일 생성
-            const testEmail = `test_${randomStr}@albi-test.com`;
-            document.getElementById('test-email').value = testEmail;
-
-            // 테스트 비밀번호 생성 (8자리 영숫자)
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            let password = 'Test';
-            for (let i = 0; i < 4; i++) {
-                password += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            password += '123';
-            document.getElementById('test-password').value = password;
-
-            console.log('✅ Test account generated:', { userId, testEmail, password });
-
-            // localStorage에 저장 (결제 페이지에서 자동 입력용)
-            localStorage.setItem('test_user_id', userId);
-            localStorage.setItem('test_email', testEmail);
-            localStorage.setItem('test_password', password);
+            // 알림 표시
+            alert(`테스트 계정이 변경되었습니다!\n\n이메일: ${FIXED_ACCOUNTS[currentAccountIndex].email}\n비밀번호: ${FIXED_ACCOUNTS[currentAccountIndex].password}`);
         }
 
         // 클립보드 복사
