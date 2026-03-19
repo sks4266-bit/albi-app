@@ -602,8 +602,8 @@ app.post('/login', async (c) => {
     if (username.includes('@albi-test.com')) {
       console.log('🧪 테스트 계정 로그인 시도:', username)
       
-      // 테스트 계정은 비밀번호가 Test로 시작하고 123으로 끝나는 패턴
-      const isValidTestPassword = password.startsWith('Test') && password.endsWith('123') && password.length === 8
+      // 테스트 계정은 비밀번호가 Test로 시작하고 123으로 끝나는 패턴 (길이 8-20자)
+      const isValidTestPassword = password.startsWith('Test') && password.endsWith('123') && password.length >= 8 && password.length <= 20
       
       if (!isValidTestPassword) {
         return c.json({ success: false, error: '테스트 계정 비밀번호가 일치하지 않습니다.' }, 400)
