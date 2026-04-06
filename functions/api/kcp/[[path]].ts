@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import { handle } from 'hono/cloudflare-pages'
 
 type Bindings = {
   DB: D1Database
@@ -8,7 +9,7 @@ type Bindings = {
   KCP_SITE_NAME: string
 }
 
-const app = new Hono<{ Bindings: Bindings }>().basePath('/api/kcp')
+const app = new Hono<{ Bindings: Bindings }>()
 
 app.use('/*', cors())
 
@@ -318,4 +319,4 @@ app.get('/batch-key/:user_id', async (c) => {
   }
 })
 
-export const onRequest = app.fetch
+export const onRequest = handle(app)
