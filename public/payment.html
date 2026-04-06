@@ -259,44 +259,20 @@
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 
-                <!-- 결제 수단 선택 -->
+                <!-- KCP 정기결제 안내 -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-3">결제 수단</label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <button type="button" onclick="selectPaymentMethod('card')" 
-                                id="payment-method-card"
-                                class="payment-method-btn flex items-center justify-center gap-2 px-4 py-3 border-2 border-gray-300 rounded-lg hover:border-blue-500 transition">
-                            <i class="fas fa-credit-card text-blue-600"></i>
-                            <span class="font-medium">신용/체크카드</span>
-                        </button>
-                        <button type="button" onclick="selectPaymentMethod('kakaopay')" 
-                                id="payment-method-kakaopay"
-                                class="payment-method-btn flex items-center justify-center gap-2 px-4 py-3 border-2 border-gray-300 rounded-lg hover:border-yellow-500 transition">
-                            <i class="fas fa-comment text-yellow-500"></i>
-                            <span class="font-medium">카카오페이</span>
-                        </button>
-                        <button type="button" onclick="selectPaymentMethod('phone')" 
-                                id="payment-method-phone"
-                                class="payment-method-btn flex items-center justify-center gap-2 px-4 py-3 border-2 border-gray-300 rounded-lg hover:border-green-500 transition">
-                            <i class="fas fa-mobile-alt text-green-600"></i>
-                            <span class="font-medium">휴대폰</span>
-                        </button>
-                        <button type="button" onclick="selectPaymentMethod('inicis')" 
-                                id="payment-method-inicis"
-                                class="payment-method-btn flex items-center justify-center gap-2 px-4 py-3 border-2 border-gray-300 rounded-lg hover:border-purple-500 transition">
-                            <i class="fas fa-building text-purple-600"></i>
-                            <span class="font-medium text-sm">KG이니시스</span>
-                        </button>
+                    <div class="bg-blue-50 border-2 border-blue-500 rounded-lg p-4">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-credit-card text-blue-600 text-2xl"></i>
+                            <div>
+                                <div class="font-semibold text-gray-800">KCP 신용/체크카드 정기결제</div>
+                                <div class="text-sm text-gray-600 mt-1">안전한 보험료 납부 전용 결제</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <style>
-                .payment-method-btn.selected {
-                    border-color: #3b82f6;
-                    background-color: #eff6ff;
-                }
-            </style>
 
             <button onclick="requestPayment()" 
                     class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-4 rounded-lg hover:from-blue-700 hover:to-purple-700 transition duration-200">
@@ -476,57 +452,11 @@
     <div id="footer-container"></div>
     <script src="/footer.js"></script>
 
-    <!-- PortOne V2 SDK - body 끝에 배치 -->
-    <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
-
+    <!-- KCP 정기결제 JavaScript -->
     <script>
-        // PortOne SDK 초기화 확인
-        console.log('🔍 Checking PortOne SDK...', typeof window.PortOne);
-        
-        // 페이지 로드 완료 시 SDK 상태 확인
-        if (typeof window.PortOne !== 'undefined') {
-            console.log('✅ PortOne SDK loaded successfully');
-        } else {
-            console.error('❌ PortOne SDK not found on window object');
-        }
-        
-        // PortOne 채널 정보
-        const CHANNELS = {
-            card: {
-                name: 'NHN KCP',
-                key: 'channel-key-f8f466e2-764d-40d4-b003-f85733fdc50a',
-                pgProvider: 'kcp_v2',
-                payMethod: 'CARD',
-                icon: 'fa-credit-card',
-                displayName: '신용/체크카드'
-            },
-            inicis: {
-                name: 'KG이니시스',
-                key: 'channel-key-e6161fd4-04fe-4de4-8073-c2f74961ec46',
-                pgProvider: 'inicis_v2',
-                payMethod: 'CARD',
-                icon: 'fa-building',
-                displayName: 'KG이니시스'
-            },
-            kakaopay: {
-                name: '카카오페이',
-                key: 'channel-key-2fd86a82-009e-43dd-b9ba-3c37f5f85374',
-                pgProvider: 'kakaopay',
-                payMethod: 'EASY_PAY',
-                icon: 'fa-comment',
-                displayName: '카카오페이'
-            },
-            phone: {
-                name: '다날 휴대폰결제',
-                key: 'channel-key-0b99f096-a083-492c-933d-c34bbbfac4fb',
-                pgProvider: 'danal',
-                payMethod: 'MOBILE',
-                icon: 'fa-mobile-alt',
-                displayName: '휴대폰 결제'
-            }
-        };
-        
-        let selectedPaymentMethod = 'card'; // 기본값: 카드 결제
+        // KCP 정기결제 초기화
+        console.log('🔍 Initializing KCP Subscription Payment...');
+
         
         // 플랜 정보 (먼저 선언)
         const plans = {
@@ -581,28 +511,7 @@
                 
                 console.log('✅ 테스트 계정 정보 자동 입력됨:', testEmail);
             }
-            
-            // 기본 결제 수단 선택 (카드)
-            selectPaymentMethod('card');
         });
-
-        // 결제 수단 선택
-        function selectPaymentMethod(method) {
-            selectedPaymentMethod = method;
-            
-            // 모든 버튼 선택 해제
-            document.querySelectorAll('.payment-method-btn').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            
-            // 선택된 버튼 강조
-            const selectedBtn = document.getElementById('payment-method-' + method);
-            if (selectedBtn) {
-                selectedBtn.classList.add('selected');
-            }
-            
-            console.log('✅ Payment method selected:', method, CHANNELS[method]);
-        }
 
         // 돌아가기 버튼 추가 (멘토 채팅에서 온 경우)
         if (fromPage === 'mentor-chat') {
@@ -663,24 +572,8 @@
             const plan = plans[selectedPlan];
 
             try {
-                // PortOne SDK 확인
-                if (typeof window.PortOne === 'undefined') {
-                    alert('결제 모듈이 로드되지 않았습니다. 페이지를 새로고침해주세요.');
-                    console.error('❌ PortOne SDK not loaded');
-                    return;
-                }
-
-                // 결제 수단 확인
-                if (!selectedPaymentMethod) {
-                    alert('결제 수단을 선택해주세요.');
-                    return;
-                }
-
-                const channel = CHANNELS[selectedPaymentMethod];
-                console.log('✅ Using channel:', channel);
-
-                // 1. 서버에 결제 요청 생성
-                const response = await fetch('/api/subscription/create', {
+                // 1. KCP 정기결제 거래 등록
+                const response = await fetch('/api/kcp/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -695,49 +588,15 @@
                 const result = await response.json();
 
                 if (!result.success) {
-                    alert('구독 생성 실패: ' + result.message);
+                    alert('정기결제 등록 실패: ' + result.message);
                     return;
                 }
 
-                console.log('✅ Subscription created:', result.data);
-                const { payment_id, billing_key } = result.data;
+                console.log('✅ KCP Transaction registered:', result.data);
+                const { approval_key, PayUrl, tno } = result.data;
 
-                // 2. PortOne V2 결제 요청 (정기결제)
-                const paymentResponse = await window.PortOne.requestPayment({
-                    storeId: 'store-1db2baf1-49d6-4b31-afcb-4662f37d7b05',
-                    paymentId: payment_id,
-                    orderName: `알비 ${plan.name} 플랜 (월간 정기구독)`,
-                    totalAmount: plan.price,
-                    currency: 'KRW',
-                    channelKey: channel.key, // 선택된 결제 수단의 채널 키
-                    payMethod: channel.payMethod,
-                    
-                    // 빌링키 발급 설정 (다날 휴대폰 제외)
-                    issueBillingKey: selectedPaymentMethod !== 'phone',
-                    billingKeyMethod: selectedPaymentMethod !== 'phone' ? channel.payMethod : undefined,
-                    customer: {
-                        customerId: billing_key,
-                        fullName: userName,
-                        email: userEmail,
-                        phoneNumber: '01012345678' // INICIS 필수 (테스트용)
-                    },
-                    
-                    // 리다이렉트 URL
-                    redirectUrl: `${window.location.origin}/payment-callback.html`,
-                    
-                    // 웹훅
-                    noticeUrls: [`${window.location.origin}/api/subscription/webhook`]
-                });
-                
-                // 결제 결과 처리
-                if (paymentResponse.code != null) {
-                    // 결제 실패
-                    alert(`결제 실패: ${paymentResponse.message}`);
-                    return;
-                }
-                
-                // 결제 성공 → 서버에 확인
-                confirmSubscription(paymentResponse);
+                // 2. KCP 결제창 열기
+                openKCPPaymentWindow(PayUrl, tno);
 
             } catch (error) {
                 console.error('❌ Payment error:', error);
@@ -745,32 +604,29 @@
             }
         }
         
-        // 결제 성공 후 서버에 확인
-        async function confirmSubscription(paymentData) {
-            try {
-                const response = await fetch('/api/subscription/confirm', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        payment_id: paymentData.paymentId,
-                        transaction_id: paymentData.transactionId,
-                        billing_key: paymentData.billingKey,
-                        paid_amount: paymentData.amount
-                    })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    alert('✅ 정기구독이 시작되었습니다!\n\n다음 결제일: ' + result.data.next_billing_date);
-                    window.location.href = '/mypage.html?subscription=success';
-                } else {
-                    alert('구독 활성화 실패: ' + result.message);
-                }
-            } catch (error) {
-                console.error('❌ Confirm error:', error);
-                alert('구독 확인 중 오류가 발생했습니다.');
+        // KCP 결제창 열기
+        function openKCPPaymentWindow(payUrl, tno) {
+            // 결제창 파라미터
+            const width = 420;
+            const height = 700;
+            const left = (window.screen.width - width) / 2;
+            const top = (window.screen.height - height) / 2;
+            
+            // 결제창 오픈
+            const paymentWindow = window.open(
+                payUrl,
+                'KCP_Payment',
+                `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
+            );
+            
+            if (!paymentWindow) {
+                alert('팝업 차단을 해제해주세요.');
+                return;
             }
+            
+            console.log('✅ KCP Payment window opened with tno:', tno);
+            
+            // 결제창 완료 후 콜백은 payment-callback.html에서 처리됨
         }
 
         // 초기 로드 시 Standard 플랜 자동 선택 (기존 동작 유지)
